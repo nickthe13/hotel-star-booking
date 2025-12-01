@@ -29,8 +29,13 @@
     </nav>
 
     <div class="header__actions">
-      <a routerLink="/auth/login" class="btn btn--secondary">Sign In</a>
-      <a routerLink="/auth/register" class="btn btn--primary">Sign Up</a>
+      @if (authService.isAuthenticated()) {
+        <span class="welcome-message">Hi, {{ authService.user()?.name }}!</span>
+        <button (click)="logout()" class="btn btn--secondary">Logout</button>
+      } @else {
+        <a routerLink="/auth/login" class="btn btn--secondary">Sign In</a>
+        <a routerLink="/auth/register" class="btn btn--primary">Sign Up</a>
+      }
     </div>
   </div>
 </header>

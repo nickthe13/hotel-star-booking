@@ -45,7 +45,18 @@
   &__actions {
     display: flex;
     gap: $spacing-sm;
+    align-items: center;
   }
+}
+
+.welcome-message {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  padding: $spacing-xs $spacing-md;
+  background: $primary-50;
+  border-radius: $radius-full;
+  white-space: nowrap;
 }
 
 .nav {

@@ -59,15 +59,11 @@ export class HotelDetailsComponent implements OnInit {
   }
 
   hoverRating(rating: number): void {
-    if (!this.hasRated()) {
-      this.hoveredRating.set(rating);
-    }
+    this.hoveredRating.set(rating);
   }
 
   clearHover(): void {
-    if (!this.hasRated()) {
-      this.hoveredRating.set(0);
-    }
+    this.hoveredRating.set(0);
   }
 
   setRating(rating: number): void {
@@ -76,16 +72,23 @@ export class HotelDetailsComponent implements OnInit {
       return;
     }
 
-    this.userRating.set(rating);
-    this.hasRated.set(true);
-    this.hoveredRating.set(0);
-
-    // Update hotel rating
     const hotel = this.hotel();
     if (hotel) {
+      const previousRating = this.userRating();
       const currentTotal = (hotel.averageRating || 0) * (hotel.totalReviews || 0);
-      const newTotalReviews = (hotel.totalReviews || 0) + 1;
-      const newAverageRating = (currentTotal + rating) / newTotalReviews;
+
+      let newTotalReviews: number;
+      let newAverageRating: number;
+
+      if (this.hasRated()) {
+        // User is changing their rating - subtract old, add new
+        newTotalReviews = hotel.totalReviews || 0;
+        newAverageRating = (currentTotal - previousRating + rating) / newTotalReviews;
+      } else {
+        // First time rating - add to total
+        newTotalReviews = (hotel.totalReviews || 0) + 1;
+        newAverageRating = (currentTotal + rating) / newTotalReviews;
+      }
 
       this.hotel.set({
         ...hotel,
@@ -93,6 +96,10 @@ export class HotelDetailsComponent implements OnInit {
         totalReviews: newTotalReviews
       });
     }
+
+    this.userRating.set(rating);
+    this.hasRated.set(true);
+    this.hoveredRating.set(0);
   }
 
   getDisplayRating(index: number): boolean {
