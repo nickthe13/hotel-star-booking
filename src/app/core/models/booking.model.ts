@@ -40,4 +40,5 @@ export interface BookingConfirmation {
   booking: Booking;
   confirmationNumber: string;
   estimatedCheckInTime: string;
+  message: string;
 }

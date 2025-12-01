@@ -1,0 +1,117 @@
+<div class="dashboard-page">
+  <div class="container">
+    <div class="dashboard-header">
+      <div class="dashboard-header__content">
+        <h1 class="dashboard-header__title">My Dashboard</h1>
+        <p class="dashboard-header__subtitle">
+          Welcome back, {{ authService.user()?.name || 'Guest' }}!
+        </p>
+      </div>
+      <a routerLink="/hotels" class="btn btn--primary">
+        Browse Hotels
+      </a>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading your bookings...</p>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="alert alert--error">
+        <span>⚠️</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    @if (!loading() && !error()) {
+      <div class="bookings-section">
+        <h2 class="section-title">My Bookings</h2>
+
+        @if (bookings().length === 0) {
+          <div class="empty-state">
+            <div class="empty-state__icon">📅</div>
+            <h3 class="empty-state__title">No bookings yet</h3>
+            <p class="empty-state__text">
+              Start exploring our hotels and make your first reservation!
+            </p>
+            <a routerLink="/hotels" class="btn btn--primary">
+              Browse Hotels
+            </a>
+          </div>
+        } @else {
+          <div class="bookings-grid">
+            @for (booking of bookings(); track booking.id) {
+              <div class="booking-card">
+                <div class="booking-card__header">
+                  <div class="booking-card__info">
+                    <h3 class="booking-card__title">Booking #{{ booking.id }}</h3>
+                    <span class="status-badge" [ngClass]="getStatusClass(booking.status)">
+                      {{ booking.status }}
+                    </span>
+                  </div>
+                  <div class="booking-card__price">
+                    ${{ booking.totalPrice }}
+                  </div>
+                </div>
+
+                <div class="booking-card__details">
+                  <div class="detail-item">
+                    <span class="detail-item__label">Check-in</span>
+                    <span class="detail-item__value">{{ formatDate(booking.checkIn) }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__label">Check-out</span>
+                    <span class="detail-item__value">{{ formatDate(booking.checkOut) }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__label">Nights</span>
+                    <span class="detail-item__value">
+                      {{ calculateNights(booking.checkIn, booking.checkOut) }}
+                    </span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__label">Guests</span>
+                    <span class="detail-item__value">{{ booking.guests }}</span>
+                  </div>
+                </div>
+
+                @if (booking.hotel) {
+                  <div class="booking-card__hotel">
+                    <div class="hotel-info">
+                      <img
+                        [src]="booking.hotel.image"
+                        [alt]="booking.hotel.name"
+                        class="hotel-info__image"
+                      />
+                      <div class="hotel-info__content">
+                        <h4 class="hotel-info__name">{{ booking.hotel.name }}</h4>
+                        <p class="hotel-info__location">📍 {{ booking.hotel.location }}</p>
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <div class="booking-card__footer">
+                  <span class="booking-card__date">
+                    Booked on {{ formatDate(booking.createdAt) }}
+                  </span>
+                  @if (canCancelBooking(booking)) {
+                    <button
+                      class="btn btn--secondary btn--small"
+                      (click)="cancelBooking(booking.id)"
+                    >
+                      Cancel Booking
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

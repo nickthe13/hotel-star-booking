@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, delay, map, of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
 import { Booking, BookingRequest, BookingConfirmation, BookingStatus } from '../models/booking.model';
@@ -25,7 +25,12 @@ export class BookingService {
       guests: 3,
       totalPrice: 1250,
       status: BookingStatus.CONFIRMED,
-      createdAt: new Date('2025-12-01')
+      createdAt: new Date('2025-12-01'),
+      hotel: {
+        name: 'Grand Plaza Hotel',
+        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
+        location: 'New York, USA'
+      }
     },
     {
       id: '2',
@@ -37,7 +42,12 @@ export class BookingService {
       guests: 2,
       totalPrice: 900,
       status: BookingStatus.COMPLETED,
-      createdAt: new Date('2025-11-01')
+      createdAt: new Date('2025-11-01'),
+      hotel: {
+        name: 'Sunset Beach Resort',
+        image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400',
+        location: 'Miami, USA'
+      }
     }
   ];
 
@@ -70,7 +80,7 @@ export class BookingService {
       confirmationNumber: `CONF-${Date.now()}`,
       estimatedCheckInTime: '3:00 PM',
       message: 'Your booking has been confirmed!'
-    }).pipe(delay(1000)); // Simulate API delay
+    });
   }
 
   getUserBookings(): Observable<Booking[]> {
@@ -81,7 +91,7 @@ export class BookingService {
     const userId = '1'; // Would get from authService.currentUser()?.id
     return of(
       this.mockBookings.filter(booking => booking.userId === userId)
-    ).pipe(delay(500));
+    );
   }
 
   getBookingById(id: string): Observable<Booking> {
@@ -93,7 +103,7 @@ export class BookingService {
     if (!booking) {
       return throwError(() => new Error('Booking not found'));
     }
-    return of(booking).pipe(delay(500));
+    return of(booking);
   }
 
   cancelBooking(id: string): Observable<void> {
@@ -105,7 +115,7 @@ export class BookingService {
     if (booking) {
       booking.status = BookingStatus.CANCELLED;
     }
-    return of(undefined).pipe(delay(500));
+    return of(undefined);
   }
 
   updateBooking(id: string, updates: Partial<BookingRequest>): Observable<Booking> {
@@ -129,7 +139,7 @@ export class BookingService {
     const index = this.mockBookings.findIndex(b => b.id === id);
     this.mockBookings[index] = updatedBooking;
 
-    return of(updatedBooking).pipe(delay(500));
+    return of(updatedBooking);
   }
 
   calculateTotalPrice(pricePerNight: number, checkIn: Date, checkOut: Date): number {
