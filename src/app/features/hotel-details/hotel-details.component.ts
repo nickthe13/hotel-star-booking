@@ -2,6 +2,7 @@ import { Component, OnInit, signal, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HotelService } from '../../core/services/hotel.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Hotel } from '../../core/models';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 
@@ -17,8 +18,15 @@ export class HotelDetailsComponent implements OnInit {
   hotel = signal<Hotel | undefined>(undefined);
   loading = signal<boolean>(true);
   selectedImageIndex = signal<number>(0);
+  userRating = signal<number>(0);
+  hoveredRating = signal<number>(0);
+  hasRated = signal<boolean>(false);
 
-  constructor(private hotelService: HotelService, private router: Router) {}
+  constructor(
+    private hotelService: HotelService,
+    public authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     if (this.id) {
@@ -48,5 +56,55 @@ export class HotelDetailsComponent implements OnInit {
     if (this.hotel()) {
       this.router.navigate(['/booking', this.hotel()!.id]);
     }
+  }
+
+  hoverRating(rating: number): void {
+    if (!this.hasRated()) {
+      this.hoveredRating.set(rating);
+    }
+  }
+
+  clearHover(): void {
+    if (!this.hasRated()) {
+      this.hoveredRating.set(0);
+    }
+  }
+
+  setRating(rating: number): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    this.userRating.set(rating);
+    this.hasRated.set(true);
+    this.hoveredRating.set(0);
+
+    // Update hotel rating
+    const hotel = this.hotel();
+    if (hotel) {
+      const currentTotal = (hotel.averageRating || 0) * (hotel.totalReviews || 0);
+      const newTotalReviews = (hotel.totalReviews || 0) + 1;
+      const newAverageRating = (currentTotal + rating) / newTotalReviews;
+
+      this.hotel.set({
+        ...hotel,
+        averageRating: Math.round(newAverageRating * 10) / 10,
+        totalReviews: newTotalReviews
+      });
+    }
+  }
+
+  getDisplayRating(index: number): boolean {
+    const hovered = this.hoveredRating();
+    const rated = this.userRating();
+
+    if (hovered > 0) {
+      return index <= hovered;
+    }
+    if (rated > 0) {
+      return index <= rated;
+    }
+    return false;
   }
 }

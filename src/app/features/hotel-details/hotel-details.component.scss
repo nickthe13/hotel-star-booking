@@ -365,3 +365,97 @@
     @include button-primary;
   }
 }
+
+// Rating Component
+.rate-hotel {
+  margin-top: $spacing-xl;
+  padding: $spacing-xl;
+  background: $neutral-50;
+  border-radius: $radius-lg;
+  border: 2px solid $border-color-light;
+
+  &__title {
+    font-size: $font-size-xl;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__auth-message {
+    font-size: $font-size-base;
+    color: $text-secondary;
+
+    .link {
+      color: $primary-500;
+      font-weight: $font-weight-semibold;
+      transition: color $transition-base;
+
+      &:hover {
+        color: $primary-600;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.star-rating-input {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+
+  .star-button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: $spacing-xs;
+    transition: transform $transition-base, filter $transition-base;
+    filter: grayscale(100%);
+    opacity: 0.4;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+
+    &.filled {
+      filter: grayscale(0%);
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    &:focus {
+      outline: 2px solid $primary-500;
+      outline-offset: 4px;
+      border-radius: $radius-sm;
+    }
+  }
+}
+
+.rating-confirmation {
+  p {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    margin-bottom: $spacing-md;
+  }
+
+  .user-rating-display {
+    display: flex;
+    gap: $spacing-xs;
+    font-size: 1.5rem;
+
+    span {
+      filter: grayscale(100%);
+      opacity: 0.4;
+
+      &.filled {
+        filter: grayscale(0%);
+        opacity: 1;
+      }
+    }
+  }
+}

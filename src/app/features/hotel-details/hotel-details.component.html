@@ -91,6 +91,48 @@
                   <p>Based on {{ hotel()!.totalReviews }} verified reviews</p>
                 </div>
               </div>
+
+              <!-- Rate This Hotel -->
+              <div class="rate-hotel">
+                <h3 class="rate-hotel__title">
+                  @if (hasRated()) {
+                    Thank you for your rating!
+                  } @else {
+                    Rate this hotel
+                  }
+                </h3>
+                @if (authService.isAuthenticated()) {
+                  @if (!hasRated()) {
+                    <p class="rate-hotel__subtitle">Share your experience with other travelers</p>
+                    <div class="star-rating-input" (mouseleave)="clearHover()">
+                      @for (star of [1, 2, 3, 4, 5]; track star) {
+                        <button
+                          class="star-button"
+                          [class.filled]="getDisplayRating(star)"
+                          (mouseenter)="hoverRating(star)"
+                          (click)="setRating(star)"
+                          [attr.aria-label]="'Rate ' + star + ' stars'"
+                        >
+                          ⭐
+                        </button>
+                      }
+                    </div>
+                  } @else {
+                    <div class="rating-confirmation">
+                      <p>You rated this hotel:</p>
+                      <div class="user-rating-display">
+                        @for (star of [1, 2, 3, 4, 5]; track star) {
+                          <span [class.filled]="star <= userRating()">⭐</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                } @else {
+                  <p class="rate-hotel__auth-message">
+                    <a routerLink="/auth/login" class="link">Sign in</a> to rate this hotel
+                  </p>
+                }
+              </div>
             </section>
           }
 
