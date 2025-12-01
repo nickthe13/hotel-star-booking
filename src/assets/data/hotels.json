@@ -1,0 +1,230 @@
+[
+  {
+    "id": "1",
+    "name": "Santorini Paradise Resort",
+    "description": "Luxury resort with stunning caldera views, infinity pools, and world-class dining. Experience the magic of Santorini's famous sunsets from your private terrace.",
+    "location": "Oia, Santorini",
+    "city": "Santorini",
+    "country": "Greece",
+    "starRating": 5,
+    "images": [
+      "https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800",
+      "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800",
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Pool", "Spa", "Restaurant", "Bar", "Room Service", "Beach Access"],
+    "pricePerNight": 450,
+    "featured": true,
+    "averageRating": 4.9,
+    "totalReviews": 328
+  },
+  {
+    "id": "2",
+    "name": "Athens Grand Hotel",
+    "description": "Historic luxury hotel in the heart of Athens with views of the Acropolis. Blend of classical elegance and modern comfort.",
+    "location": "Syntagma Square, Athens",
+    "city": "Athens",
+    "country": "Greece",
+    "starRating": 5,
+    "images": [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Gym", "Restaurant", "Bar", "Business Center", "Parking"],
+    "pricePerNight": 280,
+    "featured": true,
+    "averageRating": 4.7,
+    "totalReviews": 542
+  },
+  {
+    "id": "3",
+    "name": "Mykonos Beach Villa",
+    "description": "Exclusive beachfront villa with private pool and direct beach access. Perfect for families and groups seeking privacy and luxury.",
+    "location": "Paradise Beach, Mykonos",
+    "city": "Mykonos",
+    "country": "Greece",
+    "starRating": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Pool", "Beach Access", "Parking", "Air Conditioning"],
+    "pricePerNight": 380,
+    "featured": false,
+    "averageRating": 4.8,
+    "totalReviews": 156
+  },
+  {
+    "id": "4",
+    "name": "Crete Seaside Resort",
+    "description": "All-inclusive resort on the beautiful beaches of Crete. Family-friendly with kids' clubs, water sports, and entertainment.",
+    "location": "Elounda, Crete",
+    "city": "Crete",
+    "country": "Greece",
+    "starRating": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+      "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Pool", "Spa", "Restaurant", "Bar", "Gym", "Beach Access", "Pet Friendly"],
+    "pricePerNight": 220,
+    "featured": true,
+    "averageRating": 4.6,
+    "totalReviews": 892
+  },
+  {
+    "id": "5",
+    "name": "Rhodes Old Town Inn",
+    "description": "Charming boutique hotel in the medieval old town. Traditional architecture with modern amenities and rooftop terrace.",
+    "location": "Old Town, Rhodes",
+    "city": "Rhodes",
+    "country": "Greece",
+    "starRating": 3,
+    "images": [
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Restaurant", "Bar", "Air Conditioning"],
+    "pricePerNight": 120,
+    "featured": false,
+    "averageRating": 4.4,
+    "totalReviews": 234
+  },
+  {
+    "id": "6",
+    "name": "Thessaloniki City Hotel",
+    "description": "Modern business hotel in the city center. Perfect for business travelers and city explorers with easy access to attractions.",
+    "location": "City Center, Thessaloniki",
+    "city": "Thessaloniki",
+    "country": "Greece",
+    "starRating": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Gym", "Restaurant", "Business Center", "Parking", "Laundry Service"],
+    "pricePerNight": 150,
+    "featured": false,
+    "averageRating": 4.5,
+    "totalReviews": 445
+  },
+  {
+    "id": "7",
+    "name": "Corfu Luxury Apartments",
+    "description": "Modern apartments with sea views and private balconies. Self-catering facilities with hotel services available.",
+    "location": "Paleokastritsa, Corfu",
+    "city": "Corfu",
+    "country": "Greece",
+    "starRating": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Pool", "Parking", "Beach Access", "Air Conditioning"],
+    "pricePerNight": 180,
+    "featured": false,
+    "averageRating": 4.7,
+    "totalReviews": 178
+  },
+  {
+    "id": "8",
+    "name": "Zakynthos Sunset Hotel",
+    "description": "Beautiful hotel overlooking the famous Navagio Beach. Romantic setting perfect for couples and honeymooners.",
+    "location": "Navagio Beach, Zakynthos",
+    "city": "Zakynthos",
+    "country": "Greece",
+    "starRating": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+      "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Pool", "Restaurant", "Bar", "Spa", "Beach Access"],
+    "pricePerNight": 200,
+    "featured": true,
+    "averageRating": 4.8,
+    "totalReviews": 267
+  },
+  {
+    "id": "9",
+    "name": "Nafplio Heritage Hotel",
+    "description": "Restored mansion in the historic town of Nafplio. Authentic Greek hospitality with antique furnishings and modern comfort.",
+    "location": "Old Town, Nafplio",
+    "city": "Nafplio",
+    "country": "Greece",
+    "starRating": 3,
+    "images": [
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Restaurant", "Bar", "Air Conditioning"],
+    "pricePerNight": 130,
+    "featured": false,
+    "averageRating": 4.6,
+    "totalReviews": 312
+  },
+  {
+    "id": "10",
+    "name": "Paros Island Resort",
+    "description": "Traditional Cycladic resort with white-washed buildings and blue domes. Peaceful retreat with stunning Aegean views.",
+    "location": "Naoussa, Paros",
+    "city": "Paros",
+    "country": "Greece",
+    "starRating": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Pool", "Restaurant", "Bar", "Beach Access", "Spa"],
+    "pricePerNight": 250,
+    "featured": false,
+    "averageRating": 4.7,
+    "totalReviews": 423
+  },
+  {
+    "id": "11",
+    "name": "Meteora Valley Lodge",
+    "description": "Mountain lodge with views of the famous Meteora monasteries. Hiking trails and nature experiences.",
+    "location": "Kalambaka, Meteora",
+    "city": "Meteora",
+    "country": "Greece",
+    "starRating": 3,
+    "images": [
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800",
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Restaurant", "Parking", "Gym", "Air Conditioning"],
+    "pricePerNight": 110,
+    "featured": false,
+    "averageRating": 4.5,
+    "totalReviews": 189
+  },
+  {
+    "id": "12",
+    "name": "Delphi Mountain Resort",
+    "description": "Ski resort and spa retreat in the mountains. Summer hiking and winter skiing with therapeutic hot springs.",
+    "location": "Delphi, Central Greece",
+    "city": "Delphi",
+    "country": "Greece",
+    "starRating": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"
+    ],
+    "amenities": ["Wi-Fi", "Spa", "Restaurant", "Bar", "Gym", "Parking"],
+    "pricePerNight": 190,
+    "featured": false,
+    "averageRating": 4.6,
+    "totalReviews": 256
+  }
+]

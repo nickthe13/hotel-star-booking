@@ -1,0 +1,145 @@
+<div class="hotels-page">
+  <div class="hotels-page__header">
+    <div class="container">
+      <h1 class="hotels-page__title">Find Your Perfect Hotel</h1>
+      <p class="hotels-page__subtitle">
+        Discover {{ resultsCount() }} amazing hotels worldwide
+      </p>
+    </div>
+  </div>
+
+  <div class="hotels-page__content">
+    <div class="container">
+      <div class="hotels-layout">
+        <!-- Filters Sidebar -->
+        <aside class="filters" [class.filters--visible]="showFilters()">
+          <div class="filters__header">
+            <h2 class="filters__title">Filters</h2>
+            <button class="btn-clear" (click)="clearFilters()">Clear All</button>
+          </div>
+
+          <!-- City Filter -->
+          <div class="filter-group">
+            <label class="filter-group__label">City</label>
+            <select
+              class="filter-group__select"
+              [(ngModel)]="selectedCity"
+              (ngModelChange)="selectedCity.set($event)"
+            >
+              <option value="">All Cities</option>
+              @for (city of cities(); track city) {
+                <option [value]="city">{{ city }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="filter-group">
+            <label class="filter-group__label">Price Range</label>
+            <div class="price-range">
+              <input
+                type="number"
+                class="price-range__input"
+                placeholder="Min"
+                [(ngModel)]="minPrice"
+                (ngModelChange)="minPrice.set($event)"
+              />
+              <span class="price-range__separator">-</span>
+              <input
+                type="number"
+                class="price-range__input"
+                placeholder="Max"
+                [(ngModel)]="maxPrice"
+                (ngModelChange)="maxPrice.set($event)"
+              />
+            </div>
+            <div class="price-range__labels">
+              <span>${{ minPrice() }}</span>
+              <span>${{ maxPrice() }}</span>
+            </div>
+          </div>
+
+          <!-- Star Rating Filter -->
+          <div class="filter-group">
+            <label class="filter-group__label">Star Rating</label>
+            <div class="star-filters">
+              @for (rating of starRatings; track rating) {
+                <button
+                  class="star-filter"
+                  [class.star-filter--active]="selectedStarRating() === rating"
+                  (click)="onStarRatingChange(rating)"
+                >
+                  @for (star of [1, 2, 3, 4, 5]; track star) {
+                    <span [class.filled]="star <= rating">⭐</span>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Amenities Filter -->
+          <div class="filter-group">
+            <label class="filter-group__label">Amenities</label>
+            <div class="amenity-filters">
+              @for (amenity of amenities.slice(0, 6); track amenity) {
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedAmenities().includes(amenity)"
+                    (change)="onAmenityToggle(amenity)"
+                  />
+                  <span>{{ amenity }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="hotels-main">
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <button class="btn-filters" (click)="toggleFilters()">
+              <span>🔍</span>
+              <span>Filters</span>
+            </button>
+
+            <div class="toolbar__sort">
+              <label>Sort by:</label>
+              <select
+                class="sort-select"
+                [(ngModel)]="sortBy"
+                (ngModelChange)="sortBy.set($event)"
+              >
+                <option value="popularity">Popularity</option>
+                <option value="price">Price</option>
+                <option value="rating">Rating</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Results -->
+          @if (loading()) {
+            <app-loader />
+          } @else if (hotels().length === 0) {
+            <div class="no-results">
+              <p class="no-results__title">No hotels found</p>
+              <p class="no-results__text">
+                Try adjusting your filters to see more results
+              </p>
+              <button class="btn btn--primary" (click)="clearFilters()">
+                Clear Filters
+              </button>
+            </div>
+          } @else {
+            <div class="hotels-grid">
+              @for (hotel of hotels(); track hotel.id) {
+                <app-hotel-card [hotel]="hotel" />
+              }
+            </div>
+          }
+        </main>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -25,6 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'booking/:hotelId',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/booking/booking.component').then((m) => m.BookingComponent)
   },
@@ -40,11 +43,13 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent)
   },
   {
     path: 'admin',
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./features/admin/admin.component').then((m) => m.AdminComponent)
   },

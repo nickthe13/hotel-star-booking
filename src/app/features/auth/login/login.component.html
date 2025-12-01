@@ -1,0 +1,91 @@
+<div class="auth-page">
+  <div class="container">
+    <div class="auth-card">
+      <div class="auth-card__header">
+        <h1 class="auth-card__title">Welcome Back</h1>
+        <p class="auth-card__subtitle">Sign in to your account to continue</p>
+      </div>
+
+      @if (error()) {
+        <div class="alert alert--error">
+          <span>⚠️</span>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="form-input"
+            [class.form-input--error]="email?.invalid && email?.touched"
+            placeholder="you@example.com"
+          />
+          @if (email?.invalid && email?.touched) {
+            <div class="form-error">
+              @if (email?.errors?.['required']) {
+                <span>Email is required</span>
+              }
+              @if (email?.errors?.['email']) {
+                <span>Please enter a valid email</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="form-input"
+            [class.form-input--error]="password?.invalid && password?.touched"
+            placeholder="Enter your password"
+          />
+          @if (password?.invalid && password?.touched) {
+            <div class="form-error">
+              @if (password?.errors?.['required']) {
+                <span>Password is required</span>
+              }
+              @if (password?.errors?.['minlength']) {
+                <span>Password must be at least 6 characters</span>
+              }
+            </div>
+          }
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn--primary btn--full"
+          [disabled]="loading()"
+        >
+          @if (loading()) {
+            <span>Signing in...</span>
+          } @else {
+            <span>Sign In</span>
+          }
+        </button>
+
+        <div class="auth-card__footer">
+          <p>
+            Don't have an account?
+            <a routerLink="/auth/register" class="link">Sign up</a>
+          </p>
+        </div>
+      </form>
+
+      <div class="demo-credentials">
+        <p class="demo-credentials__title">Demo Credentials:</p>
+        <p class="demo-credentials__text">Email: <strong>demo@hotel.com</strong></p>
+        <p class="demo-credentials__text">Password: <strong>password</strong></p>
+        <p class="demo-credentials__text">
+          Admin: <strong>admin@hotel.com</strong> / <strong>password</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

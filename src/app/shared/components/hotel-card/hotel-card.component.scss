@@ -1,0 +1,172 @@
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/mixins';
+
+.hotel-card {
+  @include card(0);
+  overflow: hidden;
+  height: 100%;
+  transition: transform $transition-base, box-shadow $transition-base;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-xl;
+  }
+
+  &__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  &__image-wrapper {
+    position: relative;
+    @include aspect-ratio(16, 9);
+    overflow: hidden;
+  }
+
+  &__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform $transition-slow;
+
+    .hotel-card:hover & {
+      transform: scale(1.05);
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: $spacing-md;
+    right: $spacing-md;
+    background: $accent-500;
+    color: $white;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    z-index: 1;
+  }
+
+  &__content {
+    padding: $spacing-md;
+  }
+
+  &__header {
+    margin-bottom: $spacing-sm;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-xs;
+    @include line-clamp(2);
+  }
+
+  &__rating {
+    display: flex;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__stars {
+    display: flex;
+    gap: 2px;
+    font-size: $font-size-sm;
+
+    .star {
+      opacity: 0.2;
+
+      &--filled {
+        opacity: 1;
+      }
+    }
+  }
+
+  &__location {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__description {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-relaxed;
+    margin-bottom: $spacing-md;
+    @include line-clamp(3);
+  }
+
+  &__amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+
+    .amenity-tag {
+      font-size: $font-size-xs;
+      padding: $spacing-xs $spacing-sm;
+      background: $neutral-100;
+      border-radius: $radius-full;
+      color: $text-secondary;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-color-light;
+  }
+
+  &__reviews {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    .rating-score {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: $primary-500;
+      color: $white;
+      border-radius: $radius-md;
+      font-weight: $font-weight-bold;
+      font-size: $font-size-sm;
+    }
+
+    .rating-text {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+    }
+  }
+
+  &__price {
+    text-align: right;
+
+    .price-label {
+      display: block;
+      font-size: $font-size-xs;
+      color: $text-secondary;
+      margin-bottom: $spacing-xs;
+    }
+
+    .price-amount {
+      display: block;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $primary-500;
+    }
+
+    .price-period {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+    }
+  }
+}

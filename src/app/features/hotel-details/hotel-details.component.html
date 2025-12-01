@@ -1,0 +1,159 @@
+@if (loading()) {
+  <app-loader />
+} @else if (hotel()) {
+  <div class="hotel-details">
+    <!-- Breadcrumb -->
+    <div class="container">
+      <nav class="breadcrumb">
+        <a routerLink="/home">Home</a>
+        <span class="breadcrumb__separator">/</span>
+        <a routerLink="/hotels">Hotels</a>
+        <span class="breadcrumb__separator">/</span>
+        <span class="breadcrumb__current">{{ hotel()!.name }}</span>
+      </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero__content">
+          <h1 class="hero__title">{{ hotel()!.name }}</h1>
+          <div class="hero__meta">
+            <div class="star-rating">
+              @for (star of [1, 2, 3, 4, 5]; track star) {
+                <span [class.filled]="star <= hotel()!.starRating">⭐</span>
+              }
+            </div>
+            <span class="location">📍 {{ hotel()!.location }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Image Gallery -->
+    <section class="gallery">
+      <div class="container">
+        <div class="gallery__main">
+          <img
+            [src]="hotel()!.images[selectedImageIndex()]"
+            [alt]="hotel()!.name"
+            class="gallery__main-image"
+          />
+        </div>
+        <div class="gallery__thumbnails">
+          @for (image of hotel()!.images; track $index) {
+            <button
+              class="gallery__thumbnail"
+              [class.gallery__thumbnail--active]="selectedImageIndex() === $index"
+              (click)="selectImage($index)"
+            >
+              <img [src]="image" [alt]="hotel()!.name + ' - Image ' + ($index + 1)" />
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="content-layout">
+        <!-- Main Info -->
+        <main class="main-content">
+          <!-- Description -->
+          <section class="section">
+            <h2 class="section__title">About This Hotel</h2>
+            <p class="section__text">{{ hotel()!.description }}</p>
+          </section>
+
+          <!-- Amenities -->
+          <section class="section">
+            <h2 class="section__title">Amenities</h2>
+            <div class="amenities-grid">
+              @for (amenity of hotel()!.amenities; track amenity) {
+                <div class="amenity-item">
+                  <span class="amenity-item__icon">✓</span>
+                  <span class="amenity-item__text">{{ amenity }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Reviews -->
+          @if (hotel()!.averageRating && hotel()!.totalReviews) {
+            <section class="section">
+              <h2 class="section__title">Guest Reviews</h2>
+              <div class="reviews-summary">
+                <div class="reviews-summary__score">
+                  <span class="score">{{ hotel()!.averageRating }}</span>
+                  <span class="score-label">Excellent</span>
+                </div>
+                <div class="reviews-summary__info">
+                  <p>Based on {{ hotel()!.totalReviews }} verified reviews</p>
+                </div>
+              </div>
+            </section>
+          }
+
+          <!-- Location -->
+          <section class="section">
+            <h2 class="section__title">Location</h2>
+            <p class="location-text">
+              📍 {{ hotel()!.location }}, {{ hotel()!.city }}, {{ hotel()!.country }}
+            </p>
+            <div class="map-placeholder">
+              <p>Map view coming soon</p>
+            </div>
+          </section>
+        </main>
+
+        <!-- Booking Card -->
+        <aside class="booking-card">
+          <div class="booking-card__content">
+            <div class="booking-card__price">
+              <span class="price-label">From</span>
+              <span class="price-amount">${{ hotel()!.pricePerNight }}</span>
+              <span class="price-period">per night</span>
+            </div>
+
+            @if (hotel()!.averageRating) {
+              <div class="booking-card__rating">
+                <span class="rating-score">{{ hotel()!.averageRating }}</span>
+                <div class="rating-info">
+                  <span class="rating-label">Excellent</span>
+                  <span class="rating-reviews">{{ hotel()!.totalReviews }} reviews</span>
+                </div>
+              </div>
+            }
+
+            <button class="btn btn--primary btn--large" (click)="bookNow()">
+              Book Now
+            </button>
+
+            <div class="booking-card__features">
+              <div class="feature">
+                <span class="feature__icon">✓</span>
+                <span class="feature__text">Free cancellation</span>
+              </div>
+              <div class="feature">
+                <span class="feature__icon">✓</span>
+                <span class="feature__text">Best price guarantee</span>
+              </div>
+              <div class="feature">
+                <span class="feature__icon">✓</span>
+                <span class="feature__text">Instant confirmation</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="container">
+    <div class="error-message">
+      <h2>Hotel Not Found</h2>
+      <p>The hotel you're looking for doesn't exist.</p>
+      <a routerLink="/hotels" class="btn btn--primary">Browse Hotels</a>
+    </div>
+  </div>
+}

@@ -1,0 +1,61 @@
+<article class="hotel-card">
+  <a [routerLink]="['/hotels', hotel.id]" class="hotel-card__link">
+    <div class="hotel-card__image-wrapper">
+      <img
+        [src]="hotel.images[0]"
+        [alt]="hotel.name"
+        class="hotel-card__image"
+        loading="lazy"
+      />
+      @if (hotel.featured) {
+        <span class="hotel-card__badge">Featured</span>
+      }
+    </div>
+
+    <div class="hotel-card__content">
+      <div class="hotel-card__header">
+        <h3 class="hotel-card__title">{{ hotel.name }}</h3>
+        <div class="hotel-card__rating">
+          <span class="hotel-card__stars">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <span
+                class="star"
+                [class.star--filled]="star <= hotel.starRating"
+                >⭐</span
+              >
+            }
+          </span>
+        </div>
+      </div>
+
+      <p class="hotel-card__location">📍 {{ hotel.location }}</p>
+
+      <p class="hotel-card__description">{{ hotel.description }}</p>
+
+      <div class="hotel-card__amenities">
+        @for (amenity of hotel.amenities.slice(0, 4); track amenity) {
+          <span class="amenity-tag">{{ amenity }}</span>
+        }
+        @if (hotel.amenities.length > 4) {
+          <span class="amenity-tag">+{{ hotel.amenities.length - 4 }} more</span>
+        }
+      </div>
+
+      <div class="hotel-card__footer">
+        <div class="hotel-card__reviews">
+          @if (hotel.averageRating) {
+            <span class="rating-score">{{ hotel.averageRating }}</span>
+            <span class="rating-text"
+              >Excellent ({{ hotel.totalReviews }} reviews)</span
+            >
+          }
+        </div>
+        <div class="hotel-card__price">
+          <span class="price-label">From</span>
+          <span class="price-amount">${{ hotel.pricePerNight }}</span>
+          <span class="price-period">/night</span>
+        </div>
+      </div>
+    </div>
+  </a>
+</article>
