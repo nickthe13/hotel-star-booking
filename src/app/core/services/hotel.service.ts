@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, delay, map, of } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { Hotel, HotelSearchParams } from '../models';
 import hotelsData from '../../../assets/data/hotels.json';
 
@@ -74,7 +74,6 @@ export class HotelService {
     }
 
     return of(filteredHotels).pipe(
-      delay(300),
       map(hotels => {
         this.loading.set(false);
         return hotels;
@@ -87,7 +86,6 @@ export class HotelService {
     const hotel = this.hotels().find(h => h.id === id);
 
     return of(hotel).pipe(
-      delay(200),
       map(h => {
         this.loading.set(false);
         return h;
@@ -97,7 +95,7 @@ export class HotelService {
 
   getFeaturedHotels(): Observable<Hotel[]> {
     const featured = this.hotels().filter(hotel => hotel.featured);
-    return of(featured).pipe(delay(200));
+    return of(featured);
   }
 
   searchHotels(query: string): Observable<Hotel[]> {
@@ -109,7 +107,6 @@ export class HotelService {
     );
 
     return of(results).pipe(
-      delay(300),
       map(hotels => {
         this.loading.set(false);
         return hotels;
