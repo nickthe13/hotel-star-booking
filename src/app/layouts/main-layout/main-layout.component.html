@@ -1,0 +1,75 @@
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="header">
+  <div class="container header__container">
+    <div class="header__logo">
+      <a routerLink="/home" class="logo">
+        <span class="logo__icon">⭐</span>
+        <span class="logo__text">Hotel Star Booking</span>
+      </a>
+    </div>
+
+    <nav class="header__nav" aria-label="Main navigation">
+      <ul class="nav">
+        <li class="nav__item">
+          <a routerLink="/home" routerLinkActive="nav__link--active" class="nav__link">Home</a>
+        </li>
+        <li class="nav__item">
+          <a routerLink="/hotels" routerLinkActive="nav__link--active" class="nav__link">Hotels</a>
+        </li>
+        <li class="nav__item">
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="nav__link--active"
+            class="nav__link"
+            >My Bookings</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <a routerLink="/auth/login" class="btn btn--secondary">Sign In</a>
+      <a routerLink="/auth/register" class="btn btn--primary">Sign Up</a>
+    </div>
+  </div>
+</header>
+
+<main id="main-content" class="main">
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="footer">
+  <div class="container footer__container">
+    <div class="footer__content">
+      <div class="footer__section">
+        <h3 class="footer__title">Hotel Star Booking</h3>
+        <p class="footer__text">
+          Your trusted partner for finding the perfect hotel for your next adventure.
+        </p>
+      </div>
+
+      <div class="footer__section">
+        <h4 class="footer__subtitle">Quick Links</h4>
+        <ul class="footer__links">
+          <li><a routerLink="/home" class="footer__link">Home</a></li>
+          <li><a routerLink="/hotels" class="footer__link">Browse Hotels</a></li>
+          <li><a routerLink="/dashboard" class="footer__link">My Bookings</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__section">
+        <h4 class="footer__subtitle">Support</h4>
+        <ul class="footer__links">
+          <li><a href="#" class="footer__link">Help Center</a></li>
+          <li><a href="#" class="footer__link">Contact Us</a></li>
+          <li><a href="#" class="footer__link">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p class="footer__copyright">&copy; 2025 Hotel Star Booking. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
