@@ -50,6 +50,17 @@ export class HotelService {
     let filteredHotels = [...this.hotels()];
 
     if (params) {
+      // Text search filter
+      if (params.query) {
+        const query = params.query.toLowerCase();
+        filteredHotels = filteredHotels.filter(hotel =>
+          hotel.name.toLowerCase().includes(query) ||
+          hotel.city.toLowerCase().includes(query) ||
+          hotel.location.toLowerCase().includes(query) ||
+          hotel.description.toLowerCase().includes(query)
+        );
+      }
+
       if (params.city) {
         filteredHotels = filteredHotels.filter(hotel =>
           hotel.city.toLowerCase().includes(params.city!.toLowerCase())

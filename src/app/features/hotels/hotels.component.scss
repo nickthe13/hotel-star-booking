@@ -18,10 +18,59 @@
   &__subtitle {
     font-size: $font-size-lg;
     opacity: 0.9;
+    margin-bottom: $spacing-xl;
   }
 
   &__content {
     padding: $spacing-xl 0;
+  }
+}
+
+.search-bar {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  gap: $spacing-sm;
+  background: $white;
+  border-radius: $radius-full;
+  padding: $spacing-xs;
+  box-shadow: $shadow-lg;
+
+  &__input {
+    flex: 1;
+    border: none;
+    padding: $spacing-sm $spacing-lg;
+    font-size: $font-size-base;
+    background: transparent;
+    outline: none;
+    color: $text-primary;
+
+    &::placeholder {
+      color: $text-disabled;
+    }
+  }
+
+  &__button {
+    background: $primary-500;
+    color: $white;
+    border: none;
+    border-radius: $radius-full;
+    padding: $spacing-sm $spacing-lg;
+    cursor: pointer;
+    font-size: $font-size-lg;
+    transition: background-color $transition-base;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+
+    &:hover {
+      background: $primary-600;
+    }
+
+    &:active {
+      background: $primary-700;
+    }
   }
 }
 
@@ -207,9 +256,25 @@
     @include button-secondary;
     display: flex;
     gap: $spacing-xs;
+    align-items: center;
+    position: relative;
 
     @include respond-to('lg') {
       display: none;
+    }
+  }
+
+  &__info {
+    display: none;
+
+    @include respond-to('md') {
+      display: block;
+    }
+
+    .results-text {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      font-weight: $font-weight-medium;
     }
   }
 
@@ -230,6 +295,23 @@
       min-width: 150px;
     }
   }
+}
+
+.filter-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: $primary-500;
+  color: $white;
+  border-radius: $radius-full;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  border: 2px solid $white;
 }
 
 .hotels-grid {

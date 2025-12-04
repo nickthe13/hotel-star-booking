@@ -50,6 +50,7 @@ export interface HotelFilters {
 }
 
 export interface HotelSearchParams extends HotelFilters {
+  query?: string;
   checkIn?: string;
   checkOut?: string;
   guests?: number;

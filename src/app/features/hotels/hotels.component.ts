@@ -20,6 +20,7 @@ export class HotelsComponent implements OnInit {
   showFilters = signal<boolean>(false);
 
   // Filter signals
+  searchQuery = signal<string>('');
   selectedCity = signal<string>('');
   minPrice = signal<number>(0);
   maxPrice = signal<number>(1000);
@@ -35,6 +36,7 @@ export class HotelsComponent implements OnInit {
 
   // Computed search params
   searchParams = computed<HotelSearchParams>(() => ({
+    query: this.searchQuery() || undefined,
     city: this.selectedCity() || undefined,
     minPrice: this.minPrice(),
     maxPrice: this.maxPrice(),
@@ -45,6 +47,18 @@ export class HotelsComponent implements OnInit {
   }));
 
   resultsCount = computed(() => this.hotels().length);
+
+  // Computed active filters count
+  activeFiltersCount = computed(() => {
+    let count = 0;
+    if (this.searchQuery()) count++;
+    if (this.selectedCity()) count++;
+    if (this.minPrice() > 0) count++;
+    if (this.maxPrice() < 1000) count++;
+    if (this.selectedStarRating()) count++;
+    if (this.selectedAmenities().length > 0) count++;
+    return count;
+  });
 
   constructor(
     private hotelService: HotelService,
@@ -107,6 +121,7 @@ export class HotelsComponent implements OnInit {
   }
 
   clearFilters(): void {
+    this.searchQuery.set('');
     this.selectedCity.set('');
     this.minPrice.set(0);
     this.maxPrice.set(1000);
