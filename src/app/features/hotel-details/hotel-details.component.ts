@@ -31,6 +31,7 @@ export class HotelDetailsComponent implements OnInit {
   ngOnInit(): void {
     if (this.id) {
       this.loadHotel();
+      this.loadUserRating();
     }
   }
 
@@ -46,6 +47,56 @@ export class HotelDetailsComponent implements OnInit {
         this.router.navigate(['/hotels']);
       }
     });
+  }
+
+  private loadUserRating(): void {
+    if (!this.authService.isAuthenticated()) {
+      return;
+    }
+
+    const userId = this.authService.user()?.id;
+    if (!userId) {
+      return;
+    }
+
+    const ratingsKey = `hotel_ratings_${userId}`;
+    const storedRatings = localStorage.getItem(ratingsKey);
+
+    if (storedRatings) {
+      try {
+        const ratings = JSON.parse(storedRatings);
+        const userRating = ratings[this.id];
+
+        if (userRating) {
+          this.userRating.set(userRating);
+          this.hasRated.set(true);
+        }
+      } catch (error) {
+        console.error('Error loading user ratings:', error);
+      }
+    }
+  }
+
+  private saveUserRating(rating: number): void {
+    const userId = this.authService.user()?.id;
+    if (!userId) {
+      return;
+    }
+
+    const ratingsKey = `hotel_ratings_${userId}`;
+    let ratings: Record<string, number> = {};
+
+    const storedRatings = localStorage.getItem(ratingsKey);
+    if (storedRatings) {
+      try {
+        ratings = JSON.parse(storedRatings);
+      } catch (error) {
+        console.error('Error parsing stored ratings:', error);
+      }
+    }
+
+    ratings[this.id] = rating;
+    localStorage.setItem(ratingsKey, JSON.stringify(ratings));
   }
 
   selectImage(index: number): void {
@@ -90,16 +141,24 @@ export class HotelDetailsComponent implements OnInit {
         newAverageRating = (currentTotal + rating) / newTotalReviews;
       }
 
+      const roundedAverageRating = Math.round(newAverageRating * 10) / 10;
+
       this.hotel.set({
         ...hotel,
-        averageRating: Math.round(newAverageRating * 10) / 10,
+        averageRating: roundedAverageRating,
         totalReviews: newTotalReviews
       });
+
+      // Persist hotel rating to the service and localStorage
+      this.hotelService.updateHotelRating(hotel.id, roundedAverageRating, newTotalReviews);
     }
 
     this.userRating.set(rating);
     this.hasRated.set(true);
     this.hoveredRating.set(0);
+
+    // Save user's rating to localStorage
+    this.saveUserRating(rating);
   }
 
   getDisplayRating(index: number): boolean {

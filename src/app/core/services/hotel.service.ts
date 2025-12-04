@@ -16,7 +16,32 @@ export class HotelService {
   }
 
   private loadHotels(): void {
-    this.hotels.set(hotelsData as Hotel[]);
+    const baseHotels = hotelsData as Hotel[];
+
+    // Load persisted ratings from localStorage
+    const storedRatings = localStorage.getItem('hotel_aggregate_ratings');
+    if (storedRatings) {
+      try {
+        const ratings = JSON.parse(storedRatings);
+        const hotelsWithRatings = baseHotels.map(hotel => {
+          const hotelRating = ratings[hotel.id];
+          if (hotelRating) {
+            return {
+              ...hotel,
+              averageRating: hotelRating.averageRating,
+              totalReviews: hotelRating.totalReviews
+            };
+          }
+          return hotel;
+        });
+        this.hotels.set(hotelsWithRatings);
+      } catch (error) {
+        console.error('Error loading hotel ratings:', error);
+        this.hotels.set(baseHotels);
+      }
+    } else {
+      this.hotels.set(baseHotels);
+    }
   }
 
   getHotels(params?: HotelSearchParams): Observable<Hotel[]> {
@@ -121,5 +146,35 @@ export class HotelService {
 
   isLoading(): boolean {
     return this.loading();
+  }
+
+  updateHotelRating(hotelId: string, averageRating: number, totalReviews: number): void {
+    // Update the hotel in the signal
+    const updatedHotels = this.hotels().map(hotel => {
+      if (hotel.id === hotelId) {
+        return {
+          ...hotel,
+          averageRating,
+          totalReviews
+        };
+      }
+      return hotel;
+    });
+    this.hotels.set(updatedHotels);
+
+    // Persist to localStorage
+    const storedRatings = localStorage.getItem('hotel_aggregate_ratings');
+    let ratings: Record<string, { averageRating: number; totalReviews: number }> = {};
+
+    if (storedRatings) {
+      try {
+        ratings = JSON.parse(storedRatings);
+      } catch (error) {
+        console.error('Error parsing hotel ratings:', error);
+      }
+    }
+
+    ratings[hotelId] = { averageRating, totalReviews };
+    localStorage.setItem('hotel_aggregate_ratings', JSON.stringify(ratings));
   }
 }
