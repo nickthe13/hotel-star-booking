@@ -14,6 +14,7 @@ import { HotelService } from './hotel.service';
 export class BookingService {
   private readonly API_URL = environment.apiUrl;
   loading = signal<boolean>(false);
+  private nextBookingNumber = 3; // Start from 3 since we have 2 initial bookings
 
   // Mock bookings data
   private mockBookings: Booking[] = [
@@ -77,8 +78,9 @@ export class BookingService {
           new Date(bookingData.checkOut)
         );
 
+        const bookingNumber = this.nextBookingNumber++;
         const newBooking: Booking = {
-          id: Math.random().toString(36).substring(7),
+          id: bookingNumber.toString(),
           userId: userId,
           hotelId: bookingData.hotelId,
           roomId: bookingData.roomId,
@@ -115,9 +117,20 @@ export class BookingService {
 
     // Mock implementation
     const userId = '1'; // Would get from authService.currentUser()?.id
-    return of(
-      this.mockBookings.filter(booking => booking.userId === userId)
-    );
+
+    // Filter bookings for the user
+    const userBookings = this.mockBookings.filter(booking => booking.userId === userId);
+
+    return of(userBookings);
+  }
+
+  removeBooking(id: string): Observable<void> {
+    // Remove booking from the array
+    const index = this.mockBookings.findIndex(b => b.id === id);
+    if (index > -1) {
+      this.mockBookings.splice(index, 1);
+    }
+    return of(undefined);
   }
 
   getBookingById(id: string): Observable<Booking> {

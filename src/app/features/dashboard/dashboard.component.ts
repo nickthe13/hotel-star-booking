@@ -15,6 +15,10 @@ export class DashboardComponent implements OnInit {
   bookings = signal<Booking[]>([]);
   loading = signal<boolean>(false);
   error = signal<string>('');
+  cancellingBookingId = signal<string | null>(null);
+  successMessage = signal<string>('');
+  showCancelModal = signal<boolean>(false);
+  bookingToCancel = signal<string | null>(null);
   BookingStatus = BookingStatus;
 
   constructor(
@@ -42,17 +46,49 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  cancelBooking(bookingId: string): void {
-    if (confirm('Are you sure you want to cancel this booking?')) {
-      this.bookingService.cancelBooking(bookingId).subscribe({
-        next: () => {
-          this.loadBookings();
-        },
-        error: (err) => {
-          alert('Failed to cancel booking. Please try again.');
-        }
-      });
-    }
+  openCancelModal(bookingId: string): void {
+    this.bookingToCancel.set(bookingId);
+    this.showCancelModal.set(true);
+  }
+
+  closeCancelModal(): void {
+    this.showCancelModal.set(false);
+    this.bookingToCancel.set(null);
+  }
+
+  confirmCancelBooking(): void {
+    const bookingId = this.bookingToCancel();
+    if (!bookingId) return;
+
+    this.cancellingBookingId.set(bookingId);
+    this.error.set('');
+
+    this.bookingService.cancelBooking(bookingId).subscribe({
+      next: () => {
+        this.cancellingBookingId.set(null);
+        this.closeCancelModal();
+        this.successMessage.set('Booking cancelled successfully! It will be removed shortly.');
+        this.loadBookings();
+
+        // Remove the cancelled booking after 3 seconds
+        setTimeout(() => {
+          this.bookingService.removeBooking(bookingId).subscribe({
+            next: () => {
+              this.loadBookings();
+            }
+          });
+        }, 3000);
+
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          this.successMessage.set('');
+        }, 5000);
+      },
+      error: () => {
+        this.cancellingBookingId.set(null);
+        this.error.set('Failed to cancel booking. Please try again.');
+      }
+    });
   }
 
   getStatusClass(status: BookingStatus): string {

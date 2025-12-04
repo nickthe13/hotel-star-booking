@@ -26,6 +26,13 @@
       </div>
     }
 
+    @if (successMessage()) {
+      <div class="alert alert--success">
+        <span>✓</span>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
     @if (!loading() && !error()) {
       <div class="bookings-section">
         <h2 class="section-title">My Bookings</h2>
@@ -44,7 +51,7 @@
         } @else {
           <div class="bookings-grid">
             @for (booking of bookings(); track booking.id) {
-              <div class="booking-card">
+              <div class="booking-card" [class.booking-card--cancelled]="booking.status === BookingStatus.CANCELLED">
                 <div class="booking-card__header">
                   <div class="booking-card__info">
                     <h3 class="booking-card__title">Booking #{{ booking.id }}</h3>
@@ -101,9 +108,14 @@
                   @if (canCancelBooking(booking)) {
                     <button
                       class="btn btn--secondary btn--small"
-                      (click)="cancelBooking(booking.id)"
+                      (click)="openCancelModal(booking.id)"
+                      [disabled]="cancellingBookingId() === booking.id"
                     >
-                      Cancel Booking
+                      @if (cancellingBookingId() === booking.id) {
+                        <span>Cancelling...</span>
+                      } @else {
+                        <span>Cancel Booking</span>
+                      }
                     </button>
                   }
                 </div>
@@ -115,3 +127,39 @@
     }
   </div>
 </div>
+
+<!-- Cancel Confirmation Modal -->
+@if (showCancelModal()) {
+  <div class="modal-overlay" (click)="closeCancelModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h3 class="modal__title">Cancel Booking</h3>
+        <button class="modal__close" (click)="closeCancelModal()">×</button>
+      </div>
+      <div class="modal__body">
+        <p>Are you sure you want to cancel this booking?</p>
+        <p class="modal__warning">This action cannot be undone.</p>
+      </div>
+      <div class="modal__footer">
+        <button
+          class="btn btn--secondary"
+          (click)="closeCancelModal()"
+          [disabled]="cancellingBookingId() !== null"
+        >
+          Keep Booking
+        </button>
+        <button
+          class="btn btn--danger"
+          (click)="confirmCancelBooking()"
+          [disabled]="cancellingBookingId() !== null"
+        >
+          @if (cancellingBookingId()) {
+            Cancelling...
+          } @else {
+            Yes, Cancel Booking
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

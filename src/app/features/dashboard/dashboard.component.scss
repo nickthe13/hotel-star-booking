@@ -78,6 +78,12 @@
     color: darken($error, 10%);
     border: 1px solid rgba($error, 0.3);
   }
+
+  &--success {
+    background: rgba($success, 0.1);
+    color: darken($success, 10%);
+    border: 1px solid rgba($success, 0.3);
+  }
 }
 
 .bookings-section {
@@ -131,11 +137,16 @@
   border-radius: $radius-lg;
   box-shadow: $shadow-md;
   padding: $spacing-xl;
-  transition: $transition-base;
+  transition: $transition-base, opacity 0.5s ease-out;
 
   &:hover {
     box-shadow: $shadow-lg;
     transform: translateY(-2px);
+  }
+
+  &--cancelled {
+    opacity: 0.6;
+    animation: fadeOut 3s ease-out forwards;
   }
 
   &__header {
@@ -298,5 +309,127 @@
   &--small {
     padding: $spacing-xs $spacing-md;
     font-size: $font-size-sm;
+  }
+
+  &--danger {
+    background: $error;
+    color: $white;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: darken($error, 10%);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Modal Styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-index-modal;
+  padding: $spacing-lg;
+}
+
+.modal {
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-xl;
+  max-width: 500px;
+  width: 100%;
+  animation: modalSlideIn 0.3s ease-out;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-lg;
+    border-bottom: 1px solid $border-color;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: $font-size-3xl;
+    color: $text-secondary;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-md;
+    transition: all $transition-base;
+
+    &:hover {
+      background: $neutral-100;
+      color: $text-primary;
+    }
+  }
+
+  &__body {
+    padding: $spacing-xl;
+
+    p {
+      margin: 0 0 $spacing-md 0;
+      color: $text-primary;
+      font-size: $font-size-base;
+      line-height: $line-height-relaxed;
+    }
+  }
+
+  &__warning {
+    color: $error !important;
+    font-weight: $font-weight-medium;
+    font-size: $font-size-sm !important;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-md;
+    padding: $spacing-lg;
+    border-top: 1px solid $border-color;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
   }
 }
