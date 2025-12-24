@@ -383,6 +383,195 @@
   }
 }
 
+// Room Selection Styles
+.room-selection-section {
+  margin-bottom: $spacing-3xl;
+  padding-bottom: $spacing-3xl;
+  border-bottom: 2px solid $border-color;
+}
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.room-card {
+  background: $white;
+  border: 2px solid $border-color;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover:not(&--unavailable) {
+    border-color: $primary-500;
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+
+  &--selected {
+    border-color: $primary-500;
+    background: rgba($primary-500, 0.03);
+  }
+
+  &--unavailable {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    .room-card__select-btn {
+      cursor: not-allowed;
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  &__badge {
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+
+    &--unavailable {
+      background: rgba($error, 0.1);
+      color: $error;
+    }
+  }
+
+  &__details {
+    margin-bottom: $spacing-md;
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__icon {
+    font-size: $font-size-base;
+  }
+
+  &__price {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+
+    .price-amount {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $primary-500;
+    }
+
+    .price-period {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+    }
+  }
+
+  &__amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+
+    .amenity-tag {
+      padding: $spacing-xs $spacing-sm;
+      background: $neutral-100;
+      border-radius: $radius-sm;
+      font-size: $font-size-xs;
+      color: $text-secondary;
+
+      &--more {
+        background: $neutral-200;
+        font-weight: $font-weight-semibold;
+      }
+    }
+  }
+
+  &__select-btn {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    border: 2px solid $primary-500;
+    background: $white;
+    color: $primary-500;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: $primary-500;
+      color: $white;
+    }
+
+    &--selected {
+      background: $primary-500;
+      color: $white;
+    }
+
+    &:disabled {
+      border-color: $neutral-300;
+      color: $neutral-400;
+      cursor: not-allowed;
+
+      &:hover {
+        background: $white;
+        color: $neutral-400;
+      }
+    }
+  }
+}
+
+.price-summary {
+  &__detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid $border-color;
+
+    .detail-label {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      font-weight: $font-weight-semibold;
+    }
+
+    .detail-value {
+      font-size: $font-size-sm;
+      color: $text-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+.alert {
+  &--warning {
+    background: rgba($warning, 0.1);
+    color: darken($warning, 20%);
+    border: 1px solid rgba($warning, 0.3);
+  }
+}
+
 .btn {
   @include button-base;
 

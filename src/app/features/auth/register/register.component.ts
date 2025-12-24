@@ -84,4 +84,40 @@ export class RegisterComponent {
   get passwordsMatch() {
     return !this.registerForm.hasError('passwordMismatch');
   }
+
+  getPasswordStrength(): { strength: string; color: string; width: string } {
+    const password = this.password?.value || '';
+
+    if (!password) {
+      return { strength: '', color: '', width: '0%' };
+    }
+
+    let score = 0;
+
+    // Length
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+
+    // Contains numbers
+    if (/\d/.test(password)) score++;
+
+    // Contains lowercase and uppercase
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+
+    // Contains special characters
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    if (score <= 2) {
+      return { strength: 'Weak', color: '#ef4444', width: '33%' };
+    } else if (score <= 3) {
+      return { strength: 'Medium', color: '#f59e0b', width: '66%' };
+    } else {
+      return { strength: 'Strong', color: '#10b981', width: '100%' };
+    }
+  }
+
+  isFieldValid(fieldName: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return !!(field && field.valid && field.touched);
+  }
 }

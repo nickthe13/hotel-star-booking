@@ -1,10 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HotelService } from '../../core/services/hotel.service';
 import { BookingService } from '../../core/services/booking.service';
-import { Hotel } from '../../core/models';
+import { Hotel, Room } from '../../core/models';
 
 @Component({
   selector: 'app-booking',
@@ -15,6 +15,7 @@ import { Hotel } from '../../core/models';
 export class BookingComponent implements OnInit {
   bookingForm: FormGroup;
   hotel = signal<Hotel | undefined>(undefined);
+  selectedRoom = signal<Room | undefined>(undefined);
   loading = signal<boolean>(false);
   error = signal<string>('');
   success = signal<boolean>(false);
@@ -22,6 +23,12 @@ export class BookingComponent implements OnInit {
 
   minDate: string;
   minCheckoutDate: string = '';
+
+  // Computed signal for available rooms
+  availableRooms = computed(() => {
+    const hotel = this.hotel();
+    return hotel?.rooms?.filter(room => room.available) || [];
+  });
 
   constructor(
     private fb: FormBuilder,
@@ -35,6 +42,7 @@ export class BookingComponent implements OnInit {
     this.minDate = today.toISOString().split('T')[0];
 
     this.bookingForm = this.fb.group({
+      roomId: ['', Validators.required],
       checkIn: ['', Validators.required],
       checkOut: ['', Validators.required],
       guests: [2, [Validators.required, Validators.min(1), Validators.max(10)]],
@@ -53,6 +61,17 @@ export class BookingComponent implements OnInit {
         if (checkOut && new Date(checkOut) <= new Date(checkInDate)) {
           this.bookingForm.patchValue({ checkOut: '' });
         }
+      }
+    });
+
+    // Update selected room when roomId changes
+    this.bookingForm.get('roomId')?.valueChanges.subscribe((roomId) => {
+      const hotel = this.hotel();
+      if (hotel && roomId) {
+        const room = hotel.rooms?.find(r => r.id === roomId);
+        this.selectedRoom.set(room);
+      } else {
+        this.selectedRoom.set(undefined);
       }
     });
   }
@@ -99,11 +118,11 @@ export class BookingComponent implements OnInit {
   }
 
   calculateTotalPrice(): number {
-    const hotel = this.hotel();
-    if (!hotel) return 0;
+    const room = this.selectedRoom();
+    if (!room) return 0;
 
     const nights = this.calculateNights();
-    return hotel.pricePerNight * nights;
+    return room.pricePerNight * nights;
   }
 
   onSubmit(): void {
@@ -125,7 +144,7 @@ export class BookingComponent implements OnInit {
 
     const bookingData = {
       hotelId: hotel.id,
-      roomId: '101', // Would be selected by user in real app
+      roomId: this.bookingForm.value.roomId,
       checkIn: this.bookingForm.value.checkIn,
       checkOut: this.bookingForm.value.checkOut,
       guests: this.bookingForm.value.guests,

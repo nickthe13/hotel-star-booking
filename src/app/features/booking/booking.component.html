@@ -42,6 +42,77 @@
           </div>
 
           <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="booking-form">
+            <!-- Room Selection Section -->
+            <div class="room-selection-section">
+              <h3 class="form-section-title">Select Your Room</h3>
+
+              @if (availableRooms().length > 0) {
+                <div class="rooms-grid">
+                  @for (room of hotel()!.rooms; track room.id) {
+                    <div
+                      class="room-card"
+                      [class.room-card--selected]="bookingForm.value.roomId === room.id"
+                      [class.room-card--unavailable]="!room.available"
+                    >
+                      <div class="room-card__header">
+                        <h4 class="room-card__title">{{ room.roomType }}</h4>
+                        @if (!room.available) {
+                          <span class="room-card__badge room-card__badge--unavailable">Unavailable</span>
+                        }
+                      </div>
+
+                      <div class="room-card__details">
+                        <div class="room-card__info">
+                          <span class="room-card__icon">👥</span>
+                          <span>Up to {{ room.capacity }} guests</span>
+                        </div>
+                        <div class="room-card__price">
+                          <span class="price-amount">${{ room.pricePerNight }}</span>
+                          <span class="price-period">per night</span>
+                        </div>
+                      </div>
+
+                      @if (room.amenities && room.amenities.length > 0) {
+                        <div class="room-card__amenities">
+                          @for (amenity of room.amenities.slice(0, 3); track amenity) {
+                            <span class="amenity-tag">{{ amenity }}</span>
+                          }
+                          @if (room.amenities.length > 3) {
+                            <span class="amenity-tag amenity-tag--more">+{{ room.amenities.length - 3 }} more</span>
+                          }
+                        </div>
+                      }
+
+                      <button
+                        type="button"
+                        class="room-card__select-btn"
+                        [class.room-card__select-btn--selected]="bookingForm.value.roomId === room.id"
+                        [disabled]="!room.available"
+                        (click)="bookingForm.patchValue({ roomId: room.id })"
+                      >
+                        @if (bookingForm.value.roomId === room.id) {
+                          <span>✓ Selected</span>
+                        } @else if (!room.available) {
+                          <span>Unavailable</span>
+                        } @else {
+                          <span>Select Room</span>
+                        }
+                      </button>
+                    </div>
+                  }
+                </div>
+
+                @if (bookingForm.get('roomId')?.invalid && bookingForm.get('roomId')?.touched) {
+                  <span class="form-error">Please select a room type</span>
+                }
+              } @else {
+                <div class="alert alert--warning">
+                  <span>⚠️</span>
+                  <span>No rooms are currently available for this hotel.</span>
+                </div>
+              }
+            </div>
+
             <h3 class="form-section-title">Booking Details</h3>
 
             <div class="form-row">
@@ -142,21 +213,32 @@
           <div class="price-summary">
             <h3 class="price-summary__title">Price Summary</h3>
 
-            @if (calculateNights() > 0) {
-              <div class="price-summary__row">
-                <span>${{ hotel()!.pricePerNight }} × {{ calculateNights() }} nights</span>
-                <span>${{ hotel()!.pricePerNight * calculateNights() }}</span>
+            @if (selectedRoom()) {
+              <div class="price-summary__detail">
+                <span class="detail-label">Room Type</span>
+                <span class="detail-value">{{ selectedRoom()!.roomType }}</span>
               </div>
 
-              <div class="price-summary__divider"></div>
+              @if (calculateNights() > 0) {
+                <div class="price-summary__row">
+                  <span>${{ selectedRoom()!.pricePerNight }} × {{ calculateNights() }} nights</span>
+                  <span>${{ selectedRoom()!.pricePerNight * calculateNights() }}</span>
+                </div>
 
-              <div class="price-summary__total">
-                <span>Total</span>
-                <span>${{ calculateTotalPrice() }}</span>
-              </div>
+                <div class="price-summary__divider"></div>
+
+                <div class="price-summary__total">
+                  <span>Total</span>
+                  <span>${{ calculateTotalPrice() }}</span>
+                </div>
+              } @else {
+                <p class="price-summary__note">
+                  Select your dates to see the total price
+                </p>
+              }
             } @else {
               <p class="price-summary__note">
-                Select your dates to see the total price
+                Select a room to see pricing details
               </p>
             }
           </div>

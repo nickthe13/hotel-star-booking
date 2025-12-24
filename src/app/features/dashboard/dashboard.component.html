@@ -65,6 +65,12 @@
                 </div>
 
                 <div class="booking-card__details">
+                  @if (booking.room?.roomType) {
+                    <div class="detail-item">
+                      <span class="detail-item__label">Room Type</span>
+                      <span class="detail-item__value">{{ booking.room?.roomType }}</span>
+                    </div>
+                  }
                   <div class="detail-item">
                     <span class="detail-item__label">Check-in</span>
                     <span class="detail-item__value">{{ formatDate(booking.checkIn) }}</span>

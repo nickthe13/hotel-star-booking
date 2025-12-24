@@ -71,9 +71,15 @@ export class BookingService {
           throw new Error('Hotel not found');
         }
 
+        // Find the selected room
+        const selectedRoom = hotel.rooms?.find(room => room.id === bookingData.roomId);
+        if (!selectedRoom) {
+          throw new Error('Room not found');
+        }
+
         const userId = this.authService.isAuthenticated() ? '1' : '1';
         const totalPrice = this.calculateTotalPrice(
-          hotel.pricePerNight,
+          selectedRoom.pricePerNight,
           new Date(bookingData.checkIn),
           new Date(bookingData.checkOut)
         );
@@ -95,6 +101,9 @@ export class BookingService {
             name: hotel.name,
             image: hotel.images[0],
             location: hotel.location
+          },
+          room: {
+            roomType: selectedRoom.roomType
           }
         };
 

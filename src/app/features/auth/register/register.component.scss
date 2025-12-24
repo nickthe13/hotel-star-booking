@@ -123,3 +123,59 @@
     }
   }
 }
+
+// Input wrapper for icons
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  right: $spacing-md;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+
+  &--success {
+    color: $success;
+  }
+}
+
+.form-input--valid {
+  border-color: $success !important;
+  padding-right: 40px;
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($success, 0.1);
+  }
+}
+
+// Password strength indicator
+.password-strength {
+  margin-top: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  &__bar {
+    flex: 1;
+    height: 4px;
+    background: $neutral-200;
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    transition: all 0.3s ease;
+    border-radius: $radius-full;
+  }
+
+  &__text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    min-width: 60px;
+    text-align: right;
+  }
+}

@@ -16,14 +16,20 @@
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
         <div class="form-group">
           <label for="name" class="form-label">Full Name</label>
-          <input
-            id="name"
-            type="text"
-            formControlName="name"
-            class="form-input"
-            [class.form-input--error]="name?.invalid && name?.touched"
-            placeholder="John Doe"
-          />
+          <div class="input-wrapper">
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              class="form-input"
+              [class.form-input--error]="name?.invalid && name?.touched"
+              [class.form-input--valid]="isFieldValid('name')"
+              placeholder="John Doe"
+            />
+            @if (isFieldValid('name')) {
+              <span class="input-icon input-icon--success">✓</span>
+            }
+          </div>
           @if (name?.invalid && name?.touched) {
             <div class="form-error">
               @if (name?.errors?.['required']) {
@@ -38,14 +44,20 @@
 
         <div class="form-group">
           <label for="email" class="form-label">Email Address</label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            class="form-input"
-            [class.form-input--error]="email?.invalid && email?.touched"
-            placeholder="you@example.com"
-          />
+          <div class="input-wrapper">
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="form-input"
+              [class.form-input--error]="email?.invalid && email?.touched"
+              [class.form-input--valid]="isFieldValid('email')"
+              placeholder="you@example.com"
+            />
+            @if (isFieldValid('email')) {
+              <span class="input-icon input-icon--success">✓</span>
+            }
+          </div>
           @if (email?.invalid && email?.touched) {
             <div class="form-error">
               @if (email?.errors?.['required']) {
@@ -60,14 +72,34 @@
 
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            class="form-input"
-            [class.form-input--error]="password?.invalid && password?.touched"
-            placeholder="Create a password"
-          />
+          <div class="input-wrapper">
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              class="form-input"
+              [class.form-input--error]="password?.invalid && password?.touched"
+              [class.form-input--valid]="isFieldValid('password')"
+              placeholder="Create a password"
+            />
+            @if (isFieldValid('password')) {
+              <span class="input-icon input-icon--success">✓</span>
+            }
+          </div>
+          @if (password?.value) {
+            <div class="password-strength">
+              <div class="password-strength__bar">
+                <div
+                  class="password-strength__fill"
+                  [style.width]="getPasswordStrength().width"
+                  [style.background-color]="getPasswordStrength().color"
+                ></div>
+              </div>
+              <span class="password-strength__text" [style.color]="getPasswordStrength().color">
+                {{ getPasswordStrength().strength }}
+              </span>
+            </div>
+          }
           @if (password?.invalid && password?.touched) {
             <div class="form-error">
               @if (password?.errors?.['required']) {
@@ -82,14 +114,20 @@
 
         <div class="form-group">
           <label for="confirmPassword" class="form-label">Confirm Password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            formControlName="confirmPassword"
-            class="form-input"
-            [class.form-input--error]="(confirmPassword?.invalid && confirmPassword?.touched) || (confirmPassword?.touched && !passwordsMatch)"
-            placeholder="Confirm your password"
-          />
+          <div class="input-wrapper">
+            <input
+              id="confirmPassword"
+              type="password"
+              formControlName="confirmPassword"
+              class="form-input"
+              [class.form-input--error]="(confirmPassword?.invalid && confirmPassword?.touched) || (confirmPassword?.touched && !passwordsMatch)"
+              [class.form-input--valid]="confirmPassword?.valid && confirmPassword?.touched && passwordsMatch"
+              placeholder="Confirm your password"
+            />
+            @if (confirmPassword?.valid && confirmPassword?.touched && passwordsMatch) {
+              <span class="input-icon input-icon--success">✓</span>
+            }
+          </div>
           @if (confirmPassword?.invalid && confirmPassword?.touched) {
             <div class="form-error">
               @if (confirmPassword?.errors?.['required']) {

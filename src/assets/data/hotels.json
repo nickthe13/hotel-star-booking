@@ -16,7 +16,39 @@
     "pricePerNight": 450,
     "featured": true,
     "averageRating": 4.9,
-    "totalReviews": 328
+    "totalReviews": 328,
+    "rooms": [
+      {
+        "id": "1-1",
+        "hotelId": "1",
+        "roomType": "Standard Room",
+        "capacity": 2,
+        "pricePerNight": 315,
+        "amenities": ["Sea View", "Balcony", "Mini Bar", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800"],
+        "available": true
+      },
+      {
+        "id": "1-2",
+        "hotelId": "1",
+        "roomType": "Deluxe Room",
+        "capacity": 3,
+        "pricePerNight": 450,
+        "amenities": ["Caldera View", "Private Terrace", "Jacuzzi", "Mini Bar", "Butler Service"],
+        "images": ["https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800"],
+        "available": true
+      },
+      {
+        "id": "1-3",
+        "hotelId": "1",
+        "roomType": "Infinity Suite",
+        "capacity": 4,
+        "pricePerNight": 675,
+        "amenities": ["Panoramic Caldera View", "Private Pool", "Jacuzzi", "Living Room", "Butler Service", "Premium Bar"],
+        "images": ["https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"],
+        "available": false
+      }
+    ]
   },
   {
     "id": "2",
@@ -35,7 +67,39 @@
     "pricePerNight": 280,
     "featured": true,
     "averageRating": 4.7,
-    "totalReviews": 542
+    "totalReviews": 542,
+    "rooms": [
+      {
+        "id": "2-1",
+        "hotelId": "2",
+        "roomType": "Classic Room",
+        "capacity": 2,
+        "pricePerNight": 196,
+        "amenities": ["City View", "Work Desk", "Mini Bar", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"],
+        "available": true
+      },
+      {
+        "id": "2-2",
+        "hotelId": "2",
+        "roomType": "Executive Room",
+        "capacity": 3,
+        "pricePerNight": 280,
+        "amenities": ["Acropolis View", "Balcony", "Mini Bar", "Nespresso Machine", "Bathrobe"],
+        "images": ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800"],
+        "available": true
+      },
+      {
+        "id": "2-3",
+        "hotelId": "2",
+        "roomType": "Presidential Suite",
+        "capacity": 4,
+        "pricePerNight": 420,
+        "amenities": ["Panoramic Acropolis View", "Living Room", "Dining Area", "Jacuzzi", "Butler Service", "Premium Bar"],
+        "images": ["https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800"],
+        "available": true
+      }
+    ]
   },
   {
     "id": "3",
@@ -54,7 +118,39 @@
     "pricePerNight": 380,
     "featured": false,
     "averageRating": 4.8,
-    "totalReviews": 156
+    "totalReviews": 156,
+    "rooms": [
+      {
+        "id": "3-1",
+        "hotelId": "3",
+        "roomType": "Beach View Room",
+        "capacity": 2,
+        "pricePerNight": 266,
+        "amenities": ["Beach View", "Balcony", "Mini Fridge", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"],
+        "available": true
+      },
+      {
+        "id": "3-2",
+        "hotelId": "3",
+        "roomType": "Beachfront Villa",
+        "capacity": 4,
+        "pricePerNight": 380,
+        "amenities": ["Direct Beach Access", "Private Pool", "Kitchen", "Living Room", "2 Bedrooms"],
+        "images": ["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"],
+        "available": true
+      },
+      {
+        "id": "3-3",
+        "hotelId": "3",
+        "roomType": "Luxury Beach Villa",
+        "capacity": 6,
+        "pricePerNight": 570,
+        "amenities": ["Private Beach Access", "Infinity Pool", "Full Kitchen", "3 Bedrooms", "BBQ Area", "Butler Service"],
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800"],
+        "available": false
+      }
+    ]
   },
   {
     "id": "4",
@@ -73,7 +169,39 @@
     "pricePerNight": 220,
     "featured": true,
     "averageRating": 4.6,
-    "totalReviews": 892
+    "totalReviews": 892,
+    "rooms": [
+      {
+        "id": "4-1",
+        "hotelId": "4",
+        "roomType": "Standard Room",
+        "capacity": 2,
+        "pricePerNight": 154,
+        "amenities": ["Garden View", "Balcony", "Mini Fridge"],
+        "images": ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"],
+        "available": true
+      },
+      {
+        "id": "4-2",
+        "hotelId": "4",
+        "roomType": "Family Room",
+        "capacity": 4,
+        "pricePerNight": 220,
+        "amenities": ["Sea View", "Balcony", "2 Bathrooms", "Mini Bar", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800"],
+        "available": true
+      },
+      {
+        "id": "4-3",
+        "hotelId": "4",
+        "roomType": "Beach Suite",
+        "capacity": 5,
+        "pricePerNight": 330,
+        "amenities": ["Direct Beach Access", "Private Terrace", "Living Room", "Jacuzzi", "Mini Bar"],
+        "images": ["https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800"],
+        "available": true
+      }
+    ]
   },
   {
     "id": "5",
@@ -92,7 +220,39 @@
     "pricePerNight": 120,
     "featured": false,
     "averageRating": 4.4,
-    "totalReviews": 234
+    "totalReviews": 234,
+    "rooms": [
+      {
+        "id": "5-1",
+        "hotelId": "5",
+        "roomType": "Cozy Room",
+        "capacity": 2,
+        "pricePerNight": 84,
+        "amenities": ["Old Town View", "Traditional Decor", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"],
+        "available": true
+      },
+      {
+        "id": "5-2",
+        "hotelId": "5",
+        "roomType": "Superior Room",
+        "capacity": 2,
+        "pricePerNight": 120,
+        "amenities": ["Castle View", "Balcony", "Mini Bar", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"],
+        "available": true
+      },
+      {
+        "id": "5-3",
+        "hotelId": "5",
+        "roomType": "Rooftop Suite",
+        "capacity": 3,
+        "pricePerNight": 180,
+        "amenities": ["Rooftop Terrace", "Panoramic View", "Living Area", "Mini Bar", "Bathrobe"],
+        "images": ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"],
+        "available": false
+      }
+    ]
   },
   {
     "id": "6",
@@ -111,7 +271,39 @@
     "pricePerNight": 150,
     "featured": false,
     "averageRating": 4.5,
-    "totalReviews": 445
+    "totalReviews": 445,
+    "rooms": [
+      {
+        "id": "6-1",
+        "hotelId": "6",
+        "roomType": "Business Room",
+        "capacity": 2,
+        "pricePerNight": 105,
+        "amenities": ["City View", "Work Desk", "Coffee Maker", "Fast Wi-Fi"],
+        "images": ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"],
+        "available": true
+      },
+      {
+        "id": "6-2",
+        "hotelId": "6",
+        "roomType": "Deluxe Room",
+        "capacity": 3,
+        "pricePerNight": 150,
+        "amenities": ["City View", "Balcony", "Mini Bar", "Coffee Maker", "Bathrobe"],
+        "images": ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800"],
+        "available": true
+      },
+      {
+        "id": "6-3",
+        "hotelId": "6",
+        "roomType": "Executive Suite",
+        "capacity": 4,
+        "pricePerNight": 225,
+        "amenities": ["Panoramic View", "Living Room", "Work Area", "Mini Bar", "Nespresso Machine"],
+        "images": ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"],
+        "available": true
+      }
+    ]
   },
   {
     "id": "7",
@@ -130,7 +322,39 @@
     "pricePerNight": 180,
     "featured": false,
     "averageRating": 4.7,
-    "totalReviews": 178
+    "totalReviews": 178,
+    "rooms": [
+      {
+        "id": "7-1",
+        "hotelId": "7",
+        "roomType": "Studio Apartment",
+        "capacity": 2,
+        "pricePerNight": 126,
+        "amenities": ["Sea View", "Kitchenette", "Balcony", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"],
+        "available": true
+      },
+      {
+        "id": "7-2",
+        "hotelId": "7",
+        "roomType": "One Bedroom Apartment",
+        "capacity": 4,
+        "pricePerNight": 180,
+        "amenities": ["Sea View", "Full Kitchen", "Living Room", "Balcony", "Washing Machine"],
+        "images": ["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"],
+        "available": true
+      },
+      {
+        "id": "7-3",
+        "hotelId": "7",
+        "roomType": "Two Bedroom Penthouse",
+        "capacity": 6,
+        "pricePerNight": 270,
+        "amenities": ["Panoramic Sea View", "Full Kitchen", "2 Bathrooms", "Large Terrace", "BBQ", "Washing Machine"],
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800"],
+        "available": true
+      }
+    ]
   },
   {
     "id": "8",
@@ -149,7 +373,39 @@
     "pricePerNight": 200,
     "featured": true,
     "averageRating": 4.8,
-    "totalReviews": 267
+    "totalReviews": 267,
+    "rooms": [
+      {
+        "id": "8-1",
+        "hotelId": "8",
+        "roomType": "Sunset Room",
+        "capacity": 2,
+        "pricePerNight": 140,
+        "amenities": ["Sea View", "Balcony", "Mini Bar", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"],
+        "available": true
+      },
+      {
+        "id": "8-2",
+        "hotelId": "8",
+        "roomType": "Honeymoon Suite",
+        "capacity": 2,
+        "pricePerNight": 200,
+        "amenities": ["Panoramic Beach View", "Private Balcony", "Jacuzzi", "Champagne on Arrival", "Mini Bar"],
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800"],
+        "available": true
+      },
+      {
+        "id": "8-3",
+        "hotelId": "8",
+        "roomType": "Premium Suite",
+        "capacity": 4,
+        "pricePerNight": 300,
+        "amenities": ["Navagio Beach View", "Large Terrace", "Jacuzzi", "Living Room", "Butler Service", "Premium Bar"],
+        "images": ["https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800"],
+        "available": false
+      }
+    ]
   },
   {
     "id": "9",
@@ -168,7 +424,39 @@
     "pricePerNight": 130,
     "featured": false,
     "averageRating": 4.6,
-    "totalReviews": 312
+    "totalReviews": 312,
+    "rooms": [
+      {
+        "id": "9-1",
+        "hotelId": "9",
+        "roomType": "Heritage Room",
+        "capacity": 2,
+        "pricePerNight": 91,
+        "amenities": ["Old Town View", "Antique Decor", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"],
+        "available": true
+      },
+      {
+        "id": "9-2",
+        "hotelId": "9",
+        "roomType": "Deluxe Heritage Room",
+        "capacity": 3,
+        "pricePerNight": 130,
+        "amenities": ["Castle View", "Balcony", "Antique Furniture", "Mini Bar", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"],
+        "available": true
+      },
+      {
+        "id": "9-3",
+        "hotelId": "9",
+        "roomType": "Mansion Suite",
+        "capacity": 4,
+        "pricePerNight": 195,
+        "amenities": ["Panoramic View", "Living Area", "Antique Furnishings", "Fireplace", "Mini Bar"],
+        "images": ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800"],
+        "available": true
+      }
+    ]
   },
   {
     "id": "10",
@@ -187,7 +475,39 @@
     "pricePerNight": 250,
     "featured": false,
     "averageRating": 4.7,
-    "totalReviews": 423
+    "totalReviews": 423,
+    "rooms": [
+      {
+        "id": "10-1",
+        "hotelId": "10",
+        "roomType": "Cycladic Room",
+        "capacity": 2,
+        "pricePerNight": 175,
+        "amenities": ["Aegean View", "Traditional Decor", "Balcony", "Mini Fridge"],
+        "images": ["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"],
+        "available": true
+      },
+      {
+        "id": "10-2",
+        "hotelId": "10",
+        "roomType": "Sea View Suite",
+        "capacity": 3,
+        "pricePerNight": 250,
+        "amenities": ["Panoramic Sea View", "Private Terrace", "Mini Bar", "Coffee Maker", "Bathrobe"],
+        "images": ["https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800"],
+        "available": true
+      },
+      {
+        "id": "10-3",
+        "hotelId": "10",
+        "roomType": "Aegean Villa",
+        "capacity": 4,
+        "pricePerNight": 375,
+        "amenities": ["Private Pool", "Sea View", "Living Room", "Kitchen", "Private Garden", "Butler Service"],
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800"],
+        "available": true
+      }
+    ]
   },
   {
     "id": "11",
@@ -206,7 +526,39 @@
     "pricePerNight": 110,
     "featured": false,
     "averageRating": 4.5,
-    "totalReviews": 189
+    "totalReviews": 189,
+    "rooms": [
+      {
+        "id": "11-1",
+        "hotelId": "11",
+        "roomType": "Mountain View Room",
+        "capacity": 2,
+        "pricePerNight": 77,
+        "amenities": ["Mountain View", "Balcony", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"],
+        "available": true
+      },
+      {
+        "id": "11-2",
+        "hotelId": "11",
+        "roomType": "Monastery View Room",
+        "capacity": 3,
+        "pricePerNight": 110,
+        "amenities": ["Meteora Monastery View", "Balcony", "Mini Bar", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800"],
+        "available": true
+      },
+      {
+        "id": "11-3",
+        "hotelId": "11",
+        "roomType": "Valley Suite",
+        "capacity": 4,
+        "pricePerNight": 165,
+        "amenities": ["Panoramic Valley View", "Living Area", "Fireplace", "Mini Bar", "Bathrobe"],
+        "images": ["https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"],
+        "available": false
+      }
+    ]
   },
   {
     "id": "12",
@@ -225,6 +577,38 @@
     "pricePerNight": 190,
     "featured": false,
     "averageRating": 4.6,
-    "totalReviews": 256
+    "totalReviews": 256,
+    "rooms": [
+      {
+        "id": "12-1",
+        "hotelId": "12",
+        "roomType": "Mountain Room",
+        "capacity": 2,
+        "pricePerNight": 133,
+        "amenities": ["Mountain View", "Balcony", "Coffee Maker"],
+        "images": ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"],
+        "available": true
+      },
+      {
+        "id": "12-2",
+        "hotelId": "12",
+        "roomType": "Spa Suite",
+        "capacity": 3,
+        "pricePerNight": 190,
+        "amenities": ["Mountain View", "Private Hot Tub", "Balcony", "Mini Bar", "Bathrobe"],
+        "images": ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"],
+        "available": true
+      },
+      {
+        "id": "12-3",
+        "hotelId": "12",
+        "roomType": "Premium Chalet",
+        "capacity": 5,
+        "pricePerNight": 285,
+        "amenities": ["Panoramic Mountain View", "Private Sauna", "Fireplace", "Living Room", "Kitchen", "2 Bedrooms"],
+        "images": ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800"],
+        "available": true
+      }
+    ]
   }
 ]
