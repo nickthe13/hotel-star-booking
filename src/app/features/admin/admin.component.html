@@ -1,0 +1,56 @@
+<div class="admin-panel">
+  <div class="admin-panel__header">
+    <div class="admin-panel__header-content">
+      <h1 class="admin-panel__title">Admin Panel</h1>
+      <p class="admin-panel__subtitle">Manage your hotel booking system</p>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="admin-panel__tabs">
+    <button
+      class="tab"
+      [class.tab--active]="isActiveTab('dashboard')"
+      (click)="selectTab('dashboard')"
+      type="button"
+    >
+      <span class="tab__icon">📊</span>
+      <span class="tab__label">Dashboard</span>
+    </button>
+
+    <button
+      class="tab"
+      [class.tab--active]="isActiveTab('hotels')"
+      (click)="selectTab('hotels')"
+      type="button"
+    >
+      <span class="tab__icon">🏨</span>
+      <span class="tab__label">Hotels</span>
+    </button>
+
+    <button
+      class="tab"
+      [class.tab--active]="isActiveTab('rooms')"
+      (click)="selectTab('rooms')"
+      type="button"
+    >
+      <span class="tab__icon">🛏️</span>
+      <span class="tab__label">Rooms</span>
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="admin-panel__content">
+    @if (isActiveTab('dashboard')) {
+      <app-admin-dashboard></app-admin-dashboard>
+    }
+
+    @if (isActiveTab('hotels')) {
+      <app-admin-hotels></app-admin-hotels>
+    }
+
+    @if (isActiveTab('rooms')) {
+      <app-admin-rooms></app-admin-rooms>
+    }
+  </div>
+</div>

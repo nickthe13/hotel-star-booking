@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, of } from 'rxjs';
-import { Hotel, HotelSearchParams } from '../models';
+import { Hotel, HotelSearchParams, Room } from '../models';
 import hotelsData from '../../../assets/data/hotels.json';
 
 @Injectable({
@@ -187,5 +187,146 @@ export class HotelService {
 
     ratings[hotelId] = { averageRating, totalReviews };
     localStorage.setItem('hotel_aggregate_ratings', JSON.stringify(ratings));
+  }
+
+  // Admin CRUD Methods
+
+  addHotel(hotelData: Omit<Hotel, 'id' | 'createdAt'>): Observable<Hotel> {
+    const newHotel: Hotel = {
+      ...hotelData,
+      id: this.generateId(),
+      createdAt: new Date(),
+      rooms: hotelData.rooms || []
+    };
+
+    const updatedHotels = [...this.hotels(), newHotel];
+    this.hotels.set(updatedHotels);
+    this.persistHotels(updatedHotels);
+
+    return of(newHotel);
+  }
+
+  updateHotel(id: string, updates: Partial<Hotel>): Observable<Hotel | undefined> {
+    const updatedHotels = this.hotels().map(hotel => {
+      if (hotel.id === id) {
+        return { ...hotel, ...updates };
+      }
+      return hotel;
+    });
+
+    this.hotels.set(updatedHotels);
+    this.persistHotels(updatedHotels);
+
+    const updatedHotel = updatedHotels.find(h => h.id === id);
+    return of(updatedHotel);
+  }
+
+  deleteHotel(id: string): Observable<void> {
+    const updatedHotels = this.hotels().filter(hotel => hotel.id !== id);
+    this.hotels.set(updatedHotels);
+    this.persistHotels(updatedHotels);
+
+    return of(undefined);
+  }
+
+  addRoom(hotelId: string, roomData: Omit<Room, 'id' | 'hotelId'>): Observable<Room | undefined> {
+    const newRoom: Room = {
+      ...roomData,
+      id: this.generateId(),
+      hotelId
+    };
+
+    const updatedHotels = this.hotels().map(hotel => {
+      if (hotel.id === hotelId) {
+        const rooms = hotel.rooms || [];
+        return {
+          ...hotel,
+          rooms: [...rooms, newRoom]
+        };
+      }
+      return hotel;
+    });
+
+    this.hotels.set(updatedHotels);
+    this.persistHotels(updatedHotels);
+
+    return of(newRoom);
+  }
+
+  updateRoom(hotelId: string, roomId: string, updates: Partial<Room>): Observable<Room | undefined> {
+    let updatedRoom: Room | undefined;
+
+    const updatedHotels = this.hotels().map(hotel => {
+      if (hotel.id === hotelId && hotel.rooms) {
+        const updatedRooms = hotel.rooms.map(room => {
+          if (room.id === roomId) {
+            updatedRoom = { ...room, ...updates };
+            return updatedRoom;
+          }
+          return room;
+        });
+
+        return { ...hotel, rooms: updatedRooms };
+      }
+      return hotel;
+    });
+
+    this.hotels.set(updatedHotels);
+    this.persistHotels(updatedHotels);
+
+    return of(updatedRoom);
+  }
+
+  deleteRoom(hotelId: string, roomId: string): Observable<void> {
+    const updatedHotels = this.hotels().map(hotel => {
+      if (hotel.id === hotelId && hotel.rooms) {
+        return {
+          ...hotel,
+          rooms: hotel.rooms.filter(room => room.id !== roomId)
+        };
+      }
+      return hotel;
+    });
+
+    this.hotels.set(updatedHotels);
+    this.persistHotels(updatedHotels);
+
+    return of(undefined);
+  }
+
+  toggleRoomAvailability(hotelId: string, roomId: string): Observable<Room | undefined> {
+    let toggledRoom: Room | undefined;
+
+    const updatedHotels = this.hotels().map(hotel => {
+      if (hotel.id === hotelId && hotel.rooms) {
+        const updatedRooms = hotel.rooms.map(room => {
+          if (room.id === roomId) {
+            toggledRoom = { ...room, available: !room.available };
+            return toggledRoom;
+          }
+          return room;
+        });
+
+        return { ...hotel, rooms: updatedRooms };
+      }
+      return hotel;
+    });
+
+    this.hotels.set(updatedHotels);
+    this.persistHotels(updatedHotels);
+
+    return of(toggledRoom);
+  }
+
+  private generateId(): string {
+    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  }
+
+  private persistHotels(hotels: Hotel[]): void {
+    try {
+      localStorage.setItem('admin_hotels', JSON.stringify(hotels));
+    } catch (error) {
+      console.error('Error persisting hotels to localStorage:', error);
+    }
   }
 }

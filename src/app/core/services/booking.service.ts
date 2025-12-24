@@ -133,6 +133,14 @@ export class BookingService {
     return of(userBookings);
   }
 
+  getAllBookings(): Observable<Booking[]> {
+    // In production, this would be:
+    // return this.http.get<Booking[]>(`${this.API_URL}${API_ENDPOINTS.admin.bookings}`);
+
+    // Mock implementation - return all bookings for admin view
+    return of([...this.mockBookings]);
+  }
+
   removeBooking(id: string): Observable<void> {
     // Remove booking from the array
     const index = this.mockBookings.findIndex(b => b.id === id);

@@ -1,0 +1,106 @@
+@import '../../../assets/styles/variables';
+@import '../../../assets/styles/mixins';
+
+.admin-panel {
+  min-height: 100vh;
+  background: $neutral-50;
+}
+
+.admin-panel__header {
+  background: $white;
+  border-bottom: 1px solid $border-color;
+  padding: $spacing-2xl;
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg;
+  }
+}
+
+.admin-panel__header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-panel__title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+
+  @include respond-to('mobile') {
+    font-size: $font-size-2xl;
+  }
+}
+
+.admin-panel__subtitle {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  margin: 0;
+}
+
+// Tab Navigation
+.admin-panel__tabs {
+  display: flex;
+  gap: $spacing-xs;
+  background: $white;
+  border-bottom: 2px solid $border-color;
+  padding: 0 $spacing-2xl;
+  overflow-x: auto;
+
+  @include respond-to('mobile') {
+    padding: 0 $spacing-lg;
+  }
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-xl;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: $text-secondary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: $text-primary;
+    background: $neutral-50;
+  }
+
+  &--active {
+    color: $primary-500;
+    border-bottom-color: $primary-500;
+    background: transparent;
+
+    &:hover {
+      background: transparent;
+    }
+  }
+
+  @include respond-to('mobile') {
+    padding: $spacing-sm $spacing-md;
+  }
+}
+
+.tab__icon {
+  font-size: $font-size-xl;
+  line-height: 1;
+}
+
+.tab__label {
+  @include respond-to('mobile') {
+    font-size: $font-size-sm;
+  }
+}
+
+// Tab Content
+.admin-panel__content {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: $neutral-50;
+}

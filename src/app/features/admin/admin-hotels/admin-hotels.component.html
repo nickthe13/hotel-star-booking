@@ -1,0 +1,218 @@
+<div class="hotels-management">
+  <div class="hotels-management__header">
+    <div>
+      <h2 class="hotels-management__title">Hotel Management</h2>
+      <p class="hotels-management__subtitle">Manage your hotel listings</p>
+    </div>
+    <button class="btn btn--primary" (click)="openAddModal()" type="button">
+      <span class="btn__icon">➕</span>
+      <span class="btn__label">Add Hotel</span>
+    </button>
+  </div>
+
+  <app-table
+    [columns]="columns"
+    [data]="hotels()"
+    [actions]="actions"
+    [loading]="loading()"
+  ></app-table>
+
+  <!-- Add/Edit Hotel Modal -->
+  <app-modal
+    [title]="isEditMode() ? 'Edit Hotel' : 'Add New Hotel'"
+    [isOpen]="showHotelModal"
+    size="lg"
+    (onClose)="closeModal()"
+    (onConfirm)="saveHotel()"
+  >
+    <form [formGroup]="hotelForm" class="hotel-form">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3 class="form-section__title">Basic Information</h3>
+
+        <div class="form-group">
+          <label class="form-label" for="name">Hotel Name *</label>
+          <input
+            id="name"
+            type="text"
+            class="form-input"
+            formControlName="name"
+            placeholder="Enter hotel name"
+          >
+          @if (getFieldError('name')) {
+            <span class="form-error">{{ getFieldError('name') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Description *</label>
+          <textarea
+            id="description"
+            class="form-input form-input--textarea"
+            formControlName="description"
+            rows="4"
+            placeholder="Enter hotel description"
+          ></textarea>
+          @if (getFieldError('description')) {
+            <span class="form-error">{{ getFieldError('description') }}</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="location">Location *</label>
+            <input
+              id="location"
+              type="text"
+              class="form-input"
+              formControlName="location"
+              placeholder="e.g., Downtown Manhattan"
+            >
+            @if (getFieldError('location')) {
+              <span class="form-error">{{ getFieldError('location') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="city">City *</label>
+            <input
+              id="city"
+              type="text"
+              class="form-input"
+              formControlName="city"
+              placeholder="e.g., New York"
+            >
+            @if (getFieldError('city')) {
+              <span class="form-error">{{ getFieldError('city') }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="country">Country *</label>
+            <input
+              id="country"
+              type="text"
+              class="form-input"
+              formControlName="country"
+              placeholder="e.g., USA"
+            >
+            @if (getFieldError('country')) {
+              <span class="form-error">{{ getFieldError('country') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="starRating">Star Rating *</label>
+            <select id="starRating" class="form-input" formControlName="starRating">
+              <option [value]="1">1 Star</option>
+              <option [value]="2">2 Stars</option>
+              <option [value]="3">3 Stars</option>
+              <option [value]="4">4 Stars</option>
+              <option [value]="5">5 Stars</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pricePerNight">Price Per Night ($) *</label>
+            <input
+              id="pricePerNight"
+              type="number"
+              class="form-input"
+              formControlName="pricePerNight"
+              placeholder="0"
+              min="0"
+            >
+            @if (getFieldError('pricePerNight')) {
+              <span class="form-error">{{ getFieldError('pricePerNight') }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" formControlName="featured">
+            <span class="form-checkbox__label">Featured Hotel</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Images -->
+      <div class="form-section">
+        <div class="form-section__header">
+          <h3 class="form-section__title">Images</h3>
+          <button type="button" class="btn btn--secondary btn--sm" (click)="addImage()">
+            ➕ Add Image
+          </button>
+        </div>
+
+        <div formArrayName="images" class="form-array">
+          @for (image of images.controls; track $index) {
+            <div [formGroupName]="$index" class="form-array-item">
+              <input
+                type="text"
+                class="form-input"
+                formControlName="url"
+                placeholder="https://example.com/image.jpg"
+              >
+              @if (images.length > 1) {
+                <button
+                  type="button"
+                  class="btn btn--danger btn--sm"
+                  (click)="removeImage($index)"
+                >
+                  🗑️
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Amenities -->
+      <div class="form-section">
+        <div class="form-section__header">
+          <h3 class="form-section__title">Amenities</h3>
+          <button type="button" class="btn btn--secondary btn--sm" (click)="addAmenity()">
+            ➕ Add Amenity
+          </button>
+        </div>
+
+        <div formArrayName="amenities" class="form-array">
+          @for (amenity of amenities.controls; track $index) {
+            <div [formGroupName]="$index" class="form-array-item">
+              <input
+                type="text"
+                class="form-input"
+                formControlName="name"
+                placeholder="e.g., Free WiFi, Pool, Gym"
+              >
+              @if (amenities.length > 1) {
+                <button
+                  type="button"
+                  class="btn btn--danger btn--sm"
+                  (click)="removeAmenity($index)"
+                >
+                  🗑️
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  </app-modal>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirmation-dialog
+    [title]="'Delete Hotel'"
+    [message]="'Are you sure you want to delete ' + selectedHotel()?.name + '? This action cannot be undone.'"
+    [isOpen]="showDeleteDialog"
+    [confirmText]="'Delete'"
+    [cancelText]="'Cancel'"
+    [variant]="'danger'"
+    (onConfirm)="confirmDelete()"
+    (onCancel)="closeDeleteDialog()"
+  ></app-confirmation-dialog>
+</div>

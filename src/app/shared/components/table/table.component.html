@@ -1,0 +1,68 @@
+@if (loading) {
+  <div class="table-loading">
+    <div class="spinner"></div>
+    <p>Loading data...</p>
+  </div>
+} @else if (data.length === 0) {
+  <div class="table-empty">
+    <p>{{ emptyMessage }}</p>
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table class="table">
+      <thead class="table-header">
+        <tr>
+          @for (column of columns; track column.key) {
+            <th
+              class="table-header-cell"
+              [class.table-header-cell--sortable]="column.sortable"
+              (click)="onSort(column)"
+            >
+              <span class="header-content">
+                {{ column.label }}
+                @if (column.sortable) {
+                  <span class="sort-icon">{{ getSortIcon(column) }}</span>
+                }
+              </span>
+            </th>
+          }
+          @if (actions.length > 0) {
+            <th class="table-header-cell table-header-cell--actions">Actions</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="table-body">
+        @for (item of sortedData(); track $index) {
+          <tr class="table-row">
+            @for (column of columns; track column.key) {
+              <td class="table-cell">
+                {{ getCellValue(item, column) }}
+              </td>
+            }
+            @if (actions.length > 0) {
+              <td class="table-cell table-cell--actions">
+                <div class="table-actions">
+                  @for (action of actions; track action.label) {
+                    @if (shouldShowAction(item, action)) {
+                      <button
+                        class="table-action"
+                        [class]="getActionClass(action.variant)"
+                        (click)="action.onClick(item)"
+                        type="button"
+                      >
+                        @if (action.icon) {
+                          <span class="action-icon">{{ action.icon }}</span>
+                        }
+                        <span class="action-label">{{ action.label }}</span>
+                      </button>
+                    }
+                  }
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

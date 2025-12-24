@@ -1,0 +1,190 @@
+<div class="rooms-management">
+  <div class="rooms-management__header">
+    <div>
+      <h2 class="rooms-management__title">Room Management</h2>
+      <p class="rooms-management__subtitle">Manage hotel rooms and availability</p>
+    </div>
+  </div>
+
+  <!-- Hotel Selector -->
+  <div class="hotel-selector">
+    <label class="hotel-selector__label" for="hotelSelect">Select Hotel:</label>
+    <select
+      id="hotelSelect"
+      class="hotel-selector__select"
+      [value]="selectedHotelId()"
+      (change)="onHotelChange($event)"
+    >
+      @for (hotel of hotels(); track hotel.id) {
+        <option [value]="hotel.id">{{ hotel.name }} - {{ hotel.city }}</option>
+      }
+    </select>
+    <button
+      class="btn btn--primary"
+      (click)="openAddModal()"
+      type="button"
+      [disabled]="!selectedHotelId()"
+    >
+      <span class="btn__icon">➕</span>
+      <span class="btn__label">Add Room</span>
+    </button>
+  </div>
+
+  @if (selectedHotelId()) {
+    <app-table
+      [columns]="columns"
+      [data]="rooms()"
+      [actions]="actions"
+      [loading]="loading()"
+    ></app-table>
+  } @else {
+    <div class="empty-state">
+      <p>Please select a hotel to manage rooms</p>
+    </div>
+  }
+
+  <!-- Add/Edit Room Modal -->
+  <app-modal
+    [title]="isEditMode() ? 'Edit Room' : 'Add New Room'"
+    [isOpen]="showRoomModal"
+    size="lg"
+    (onClose)="closeModal()"
+    (onConfirm)="saveRoom()"
+  >
+    <form [formGroup]="roomForm" class="room-form">
+      <!-- Room Information -->
+      <div class="form-section">
+        <h3 class="form-section__title">Room Information</h3>
+
+        <div class="form-group">
+          <label class="form-label" for="roomType">Room Type *</label>
+          <input
+            id="roomType"
+            type="text"
+            class="form-input"
+            formControlName="roomType"
+            placeholder="e.g., Standard Room, Deluxe Suite"
+          >
+          @if (getFieldError('roomType')) {
+            <span class="form-error">{{ getFieldError('roomType') }}</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="capacity">Capacity *</label>
+            <input
+              id="capacity"
+              type="number"
+              class="form-input"
+              formControlName="capacity"
+              placeholder="Number of guests"
+              min="1"
+            >
+            @if (getFieldError('capacity')) {
+              <span class="form-error">{{ getFieldError('capacity') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pricePerNight">Price Per Night ($) *</label>
+            <input
+              id="pricePerNight"
+              type="number"
+              class="form-input"
+              formControlName="pricePerNight"
+              placeholder="0"
+              min="0"
+            >
+            @if (getFieldError('pricePerNight')) {
+              <span class="form-error">{{ getFieldError('pricePerNight') }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" formControlName="available">
+            <span class="form-checkbox__label">Room Available</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Images -->
+      <div class="form-section">
+        <div class="form-section__header">
+          <h3 class="form-section__title">Images</h3>
+          <button type="button" class="btn btn--secondary btn--sm" (click)="addImage()">
+            ➕ Add Image
+          </button>
+        </div>
+
+        <div formArrayName="images" class="form-array">
+          @for (image of images.controls; track $index) {
+            <div [formGroupName]="$index" class="form-array-item">
+              <input
+                type="text"
+                class="form-input"
+                formControlName="url"
+                placeholder="https://example.com/room-image.jpg"
+              >
+              @if (images.length > 1) {
+                <button
+                  type="button"
+                  class="btn btn--danger btn--sm"
+                  (click)="removeImage($index)"
+                >
+                  🗑️
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Amenities -->
+      <div class="form-section">
+        <div class="form-section__header">
+          <h3 class="form-section__title">Amenities</h3>
+          <button type="button" class="btn btn--secondary btn--sm" (click)="addAmenity()">
+            ➕ Add Amenity
+          </button>
+        </div>
+
+        <div formArrayName="amenities" class="form-array">
+          @for (amenity of amenities.controls; track $index) {
+            <div [formGroupName]="$index" class="form-array-item">
+              <input
+                type="text"
+                class="form-input"
+                formControlName="name"
+                placeholder="e.g., King Bed, Mini Bar, Balcony"
+              >
+              @if (amenities.length > 1) {
+                <button
+                  type="button"
+                  class="btn btn--danger btn--sm"
+                  (click)="removeAmenity($index)"
+                >
+                  🗑️
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  </app-modal>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirmation-dialog
+    [title]="'Delete Room'"
+    [message]="'Are you sure you want to delete this ' + selectedRoom()?.roomType + '? This action cannot be undone.'"
+    [isOpen]="showDeleteDialog"
+    [confirmText]="'Delete'"
+    [cancelText]="'Cancel'"
+    [variant]="'danger'"
+    (onConfirm)="confirmDelete()"
+    (onCancel)="closeDeleteDialog()"
+  ></app-confirmation-dialog>
+</div>

@@ -1,0 +1,200 @@
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/mixins';
+
+.hotels-management {
+  padding: $spacing-2xl;
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg;
+  }
+}
+
+.hotels-management__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-2xl;
+  gap: $spacing-lg;
+
+  @include respond-to('mobile') {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.hotels-management__title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+}
+
+.hotels-management__subtitle {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  margin: 0;
+}
+
+// Button Styles
+.btn {
+  @include button-base;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  &--primary {
+    @include button-primary;
+  }
+
+  &--secondary {
+    @include button-secondary;
+  }
+
+  &--danger {
+    background: $white;
+    color: $error;
+    border: 2px solid $error;
+
+    &:hover {
+      background: $error;
+      color: $white;
+      border-color: $error;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  &--sm {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+  }
+}
+
+.btn__icon {
+  font-size: $font-size-base;
+}
+
+.btn__label {
+  @include respond-to('mobile') {
+    display: none;
+  }
+}
+
+// Hotel Form
+.hotel-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.form-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.form-section__title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0;
+  padding-bottom: $spacing-sm;
+  border-bottom: 2px solid $border-color;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-lg;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.form-label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.form-input {
+  padding: $spacing-sm $spacing-md;
+  border: 2px solid $border-color;
+  border-radius: $radius-md;
+  font-size: $font-size-base;
+  color: $text-primary;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-500;
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.1);
+  }
+
+  &::placeholder {
+    color: $text-secondary;
+  }
+
+  &--textarea {
+    resize: vertical;
+    font-family: inherit;
+  }
+}
+
+.form-error {
+  font-size: $font-size-xs;
+  color: $error;
+  margin-top: $spacing-xs;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+}
+
+.form-checkbox__label {
+  font-size: $font-size-base;
+  color: $text-primary;
+  user-select: none;
+}
+
+// Form Arrays
+.form-array {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.form-array-item {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+
+  .form-input {
+    flex: 1;
+  }
+
+  .btn {
+    flex-shrink: 0;
+  }
+}

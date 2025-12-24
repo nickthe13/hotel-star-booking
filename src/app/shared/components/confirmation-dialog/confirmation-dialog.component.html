@@ -1,0 +1,31 @@
+@if (isOpen()) {
+  <div class="dialog-backdrop" (click)="onBackdropClick($event)">
+    <div class="dialog" [class]="'dialog--' + variant" (click)="$event.stopPropagation()">
+      <div class="dialog-icon">
+        @if (variant === 'danger') {
+          <span class="icon-danger">⚠️</span>
+        } @else if (variant === 'warning') {
+          <span class="icon-warning">⚠️</span>
+        } @else {
+          <span class="icon-info">ℹ️</span>
+        }
+      </div>
+      <h3 class="dialog-title">{{ title }}</h3>
+      <p class="dialog-message">{{ message }}</p>
+      <div class="dialog-actions">
+        <button class="btn btn--secondary" (click)="cancel()" type="button">
+          {{ cancelText }}
+        </button>
+        <button
+          class="btn"
+          [class.btn--danger]="variant === 'danger'"
+          [class.btn--primary]="variant !== 'danger'"
+          (click)="confirm()"
+          type="button"
+        >
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

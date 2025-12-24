@@ -1,0 +1,365 @@
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/mixins';
+
+.dashboard-loading {
+  @include flex-center;
+  flex-direction: column;
+  min-height: 400px;
+  gap: $spacing-md;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $neutral-200;
+    border-top-color: $primary-500;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: $font-size-base;
+  }
+}
+
+.dashboard {
+  padding: $spacing-2xl;
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg;
+  }
+}
+
+.dashboard__header {
+  margin-bottom: $spacing-2xl;
+}
+
+.dashboard__title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+}
+
+.dashboard__subtitle {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  margin: 0;
+}
+
+// Stats Grid
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-2xl;
+
+  @include respond-to('mobile') {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  background: $white;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+  border: 1px solid $border-color;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+  }
+
+  &--primary {
+    border-left: 4px solid $primary-500;
+  }
+
+  &--success {
+    border-left: 4px solid $success;
+  }
+
+  &--info {
+    border-left: 4px solid $info;
+  }
+
+  &--warning {
+    border-left: 4px solid $warning;
+  }
+}
+
+.stat-card__icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.stat-card__content {
+  flex: 1;
+}
+
+.stat-card__value {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.stat-card__label {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Section
+.section {
+  background: $white;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  border: 1px solid $border-color;
+  margin-bottom: $spacing-lg;
+}
+
+.section__title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0 0 $spacing-lg 0;
+}
+
+// Status Grid
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-lg;
+
+  @include respond-to('mobile') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-lg;
+  background: $neutral-50;
+  border-radius: $radius-md;
+  gap: $spacing-sm;
+}
+
+.status-item__label {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-item__value {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+
+  &--warning {
+    color: $warning;
+  }
+
+  &--success {
+    color: $success;
+  }
+
+  &--info {
+    color: $info;
+  }
+
+  &--danger {
+    color: $error;
+  }
+}
+
+// Dashboard Grid
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: $spacing-lg;
+
+  @include respond-to('tablet') {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Bookings List
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.booking-card {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $neutral-50;
+  border-radius: $radius-md;
+  transition: background 0.2s ease;
+  align-items: center;
+
+  &:hover {
+    background: $neutral-100;
+  }
+}
+
+.booking-card__image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.booking-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.booking-card__hotel {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.booking-card__location {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.booking-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.booking-card__dates {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+}
+
+.booking-card__price {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $primary-500;
+}
+
+// Hotels List
+.hotels-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.hotel-card {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $neutral-50;
+  border-radius: $radius-md;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: $neutral-100;
+  }
+}
+
+.hotel-card__image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.hotel-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.hotel-card__name {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hotel-card__location {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.hotel-card__stats {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.hotel-card__bookings,
+.hotel-card__revenue {
+  font-size: $font-size-sm;
+  color: $text-primary;
+  font-weight: $font-weight-medium;
+}
+
+// Badge
+.badge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+
+  &--success {
+    background: rgba($success, 0.1);
+    color: $success;
+  }
+
+  &--warning {
+    background: rgba($warning, 0.1);
+    color: $warning;
+  }
+
+  &--danger {
+    background: rgba($error, 0.1);
+    color: $error;
+  }
+
+  &--info {
+    background: rgba($info, 0.1);
+    color: $info;
+  }
+}
+
+// Empty State
+.empty-state {
+  @include flex-center;
+  padding: $spacing-3xl;
+  color: $text-secondary;
+  font-size: $font-size-base;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
