@@ -45,7 +45,7 @@
             <button
               class="gallery__thumbnail"
               [class.gallery__thumbnail--active]="selectedImageIndex() === $index"
-              (click)="selectImage($index)"
+              (mouseenter)="selectImage($index)"
             >
               <img [src]="image" [alt]="hotel()!.name + ' - Image ' + ($index + 1)" />
             </button>
