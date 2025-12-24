@@ -1,0 +1,289 @@
+<div class="profile">
+  <!-- Success/Error Messages -->
+  @if (updateSuccess()) {
+    <div class="alert alert--success">
+      <span class="alert__icon">✓</span>
+      <span class="alert__message">Profile updated successfully!</span>
+    </div>
+  }
+
+  @if (updateError()) {
+    <div class="alert alert--error">
+      <span class="alert__icon">⚠</span>
+      <span class="alert__message">{{ updateError() }}</span>
+    </div>
+  }
+
+  <!-- Profile Header -->
+  <div class="profile__header">
+    <div class="profile__avatar-container">
+      @if (user()?.avatar) {
+        <img [src]="user()?.avatar" [alt]="user()?.name" class="profile__avatar">
+      } @else {
+        <div class="profile__avatar profile__avatar--placeholder">
+          {{ user()?.name?.charAt(0).toUpperCase() }}
+        </div>
+      }
+    </div>
+    <div class="profile__header-info">
+      <h1 class="profile__name">{{ user()?.name }}</h1>
+      <p class="profile__email">{{ user()?.email }}</p>
+      <p class="profile__joined">Member since {{ formatDate(user()?.createdAt!) }}</p>
+    </div>
+  </div>
+
+  <!-- Profile Sections -->
+  <div class="profile__sections">
+    <!-- Basic Information Section -->
+    <section class="section">
+      <div class="section__header">
+        <h2 class="section__title">Basic Information</h2>
+        @if (!isEditingProfile()) {
+          <button class="btn btn--secondary btn--sm" (click)="toggleEditProfile()" type="button">
+            ✏️ Edit
+          </button>
+        }
+      </div>
+
+      @if (!isEditingProfile()) {
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-item__label">Full Name</span>
+            <span class="info-item__value">{{ user()?.name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-item__label">Email Address</span>
+            <span class="info-item__value">{{ user()?.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-item__label">Account Type</span>
+            <span class="info-item__value">{{ user()?.role === 'admin' ? 'Administrator' : 'Standard User' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-item__label">User ID</span>
+            <span class="info-item__value">{{ user()?.id }}</span>
+          </div>
+        </div>
+      } @else {
+        <form [formGroup]="profileForm" class="edit-form">
+          <div class="form-group">
+            <label class="form-label" for="name">Full Name</label>
+            <input
+              id="name"
+              type="text"
+              class="form-input"
+              formControlName="name"
+              placeholder="Enter your name"
+            >
+            @if (getFieldError(profileForm, 'name')) {
+              <span class="form-error">{{ getFieldError(profileForm, 'name') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              class="form-input"
+              formControlName="email"
+              placeholder="Enter your email"
+            >
+            @if (getFieldError(profileForm, 'email')) {
+              <span class="form-error">{{ getFieldError(profileForm, 'email') }}</span>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--secondary" (click)="toggleEditProfile()" type="button">
+              Cancel
+            </button>
+            <button class="btn btn--primary" (click)="saveProfile()" type="button">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+
+    <!-- Avatar Section -->
+    <section class="section">
+      <div class="section__header">
+        <h2 class="section__title">Profile Picture</h2>
+        @if (!isEditingAvatar()) {
+          <button class="btn btn--secondary btn--sm" (click)="toggleEditAvatar()" type="button">
+            ✏️ Edit
+          </button>
+        }
+      </div>
+
+      @if (!isEditingAvatar()) {
+        <div class="avatar-display">
+          @if (user()?.avatar) {
+            <img [src]="user()?.avatar" [alt]="user()?.name" class="avatar-display__image">
+            <p class="avatar-display__text">Current profile picture</p>
+          } @else {
+            <div class="avatar-display__placeholder">
+              {{ user()?.name?.charAt(0).toUpperCase() }}
+            </div>
+            <p class="avatar-display__text">No profile picture set</p>
+          }
+        </div>
+      } @else {
+        <form [formGroup]="avatarForm" class="edit-form">
+          <div class="form-group">
+            <label class="form-label" for="avatar">Avatar URL</label>
+            <input
+              id="avatar"
+              type="text"
+              class="form-input"
+              formControlName="avatar"
+              placeholder="https://example.com/avatar.jpg"
+            >
+            @if (getFieldError(avatarForm, 'avatar')) {
+              <span class="form-error">{{ getFieldError(avatarForm, 'avatar') }}</span>
+            }
+            <span class="form-help">Enter a URL to your profile picture</span>
+          </div>
+
+          @if (avatarForm.get('avatar')?.value) {
+            <div class="avatar-preview">
+              <p class="avatar-preview__label">Preview:</p>
+              <img [src]="avatarForm.get('avatar')?.value" alt="Avatar preview" class="avatar-preview__image">
+            </div>
+          }
+
+          <div class="form-actions">
+            <button class="btn btn--secondary" (click)="toggleEditAvatar()" type="button">
+              Cancel
+            </button>
+            <button class="btn btn--primary" (click)="saveAvatar()" type="button">
+              Save Avatar
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+
+    <!-- Password Change Section -->
+    <section class="section">
+      <div class="section__header">
+        <h2 class="section__title">Password & Security</h2>
+        @if (!isChangingPassword()) {
+          <button class="btn btn--secondary btn--sm" (click)="toggleChangePassword()" type="button">
+            🔒 Change Password
+          </button>
+        }
+      </div>
+
+      @if (!isChangingPassword()) {
+        <p class="section__description">Keep your account secure by using a strong password</p>
+      } @else {
+        <form [formGroup]="passwordForm" class="edit-form">
+          <div class="form-group">
+            <label class="form-label" for="currentPassword">Current Password</label>
+            <input
+              id="currentPassword"
+              type="password"
+              class="form-input"
+              formControlName="currentPassword"
+              placeholder="Enter current password"
+            >
+            @if (getFieldError(passwordForm, 'currentPassword')) {
+              <span class="form-error">{{ getFieldError(passwordForm, 'currentPassword') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newPassword">New Password</label>
+            <input
+              id="newPassword"
+              type="password"
+              class="form-input"
+              formControlName="newPassword"
+              placeholder="Enter new password"
+            >
+            @if (getFieldError(passwordForm, 'newPassword')) {
+              <span class="form-error">{{ getFieldError(passwordForm, 'newPassword') }}</span>
+            }
+            <span class="form-help">Must be at least 6 characters</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm New Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              class="form-input"
+              formControlName="confirmPassword"
+              placeholder="Confirm new password"
+            >
+            @if (getFieldError(passwordForm, 'confirmPassword')) {
+              <span class="form-error">{{ getFieldError(passwordForm, 'confirmPassword') }}</span>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--secondary" (click)="toggleChangePassword()" type="button">
+              Cancel
+            </button>
+            <button class="btn btn--primary" (click)="changePassword()" type="button">
+              Update Password
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+
+    <!-- Favorites Section -->
+    <section class="section">
+      <div class="section__header">
+        <h2 class="section__title">Favorite Hotels</h2>
+        <span class="section__badge">{{ favoriteHotels().length }}</span>
+      </div>
+
+      @if (loadingFavorites()) {
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading favorites...</p>
+        </div>
+      } @else {
+        @if (favoriteHotels().length > 0) {
+          <div class="favorites-grid">
+            @for (hotel of favoriteHotels(); track hotel.id) {
+              <div class="favorite-card">
+                <img
+                  [src]="hotel.images[0]"
+                  [alt]="hotel.name"
+                  class="favorite-card__image"
+                >
+                <div class="favorite-card__content">
+                  <h3 class="favorite-card__name">{{ hotel.name }}</h3>
+                  <p class="favorite-card__location">📍 {{ hotel.location }}</p>
+                  <div class="favorite-card__details">
+                    <span class="favorite-card__price">${{ hotel.pricePerNight }}/night</span>
+                    <span class="favorite-card__rating">⭐ {{ hotel.starRating }}</span>
+                  </div>
+                </div>
+                <button
+                  class="favorite-card__remove"
+                  (click)="removeFavorite(hotel.id)"
+                  type="button"
+                  title="Remove from favorites"
+                >
+                  ❌
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-state">
+            <span class="empty-state__icon">💙</span>
+            <p class="empty-state__text">No favorite hotels yet</p>
+            <p class="empty-state__subtext">Browse hotels and save your favorites!</p>
+          </div>
+        }
+      }
+    </section>
+  </div>
+</div>

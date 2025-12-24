@@ -17,14 +17,24 @@
         <li class="nav__item">
           <a routerLink="/hotels" routerLinkActive="nav__link--active" class="nav__link">Hotels</a>
         </li>
-        <li class="nav__item">
-          <a
-            routerLink="/dashboard"
-            routerLinkActive="nav__link--active"
-            class="nav__link"
-            >My Bookings</a
-          >
-        </li>
+        @if (authService.isAuthenticated()) {
+          <li class="nav__item">
+            <a
+              routerLink="/dashboard"
+              routerLinkActive="nav__link--active"
+              class="nav__link"
+              >My Bookings</a
+            >
+          </li>
+          <li class="nav__item">
+            <a
+              routerLink="/profile"
+              routerLinkActive="nav__link--active"
+              class="nav__link"
+              >Profile</a
+            >
+          </li>
+        }
       </ul>
     </nav>
 
@@ -60,6 +70,7 @@
           <li><a routerLink="/home" class="footer__link">Home</a></li>
           <li><a routerLink="/hotels" class="footer__link">Browse Hotels</a></li>
           <li><a routerLink="/dashboard" class="footer__link">My Bookings</a></li>
+          <li><a routerLink="/profile" class="footer__link">Profile</a></li>
         </ul>
       </div>
 
