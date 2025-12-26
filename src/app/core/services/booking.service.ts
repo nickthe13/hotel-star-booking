@@ -1,12 +1,14 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
 import { Booking, BookingRequest, BookingConfirmation, BookingStatus } from '../models/booking.model';
+import { PaymentTransaction, PaymentStatus } from '../models/payment.model';
 import { AuthService } from './auth.service';
 import { HotelService } from './hotel.service';
+import { PaymentService } from './payment.service';
 
 @Injectable({
   providedIn: 'root'
@@ -57,7 +59,8 @@ export class BookingService {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private hotelService: HotelService
+    private hotelService: HotelService,
+    private paymentService: PaymentService
   ) {}
 
   createBooking(bookingData: BookingRequest): Observable<BookingConfirmation> {
@@ -116,6 +119,95 @@ export class BookingService {
           estimatedCheckInTime: '3:00 PM',
           message: 'Your booking has been confirmed!'
         };
+      })
+    );
+  }
+
+  createBookingWithPayment(bookingData: BookingRequest & { paymentIntentId: string }): Observable<BookingConfirmation> {
+    // In production, this would be:
+    // return this.http.post<BookingConfirmation>(`${this.API_URL}${API_ENDPOINTS.bookings}/with-payment`, bookingData);
+
+    // Mock implementation - fetch hotel data and create booking with payment
+    return this.hotelService.getHotelById(bookingData.hotelId).pipe(
+      switchMap(hotel => {
+        if (!hotel) {
+          throw new Error('Hotel not found');
+        }
+
+        // Find the selected room
+        const selectedRoom = hotel.rooms?.find(room => room.id === bookingData.roomId);
+        if (!selectedRoom) {
+          throw new Error('Room not found');
+        }
+
+        const userId = this.authService.isAuthenticated() ? '1' : '1';
+        const totalPrice = this.calculateTotalPrice(
+          selectedRoom.pricePerNight,
+          new Date(bookingData.checkIn),
+          new Date(bookingData.checkOut)
+        );
+
+        const bookingNumber = this.nextBookingNumber++;
+
+        // Create mock payment transaction
+        const paymentTransaction: PaymentTransaction = {
+          id: `txn_${Date.now()}`,
+          bookingId: bookingNumber.toString(),
+          userId: userId,
+          amount: totalPrice,
+          currency: 'usd',
+          status: PaymentStatus.SUCCEEDED,
+          stripePaymentIntentId: bookingData.paymentIntentId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          metadata: {
+            hotelName: hotel.name,
+            roomType: selectedRoom.roomType,
+            checkIn: bookingData.checkIn,
+            checkOut: bookingData.checkOut
+          }
+        };
+
+        // Store the transaction
+        this.paymentService.createMockTransaction(paymentTransaction);
+
+        const newBooking: Booking = {
+          id: bookingNumber.toString(),
+          userId: userId,
+          hotelId: bookingData.hotelId,
+          roomId: bookingData.roomId,
+          checkIn: new Date(bookingData.checkIn),
+          checkOut: new Date(bookingData.checkOut),
+          guests: bookingData.guests,
+          totalPrice: totalPrice,
+          status: BookingStatus.CONFIRMED,
+          createdAt: new Date(),
+          specialRequests: bookingData.specialRequests,
+          hotel: {
+            name: hotel.name,
+            image: hotel.images[0],
+            location: hotel.location
+          },
+          room: {
+            roomType: selectedRoom.roomType
+          },
+          paymentTransactionId: paymentTransaction.id,
+          paymentStatus: PaymentStatus.SUCCEEDED,
+          isPaid: true,
+          paidAt: new Date()
+        };
+
+        // Add the new booking to the mock array
+        this.mockBookings.unshift(newBooking);
+
+        return of({
+          booking: newBooking,
+          confirmationNumber: `CONF-${Date.now()}`,
+          estimatedCheckInTime: '3:00 PM',
+          message: 'Your booking has been confirmed and payment processed!',
+          paymentTransaction: paymentTransaction,
+          requiresPayment: false
+        });
       })
     );
   }
