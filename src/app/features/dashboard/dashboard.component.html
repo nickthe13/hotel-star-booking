@@ -55,9 +55,14 @@
                 <div class="booking-card__header">
                   <div class="booking-card__info">
                     <h3 class="booking-card__title">Booking #{{ booking.id }}</h3>
-                    <span class="status-badge" [ngClass]="getStatusClass(booking.status)">
-                      {{ booking.status }}
-                    </span>
+                    <div class="badge-group">
+                      <span class="status-badge" [ngClass]="getStatusClass(booking.status)">
+                        {{ booking.status }}
+                      </span>
+                      <span class="payment-status-badge" [ngClass]="getPaymentStatusClass(booking.paymentStatus)">
+                        {{ getPaymentStatusLabel(booking.paymentStatus) }}
+                      </span>
+                    </div>
                   </div>
                   <div class="booking-card__price">
                     ${{ booking.totalPrice }}
@@ -111,19 +116,30 @@
                   <span class="booking-card__date">
                     Booked on {{ formatDate(booking.createdAt) }}
                   </span>
-                  @if (canCancelBooking(booking)) {
-                    <button
-                      class="btn btn--secondary btn--small"
-                      (click)="openCancelModal(booking.id)"
-                      [disabled]="cancellingBookingId() === booking.id"
-                    >
-                      @if (cancellingBookingId() === booking.id) {
-                        <span>Cancelling...</span>
-                      } @else {
-                        <span>Cancel Booking</span>
-                      }
-                    </button>
-                  }
+                  <div class="booking-card__actions">
+                    @if (booking.isPaid && booking.paymentTransactionId) {
+                      <button
+                        class="btn btn--secondary btn--small"
+                        (click)="viewPaymentReceipt(booking)"
+                        title="View payment receipt"
+                      >
+                        📄 Receipt
+                      </button>
+                    }
+                    @if (canCancelBooking(booking)) {
+                      <button
+                        class="btn btn--secondary btn--small"
+                        (click)="openCancelModal(booking.id)"
+                        [disabled]="cancellingBookingId() === booking.id"
+                      >
+                        @if (cancellingBookingId() === booking.id) {
+                          <span>Cancelling...</span>
+                        } @else {
+                          <span>Cancel Booking</span>
+                        }
+                      </button>
+                    }
+                  </div>
                 </div>
               </div>
             }

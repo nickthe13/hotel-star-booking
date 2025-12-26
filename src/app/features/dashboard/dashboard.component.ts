@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { BookingService } from '../../core/services/booking.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Booking, BookingStatus } from '../../core/models/booking.model';
+import { PaymentStatus } from '../../core/models/payment.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +21,7 @@ export class DashboardComponent implements OnInit {
   showCancelModal = signal<boolean>(false);
   bookingToCancel = signal<string | null>(null);
   BookingStatus = BookingStatus;
+  PaymentStatus = PaymentStatus;
 
   constructor(
     private bookingService: BookingService,
@@ -123,5 +125,51 @@ export class DashboardComponent implements OnInit {
 
   canCancelBooking(booking: Booking): boolean {
     return booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.PENDING;
+  }
+
+  getPaymentStatusClass(status?: PaymentStatus): string {
+    if (!status) return 'payment-status--unknown';
+
+    switch (status) {
+      case PaymentStatus.SUCCEEDED:
+        return 'payment-status--success';
+      case PaymentStatus.PENDING:
+      case PaymentStatus.PROCESSING:
+        return 'payment-status--warning';
+      case PaymentStatus.FAILED:
+      case PaymentStatus.CANCELLED:
+        return 'payment-status--danger';
+      case PaymentStatus.REFUNDED:
+      case PaymentStatus.PARTIALLY_REFUNDED:
+        return 'payment-status--info';
+      default:
+        return 'payment-status--unknown';
+    }
+  }
+
+  getPaymentStatusLabel(status?: PaymentStatus): string {
+    if (!status) return 'Not Paid';
+
+    return status.split('_').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  }
+
+  viewPaymentReceipt(booking: Booking): void {
+    if (!booking.paymentTransactionId) {
+      alert('No payment receipt available for this booking.');
+      return;
+    }
+
+    // In production, this would download or open a receipt PDF
+    console.log('Viewing receipt for transaction:', booking.paymentTransactionId);
+    alert(`Payment Receipt\n\nBooking ID: ${booking.id}\nTransaction ID: ${booking.paymentTransactionId}\nAmount: ${this.formatCurrency(booking.totalPrice)}\nStatus: ${this.getPaymentStatusLabel(booking.paymentStatus)}\nDate: ${this.formatDate(booking.createdAt)}`);
   }
 }
