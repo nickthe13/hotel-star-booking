@@ -103,7 +103,7 @@
               <td>
                 <span class="hotel-name">{{ transaction.metadata?.hotelName || 'N/A' }}</span>
                 @if (transaction.metadata?.roomType) {
-                  <span class="room-type">{{ transaction.metadata.roomType }}</span>
+                  <span class="room-type">{{ transaction.metadata?.roomType }}</span>
                 }
               </td>
               <td class="amount">{{ formatCurrency(transaction.amount) }}</td>

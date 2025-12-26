@@ -128,7 +128,7 @@ export class AdminBookingsComponent implements OnInit {
       label: 'Refund',
       icon: '💰',
       onClick: (booking: Booking) => this.openRefundModal(booking),
-      variant: 'warning',
+      variant: 'primary',
       condition: (booking: Booking) => booking.isPaid === true && booking.paymentStatus === PaymentStatus.SUCCEEDED
     },
     {
