@@ -8,15 +8,16 @@
       <a routerLink="/hotels" class="btn btn--primary">Back to Hotels</a>
     }
 
-    @if (hotel() && !success()) {
+    @if (hotel() && !success() && paymentStep() !== 'confirmation') {
       <div class="booking-container">
-        <div class="booking-content">
-          <div class="booking-header">
-            <h1 class="booking-header__title">Complete Your Booking</h1>
-            <p class="booking-header__subtitle">
-              You're just one step away from your perfect stay
-            </p>
-          </div>
+        @if (paymentStep() === 'booking') {
+          <div class="booking-content">
+            <div class="booking-header">
+              <h1 class="booking-header__title">Complete Your Booking</h1>
+              <p class="booking-header__subtitle">
+                You're just one step away from your perfect stay
+              </p>
+            </div>
 
           <div class="hotel-summary">
             <img
@@ -202,7 +203,7 @@
                 @if (loading()) {
                   <span>Processing...</span>
                 } @else {
-                  <span>Confirm Booking</span>
+                  <span>Continue to Payment</span>
                 }
               </button>
             </div>
@@ -247,11 +248,75 @@
             <h4 class="booking-info__title">Good to know</h4>
             <ul class="booking-info__list">
               <li>✓ Free cancellation up to 24 hours before check-in</li>
-              <li>✓ No payment needed today</li>
-              <li>✓ Confirmation is immediate</li>
+              <li>✓ Secure payment with Stripe</li>
+              <li>✓ Full refund if cancelled 24+ hours before</li>
             </ul>
           </div>
         </div>
+        }
+
+        @if (paymentStep() === 'payment') {
+          <div class="payment-container-wrapper">
+            <div class="payment-header">
+              <button type="button" (click)="goBackToBooking()" class="btn-back">← Back to Booking</button>
+              <h1>Payment Details</h1>
+            </div>
+
+            <div class="payment-content">
+              <!-- Booking Summary -->
+              <div class="booking-summary-card">
+                <h3>Booking Summary</h3>
+                <div class="summary-row">
+                  <span class="label">Hotel:</span>
+                  <span class="value">{{ hotel()!.name }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="label">Room:</span>
+                  <span class="value">{{ selectedRoom()!.roomType }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="label">Check-in:</span>
+                  <span class="value">{{ bookingForm.value.checkIn }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="label">Check-out:</span>
+                  <span class="value">{{ bookingForm.value.checkOut }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="label">Guests:</span>
+                  <span class="value">{{ bookingForm.value.guests }}</span>
+                </div>
+                <div class="summary-row">
+                  <span class="label">Nights:</span>
+                  <span class="value">{{ calculateNights() }}</span>
+                </div>
+                <div class="summary-row total">
+                  <span class="label">Total:</span>
+                  <span class="value">${{ calculateTotalPrice() }}</span>
+                </div>
+              </div>
+
+              <!-- Stripe Payment Component -->
+              <app-stripe-payment
+                [clientSecret]="paymentIntent()!.clientSecret"
+                [amount]="calculateTotalPrice()"
+                [savedPaymentMethods]="savedPaymentMethods()"
+                [allowSavePaymentMethod]="true"
+                (paymentSuccess)="onPaymentSuccess($event)"
+                (paymentError)="onPaymentError($event)"
+                (savePaymentMethodChange)="savePaymentMethod.set($event)"
+                (selectedPaymentMethodChange)="selectedPaymentMethodId.set($event)"
+              ></app-stripe-payment>
+
+              @if (paymentError()) {
+                <div class="alert alert--error">
+                  <span>⚠️</span>
+                  <span>{{ paymentError() }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
       </div>
     }
 
@@ -292,7 +357,7 @@
           </div>
 
           <p class="success-note">
-            A confirmation email has been sent to your email address.
+            A confirmation email and payment receipt have been sent to your email address.
           </p>
 
           <div class="success-actions">
