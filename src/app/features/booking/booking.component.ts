@@ -4,11 +4,14 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HotelService } from '../../core/services/hotel.service';
 import { BookingService } from '../../core/services/booking.service';
-import { Hotel, Room } from '../../core/models';
+import { PaymentService } from '../../core/services/payment.service';
+import { EmailService } from '../../core/services/email.service';
+import { Hotel, Room, CreatePaymentIntentRequest, CreatePaymentIntentResponse, SavedPaymentMethod } from '../../core/models';
+import { StripePaymentComponent } from '../../shared/components/stripe-payment/stripe-payment.component';
 
 @Component({
   selector: 'app-booking',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, StripePaymentComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.scss'
 })
@@ -20,6 +23,15 @@ export class BookingComponent implements OnInit {
   error = signal<string>('');
   success = signal<boolean>(false);
   confirmationNumber = signal<string>('');
+
+  // Payment step signals
+  paymentStep = signal<'booking' | 'payment' | 'confirmation'>('booking');
+  paymentIntent = signal<CreatePaymentIntentResponse | null>(null);
+  savedPaymentMethods = signal<SavedPaymentMethod[]>([]);
+  selectedPaymentMethodId = signal<string | null>(null);
+  savePaymentMethod = signal<boolean>(false);
+  processingPayment = signal<boolean>(false);
+  paymentError = signal<string>('');
 
   minDate: string;
   minCheckoutDate: string = '';
@@ -35,7 +47,9 @@ export class BookingComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private hotelService: HotelService,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private paymentService: PaymentService,
+    private emailService: EmailService
   ) {
     // Set minimum date to today
     const today = new Date();
@@ -86,6 +100,16 @@ export class BookingComponent implements OnInit {
     } else {
       this.error.set('No hotel selected');
     }
+
+    // Load saved payment methods
+    this.loadSavedPaymentMethods();
+  }
+
+  loadSavedPaymentMethods(): void {
+    this.paymentService.getUserPaymentMethods().subscribe({
+      next: (methods) => this.savedPaymentMethods.set(methods),
+      error: (err) => console.error('Failed to load payment methods', err)
+    });
   }
 
   loadHotel(hotelId: string): void {
@@ -139,29 +163,104 @@ export class BookingComponent implements OnInit {
       return;
     }
 
+    // Proceed to payment step
+    this.createPaymentIntent();
+  }
+
+  createPaymentIntent(): void {
     this.loading.set(true);
     this.error.set('');
 
+    const hotel = this.hotel();
+    const room = this.selectedRoom();
+
+    if (!hotel || !room) {
+      this.error.set('Hotel or room not found');
+      this.loading.set(false);
+      return;
+    }
+
+    const totalPrice = this.calculateTotalPrice();
+
+    const paymentRequest: CreatePaymentIntentRequest = {
+      amount: totalPrice * 100, // Convert to cents
+      currency: 'usd',
+      savePaymentMethod: this.savePaymentMethod(),
+      paymentMethodId: this.selectedPaymentMethodId() || undefined,
+      metadata: {
+        hotelId: hotel.id,
+        hotelName: hotel.name,
+        roomType: room.roomType,
+        checkIn: this.bookingForm.value.checkIn,
+        checkOut: this.bookingForm.value.checkOut
+      }
+    };
+
+    this.paymentService.createPaymentIntent(paymentRequest).subscribe({
+      next: (response) => {
+        this.paymentIntent.set(response);
+        this.paymentStep.set('payment');
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set('Failed to initialize payment. Please try again.');
+      }
+    });
+  }
+
+  onPaymentSuccess(paymentIntentId: string): void {
+    this.processingPayment.set(true);
+
+    const hotel = this.hotel();
+    if (!hotel) {
+      this.paymentError.set('Hotel information not found');
+      this.processingPayment.set(false);
+      return;
+    }
+
+    // Now create the booking with payment confirmation
     const bookingData = {
       hotelId: hotel.id,
       roomId: this.bookingForm.value.roomId,
       checkIn: this.bookingForm.value.checkIn,
       checkOut: this.bookingForm.value.checkOut,
       guests: this.bookingForm.value.guests,
-      specialRequests: this.bookingForm.value.specialRequests
+      specialRequests: this.bookingForm.value.specialRequests,
+      paymentIntentId: paymentIntentId
     };
 
-    this.bookingService.createBooking(bookingData).subscribe({
+    this.bookingService.createBookingWithPayment(bookingData).subscribe({
       next: (response) => {
-        this.loading.set(false);
+        this.processingPayment.set(false);
         this.success.set(true);
         this.confirmationNumber.set(response.confirmationNumber);
+        this.paymentStep.set('confirmation');
+
+        // Send receipt email
+        if (response.paymentTransaction) {
+          this.emailService.sendPaymentReceipt(
+            response.booking.id,
+            response.paymentTransaction.id
+          ).subscribe();
+        }
       },
       error: (err) => {
-        this.loading.set(false);
-        this.error.set('Failed to create booking. Please try again.');
+        this.processingPayment.set(false);
+        this.paymentError.set('Booking creation failed. Payment was successful - please contact support.');
       }
     });
+  }
+
+  onPaymentError(error: string): void {
+    this.paymentError.set(error);
+    this.processingPayment.set(false);
+  }
+
+  goBackToBooking(): void {
+    this.paymentStep.set('booking');
+    this.paymentIntent.set(null);
+    this.paymentError.set('');
   }
 
   goToDashboard(): void {
