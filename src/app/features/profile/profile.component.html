@@ -32,8 +32,41 @@
     </div>
   </div>
 
-  <!-- Profile Sections -->
-  <div class="profile__sections">
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button
+      class="tab"
+      [class.tab--active]="activeTab() === 'profile'"
+      (click)="setActiveTab('profile')"
+      type="button"
+    >
+      <span class="tab__icon">👤</span>
+      <span class="tab__label">Profile</span>
+    </button>
+    <button
+      class="tab"
+      [class.tab--active]="activeTab() === 'payment-methods'"
+      (click)="setActiveTab('payment-methods')"
+      type="button"
+    >
+      <span class="tab__icon">💳</span>
+      <span class="tab__label">Payment Methods</span>
+    </button>
+    <button
+      class="tab"
+      [class.tab--active]="activeTab() === 'payment-history'"
+      (click)="setActiveTab('payment-history')"
+      type="button"
+    >
+      <span class="tab__icon">📊</span>
+      <span class="tab__label">Payment History</span>
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <!-- Profile Tab -->
+  @if (activeTab() === 'profile') {
+    <div class="profile__sections">
     <!-- Basic Information Section -->
     <section class="section">
       <div class="section__header">
@@ -285,5 +318,16 @@
         }
       }
     </section>
-  </div>
+    </div>
+  }
+
+  <!-- Payment Methods Tab -->
+  @if (activeTab() === 'payment-methods') {
+    <app-saved-payment-methods></app-saved-payment-methods>
+  }
+
+  <!-- Payment History Tab -->
+  @if (activeTab() === 'payment-history') {
+    <app-payment-history></app-payment-history>
+  }
 </div>

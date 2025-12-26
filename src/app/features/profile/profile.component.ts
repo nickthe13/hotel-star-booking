@@ -6,15 +6,22 @@ import { BookingService } from '../../core/services/booking.service';
 import { HotelService } from '../../core/services/hotel.service';
 import { User } from '../../core/models/user.model';
 import { Hotel } from '../../core/models';
+import { PaymentHistoryComponent } from './payment-history/payment-history.component';
+import { SavedPaymentMethodsComponent } from './saved-payment-methods/saved-payment-methods.component';
+
+type ProfileTab = 'profile' | 'payment-methods' | 'payment-history';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PaymentHistoryComponent, SavedPaymentMethodsComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
   user;
+
+  // Tab navigation
+  activeTab = signal<ProfileTab>('profile');
 
   isEditingProfile = signal<boolean>(false);
   isEditingAvatar = signal<boolean>(false);
@@ -252,5 +259,9 @@ export class ProfileComponent implements OnInit {
       month: 'long',
       day: 'numeric'
     });
+  }
+
+  setActiveTab(tab: ProfileTab): void {
+    this.activeTab.set(tab);
   }
 }

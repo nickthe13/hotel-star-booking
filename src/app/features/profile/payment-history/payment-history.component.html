@@ -1,0 +1,140 @@
+<div class="payment-history">
+  <div class="page-header">
+    <h2>Payment History</h2>
+    <p class="subtitle">View all your payment transactions</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Search by booking ID or hotel..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($event)"
+        class="search-input"
+      />
+    </div>
+
+    <div class="filter-group">
+      <select
+        [value]="statusFilter()"
+        (change)="onStatusFilterChange($event)"
+        class="filter-select"
+      >
+        <option value="all">All Status</option>
+        <option [value]="PaymentStatus.SUCCEEDED">Succeeded</option>
+        <option [value]="PaymentStatus.PENDING">Pending</option>
+        <option [value]="PaymentStatus.PROCESSING">Processing</option>
+        <option [value]="PaymentStatus.FAILED">Failed</option>
+        <option [value]="PaymentStatus.REFUNDED">Refunded</option>
+        <option [value]="PaymentStatus.PARTIALLY_REFUNDED">Partially Refunded</option>
+        <option [value]="PaymentStatus.CANCELLED">Cancelled</option>
+      </select>
+
+      @if (searchQuery() || statusFilter() !== 'all') {
+        <button (click)="clearFilters()" class="btn btn--secondary btn--sm">
+          Clear Filters
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading payment history...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="alert alert--error">
+      <span>⚠️</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && !error() && filteredTransactions().length === 0 && !searchQuery() && statusFilter() === 'all') {
+    <div class="empty-state">
+      <div class="empty-icon">💳</div>
+      <h3>No Payment History</h3>
+      <p>You haven't made any payments yet.</p>
+    </div>
+  }
+
+  <!-- No Results State -->
+  @if (!loading() && !error() && filteredTransactions().length === 0 && (searchQuery() || statusFilter() !== 'all')) {
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No Results Found</h3>
+      <p>Try adjusting your filters.</p>
+      <button (click)="clearFilters()" class="btn btn--primary">Clear Filters</button>
+    </div>
+  }
+
+  <!-- Transactions Table -->
+  @if (!loading() && !error() && filteredTransactions().length > 0) {
+    <div class="transactions-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Transaction ID</th>
+            <th>Booking ID</th>
+            <th>Hotel</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (transaction of filteredTransactions(); track transaction.id) {
+            <tr>
+              <td>{{ formatDate(transaction.createdAt) }}</td>
+              <td>
+                <span class="transaction-id">{{ transaction.id }}</span>
+              </td>
+              <td>
+                <span class="booking-id">{{ transaction.bookingId }}</span>
+              </td>
+              <td>
+                <span class="hotel-name">{{ transaction.metadata?.hotelName || 'N/A' }}</span>
+                @if (transaction.metadata?.roomType) {
+                  <span class="room-type">{{ transaction.metadata.roomType }}</span>
+                }
+              </td>
+              <td class="amount">{{ formatCurrency(transaction.amount) }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(transaction.status)">
+                  {{ getStatusLabel(transaction.status) }}
+                </span>
+                @if (transaction.refundAmount) {
+                  <div class="refund-info">
+                    Refunded: {{ formatCurrency(transaction.refundAmount) }}
+                  </div>
+                }
+              </td>
+              <td>
+                <button
+                  (click)="viewReceipt(transaction)"
+                  class="btn btn--secondary btn--sm"
+                  title="View Receipt"
+                >
+                  📄 Receipt
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <p>Showing {{ filteredTransactions().length }} of {{ transactions().length }} transactions</p>
+    </div>
+  }
+</div>
