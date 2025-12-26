@@ -1,0 +1,145 @@
+@if (loading()) {
+  <div class="bookings-loading">
+    <div class="spinner"></div>
+    <p>Loading bookings...</p>
+  </div>
+} @else {
+  <div class="bookings">
+    <div class="bookings__header">
+      <div>
+        <h2 class="bookings__title">Bookings Management</h2>
+        <p class="bookings__subtitle">Manage all customer bookings</p>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters">
+      <div class="filters__row">
+        <!-- Search Input -->
+        <div class="filter-group">
+          <label for="search" class="filter-group__label">Search</label>
+          <input
+            id="search"
+            type="text"
+            class="filter-group__input"
+            placeholder="Search by hotel, location, or booking ID..."
+            [value]="searchQuery()"
+            (input)="onSearchChange($event)"
+          />
+        </div>
+
+        <!-- Status Filter -->
+        <div class="filter-group">
+          <label for="status-filter" class="filter-group__label">Status</label>
+          <select
+            id="status-filter"
+            class="filter-group__select"
+            [value]="statusFilter()"
+            (change)="onStatusFilterChange($event)"
+          >
+            <option value="all">All Statuses</option>
+            <option [value]="BookingStatus.PENDING">Pending</option>
+            <option [value]="BookingStatus.CONFIRMED">Confirmed</option>
+            <option [value]="BookingStatus.COMPLETED">Completed</option>
+            <option [value]="BookingStatus.CANCELLED">Cancelled</option>
+          </select>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <div class="filter-group">
+          <label class="filter-group__label">&nbsp;</label>
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="clearFilters()"
+          >
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Summary -->
+      <div class="filters__summary">
+        Showing <strong>{{ filteredBookings().length }}</strong> of <strong>{{ allBookings().length }}</strong> bookings
+      </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="bookings__table">
+      @if (filteredBookings().length > 0) {
+        <app-table
+          [data]="filteredBookings()"
+          [columns]="columns"
+          [actions]="actions"
+        ></app-table>
+      } @else {
+        <div class="empty-state">
+          <div class="empty-state__icon">📋</div>
+          <h3 class="empty-state__title">No bookings found</h3>
+          <p class="empty-state__message">
+            @if (searchQuery() || statusFilter() !== 'all') {
+              Try adjusting your filters to see more results.
+            } @else {
+              No bookings have been made yet.
+            }
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Status Update Modal -->
+<app-modal
+  [isOpen]="showStatusModal"
+  [title]="'Update Booking Status'"
+  (onClose)="closeStatusModal()"
+>
+  <form [formGroup]="statusForm" (ngSubmit)="updateBookingStatus()">
+    <div class="modal-body">
+      @if (selectedBooking(); as booking) {
+        <div class="booking-info">
+          <h4 class="booking-info__title">Booking #{{ booking.id }}</h4>
+          <p class="booking-info__hotel">{{ booking.hotel?.name || 'N/A' }}</p>
+          <p class="booking-info__dates">
+            {{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="status" class="form-group__label">New Status</label>
+          <select
+            id="status"
+            formControlName="status"
+            class="form-group__select"
+          >
+            @for (status of bookingStatuses; track status) {
+              <option [value]="status">{{ getStatusLabel(status) }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn--secondary" (click)="closeStatusModal()">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn--primary">
+        Update Status
+      </button>
+    </div>
+  </form>
+</app-modal>
+
+<!-- Cancel Booking Confirmation Dialog -->
+<app-confirmation-dialog
+  [isOpen]="showCancelDialog"
+  [title]="'Cancel Booking'"
+  [message]="'Are you sure you want to cancel this booking? This action cannot be undone.'"
+  [confirmText]="'Yes, Cancel Booking'"
+  [cancelText]="'No, Keep It'"
+  [variant]="'danger'"
+  (onConfirm)="confirmCancel()"
+  (onCancel)="closeCancelDialog()"
+></app-confirmation-dialog>

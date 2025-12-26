@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm start)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdded room selection feature to booking flow\n\n- Added room types \\(Standard, Deluxe, Suite\\) to all 12 hotels with varying prices and amenities\n- Implemented room selection UI on booking page with availability indicators\n- Updated booking form to require room selection with validation\n- Modified price calculation to use selected room price instead of base hotel price\n- Enhanced booking service to store room details with bookings\n- Added room type display in dashboard booking history\n- Improved registration form with password strength indicator\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git remote add:*)",
+      "Bash(git commit:*)",
+      "Bash(ls -la \"C:\\\\Users\\\\30694\\\\StudioProjects\\\\hotel-star-booking\\\\src\\\\app\\\\features\" 2>&1 | grep \"^d \")",
+      "Bash(dir:*)"
+    ]
+  }
+}

@@ -14,7 +14,7 @@ import { Hotel } from '../../core/models';
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
-  user = this.authService.user;
+  user;
 
   isEditingProfile = signal<boolean>(false);
   isEditingAvatar = signal<boolean>(false);
@@ -36,6 +36,7 @@ export class ProfileComponent implements OnInit {
     private bookingService: BookingService,
     private hotelService: HotelService
   ) {
+    this.user = authService.user;
     this.initForms();
   }
 

@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { AdminHotelsComponent } from './admin-hotels/admin-hotels.component';
 import { AdminRoomsComponent } from './admin-rooms/admin-rooms.component';
+import { AdminBookingsComponent } from './admin-bookings/admin-bookings.component';
 
-type AdminTab = 'dashboard' | 'hotels' | 'rooms';
+type AdminTab = 'dashboard' | 'hotels' | 'rooms' | 'bookings';
 
 @Component({
   selector: 'app-admin',
@@ -12,7 +13,8 @@ type AdminTab = 'dashboard' | 'hotels' | 'rooms';
     CommonModule,
     AdminDashboardComponent,
     AdminHotelsComponent,
-    AdminRoomsComponent
+    AdminRoomsComponent,
+    AdminBookingsComponent
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']

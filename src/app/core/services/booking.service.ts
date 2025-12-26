@@ -198,6 +198,18 @@ export class BookingService {
     return of(updatedBooking);
   }
 
+  updateBookingStatus(id: string, status: BookingStatus): Observable<void> {
+    // In production, this would be:
+    // return this.http.patch<void>(`${this.API_URL}${API_ENDPOINTS.bookings}/${id}/status`, { status });
+
+    // Mock implementation
+    const booking = this.mockBookings.find(b => b.id === id);
+    if (booking) {
+      booking.status = status;
+    }
+    return of(undefined);
+  }
+
   calculateTotalPrice(pricePerNight: number, checkIn: Date, checkOut: Date): number {
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
     return pricePerNight * nights;

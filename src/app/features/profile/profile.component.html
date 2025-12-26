@@ -21,7 +21,7 @@
         <img [src]="user()?.avatar" [alt]="user()?.name" class="profile__avatar">
       } @else {
         <div class="profile__avatar profile__avatar--placeholder">
-          {{ user()?.name?.charAt(0).toUpperCase() }}
+          {{ user()?.name?.charAt(0)?.toUpperCase() || '?' }}
         </div>
       }
     </div>
@@ -124,7 +124,7 @@
             <p class="avatar-display__text">Current profile picture</p>
           } @else {
             <div class="avatar-display__placeholder">
-              {{ user()?.name?.charAt(0).toUpperCase() }}
+              {{ user()?.name?.charAt(0)?.toUpperCase() || '?' }}
             </div>
             <p class="avatar-display__text">No profile picture set</p>
           }
