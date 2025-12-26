@@ -75,30 +75,34 @@ export class SavedPaymentMethodsComponent implements OnInit {
     return `•••• •••• •••• ${last4}`;
   }
 
-  formatExpiryDate(month: number, year: number): string {
+  formatExpiryDate(method: SavedPaymentMethod): string {
+    const month = method.card.expMonth;
+    const year = method.card.expYear;
     const paddedMonth = month.toString().padStart(2, '0');
     const shortYear = year.toString().slice(-2);
     return `${paddedMonth}/${shortYear}`;
   }
 
-  isExpired(month: number, year: number): boolean {
+  isExpired(method: SavedPaymentMethod): boolean {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
+    const month = method.card.expMonth;
+    const year = method.card.expYear;
 
     return year < currentYear || (year === currentYear && month < currentMonth);
   }
 
-  isExpiringSoon(month: number, year: number): boolean {
+  isExpiringSoon(method: SavedPaymentMethod): boolean {
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
+    const month = method.card.expMonth;
+    const year = method.card.expYear;
 
     // Check if expiring within 3 months
     const expiryDate = new Date(year, month - 1);
     const threeMonthsFromNow = new Date(now.getFullYear(), now.getMonth() + 3);
 
-    return !this.isExpired(month, year) && expiryDate <= threeMonthsFromNow;
+    return !this.isExpired(method) && expiryDate <= threeMonthsFromNow;
   }
 
   onSetDefault(method: SavedPaymentMethod): void {

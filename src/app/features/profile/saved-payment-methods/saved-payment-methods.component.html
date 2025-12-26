@@ -46,8 +46,8 @@
           <!-- Card Header -->
           <div class="card-header">
             <div class="card-brand">
-              <span class="brand-icon">{{ getCardBrandIcon(method.brand) }}</span>
-              <span class="brand-name">{{ getCardBrandName(method.brand) }}</span>
+              <span class="brand-icon">{{ getCardBrandIcon(method.card.brand) }}</span>
+              <span class="brand-name">{{ getCardBrandName(method.card.brand) }}</span>
             </div>
             @if (method.isDefault) {
               <span class="default-badge">Default</span>
@@ -56,7 +56,7 @@
 
           <!-- Card Number -->
           <div class="card-number">
-            {{ formatCardNumber(method.last4) }}
+            {{ formatCardNumber(method.card.last4) }}
           </div>
 
           <!-- Card Details -->
@@ -64,23 +64,17 @@
             <div class="detail-item">
               <span class="detail-label">Expires</span>
               <span class="detail-value">
-                {{ formatExpiryDate(method.expiryMonth, method.expiryYear) }}
+                {{ formatExpiryDate(method) }}
               </span>
             </div>
-            @if (method.holderName) {
-              <div class="detail-item">
-                <span class="detail-label">Cardholder</span>
-                <span class="detail-value">{{ method.holderName }}</span>
-              </div>
-            }
           </div>
 
           <!-- Expiry Warning -->
-          @if (isExpired(method.expiryMonth, method.expiryYear)) {
+          @if (isExpired(method)) {
             <div class="expiry-warning expiry-warning--expired">
               ⚠️ This card has expired
             </div>
-          } @else if (isExpiringSoon(method.expiryMonth, method.expiryYear)) {
+          } @else if (isExpiringSoon(method)) {
             <div class="expiry-warning expiry-warning--soon">
               ⚠️ Expiring soon
             </div>
@@ -123,8 +117,8 @@
           @if (methodToDelete()) {
             <p>Are you sure you want to delete this payment method?</p>
             <div class="method-preview">
-              <span class="brand-icon">{{ getCardBrandIcon(methodToDelete()!.brand) }}</span>
-              <span>{{ getCardBrandName(methodToDelete()!.brand) }} ending in {{ methodToDelete()!.last4 }}</span>
+              <span class="brand-icon">{{ getCardBrandIcon(methodToDelete()!.card.brand) }}</span>
+              <span>{{ getCardBrandName(methodToDelete()!.card.brand) }} ending in {{ methodToDelete()!.card.last4 }}</span>
             </div>
             @if (methodToDelete()!.isDefault) {
               <div class="alert alert--warning">
