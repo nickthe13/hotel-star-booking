@@ -36,8 +36,10 @@ export class PaymentService {
    */
   private async initializeStripe(): Promise<void> {
     try {
+      console.log('Initializing Stripe with key:', environment.stripePublishableKey.substring(0, 20) + '...');
       this.stripe = await loadStripe(environment.stripePublishableKey);
       this.stripeLoaded.set(true);
+      console.log('Stripe loaded successfully:', !!this.stripe);
     } catch (error) {
       console.error('Failed to load Stripe:', error);
       this.stripeLoaded.set(false);
