@@ -1,3 +1,5 @@
+import { PaymentStatus, SavedPaymentMethodInfo, PaymentTransaction } from './payment.model';
+
 export interface Booking {
   id: string;
   userId: string;
@@ -18,9 +20,15 @@ export interface Booking {
   room?: {
     roomType: string;
   };
+  paymentTransactionId?: string;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: SavedPaymentMethodInfo;
+  isPaid?: boolean;
+  paidAt?: Date;
 }
 
 export enum BookingStatus {
+  PENDING_PAYMENT = 'pending_payment',
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled',
@@ -41,4 +49,6 @@ export interface BookingConfirmation {
   confirmationNumber: string;
   estimatedCheckInTime: string;
   message: string;
+  paymentTransaction?: PaymentTransaction;
+  requiresPayment?: boolean;
 }
