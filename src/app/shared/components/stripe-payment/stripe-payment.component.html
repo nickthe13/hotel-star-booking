@@ -1,0 +1,96 @@
+<div class="stripe-payment">
+  <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="payment-form">
+    <div class="payment-amount">
+      <h3>Total Amount</h3>
+      <div class="amount">${{ amount | number:'1.2-2' }}</div>
+    </div>
+
+    <!-- Saved Payment Methods -->
+    @if (savedPaymentMethods.length > 0) {
+      <div class="saved-methods">
+        <h4>Payment Method</h4>
+
+        <div class="payment-options">
+          @for (method of savedPaymentMethods; track method.id) {
+            <div
+              class="saved-card"
+              [class.saved-card--selected]="paymentForm.value.selectedMethod === method.id"
+              (click)="onUseSavedCard(method.id)"
+            >
+              <div class="saved-card__info">
+                <span class="card-icon">{{ getCardBrandIcon(method.card.brand) }}</span>
+                <div class="card-details">
+                  <span class="card-number">{{ formatCardNumber(method.card.last4) }}</span>
+                  <span class="card-expiry">Expires {{ method.card.expMonth }}/{{ method.card.expYear }}</span>
+                </div>
+              </div>
+              @if (method.isDefault) {
+                <span class="badge badge--primary">Default</span>
+              }
+              @if (paymentForm.value.selectedMethod === method.id) {
+                <span class="checkmark">✓</span>
+              }
+            </div>
+          }
+
+          <button
+            type="button"
+            class="use-new-card-btn"
+            [class.use-new-card-btn--active]="useNewCard()"
+            (click)="onUseNewCard()"
+          >
+            + Use New Card
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- New Card Details -->
+    @if (useNewCard()) {
+      <div class="new-card-section">
+        <h4>Card Details</h4>
+
+        <div class="card-element-container">
+          <div #cardElement class="card-element"></div>
+        </div>
+
+        @if (allowSavePaymentMethod) {
+          <div class="save-card-checkbox">
+            <label>
+              <input
+                type="checkbox"
+                formControlName="saveCard"
+              />
+              <span>Save card for future bookings</span>
+            </label>
+          </div>
+        }
+      </div>
+    }
+
+    @if (error()) {
+      <div class="alert alert--error">
+        <span>⚠️</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <button
+      type="submit"
+      class="btn btn--primary btn--full"
+      [disabled]="processing() || (!useNewCard() && !paymentForm.value.selectedMethod)"
+    >
+      @if (processing()) {
+        <span class="spinner"></span>
+        <span>Processing Payment...</span>
+      } @else {
+        <span>Pay ${{ amount | number:'1.2-2' }}</span>
+      }
+    </button>
+
+    <div class="secure-badge">
+      <span>🔒</span>
+      <span>Secure payment powered by Stripe</span>
+    </div>
+  </form>
+</div>
