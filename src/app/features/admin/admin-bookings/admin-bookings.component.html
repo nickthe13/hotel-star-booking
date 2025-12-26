@@ -143,3 +143,104 @@
   (onConfirm)="confirmCancel()"
   (onCancel)="closeCancelDialog()"
 ></app-confirmation-dialog>
+
+<!-- Refund Modal -->
+<app-modal
+  [isOpen]="showRefundModal"
+  [title]="'Process Refund'"
+  (onClose)="closeRefundModal()"
+>
+  <form [formGroup]="refundForm" (ngSubmit)="processRefund()">
+    <div class="modal-body">
+      @if (selectedBooking(); as booking) {
+        <div class="booking-info">
+          <h4 class="booking-info__title">Booking #{{ booking.id }}</h4>
+          <p class="booking-info__hotel">{{ booking.hotel?.name || 'N/A' }}</p>
+          <p class="booking-info__dates">
+            {{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}
+          </p>
+          <p class="booking-info__payment">
+            <strong>Payment Amount:</strong> {{ formatCurrency(booking.totalPrice) }}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input
+              type="checkbox"
+              id="isPartial"
+              formControlName="isPartial"
+              (change)="onPartialRefundChange($event)"
+              class="checkbox-group__input"
+            />
+            <label for="isPartial" class="checkbox-group__label">
+              Partial Refund
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="refund-amount" class="form-group__label">
+            Refund Amount
+          </label>
+          <input
+            type="number"
+            id="refund-amount"
+            formControlName="amount"
+            class="form-group__input"
+            [readonly]="!refundForm.value.isPartial"
+            placeholder="Enter refund amount"
+            step="0.01"
+            min="0.01"
+            [max]="booking.totalPrice"
+          />
+          @if (refundForm.get('amount')?.touched && refundForm.get('amount')?.invalid) {
+            <span class="form-group__error">
+              Please enter a valid refund amount
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="refund-reason" class="form-group__label">
+            Refund Reason
+          </label>
+          <textarea
+            id="refund-reason"
+            formControlName="reason"
+            class="form-group__textarea"
+            placeholder="Enter reason for refund..."
+            rows="4"
+          ></textarea>
+          @if (refundForm.get('reason')?.touched && refundForm.get('reason')?.invalid) {
+            <span class="form-group__error">
+              Refund reason is required
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="closeRefundModal()"
+        [disabled]="processingRefund()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn--warning"
+        [disabled]="processingRefund() || refundForm.invalid"
+      >
+        @if (processingRefund()) {
+          <span>Processing...</span>
+        } @else {
+          <span>Process Refund</span>
+        }
+      </button>
+    </div>
+  </form>
+</app-modal>

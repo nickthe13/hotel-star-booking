@@ -1,8 +1,10 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BookingService } from '../../../core/services/booking.service';
+import { PaymentService } from '../../../core/services/payment.service';
 import { Booking, BookingStatus } from '../../../core/models/booking.model';
+import { PaymentStatus, RefundRequest } from '../../../core/models/payment.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
@@ -25,16 +27,20 @@ export class AdminBookingsComponent implements OnInit {
   loading = signal<boolean>(false);
   showStatusModal = signal<boolean>(false);
   showCancelDialog = signal<boolean>(false);
+  showRefundModal = signal<boolean>(false);
   selectedBooking = signal<Booking | null>(null);
+  processingRefund = signal<boolean>(false);
 
   // Filter signals
   searchQuery = signal<string>('');
   statusFilter = signal<BookingStatus | 'all'>('all');
 
-  // Expose BookingStatus enum to template
+  // Expose enums to template
   readonly BookingStatus = BookingStatus;
+  readonly PaymentStatus = PaymentStatus;
 
   statusForm!: FormGroup;
+  refundForm!: FormGroup;
 
   // Computed filtered bookings
   filteredBookings = computed(() => {
@@ -119,6 +125,13 @@ export class AdminBookingsComponent implements OnInit {
       condition: (booking: Booking) => booking.status !== BookingStatus.COMPLETED && booking.status !== BookingStatus.CANCELLED
     },
     {
+      label: 'Refund',
+      icon: '💰',
+      onClick: (booking: Booking) => this.openRefundModal(booking),
+      variant: 'warning',
+      condition: (booking: Booking) => booking.isPaid === true && booking.paymentStatus === PaymentStatus.SUCCEEDED
+    },
+    {
       label: 'Cancel',
       icon: '❌',
       onClick: (booking: Booking) => this.openCancelDialog(booking),
@@ -143,7 +156,8 @@ export class AdminBookingsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private paymentService: PaymentService
   ) {
     this.initForm();
   }
@@ -155,6 +169,12 @@ export class AdminBookingsComponent implements OnInit {
   initForm(): void {
     this.statusForm = this.fb.group({
       status: ['']
+    });
+
+    this.refundForm = this.fb.group({
+      amount: ['', [Validators.required, Validators.min(0.01)]],
+      reason: ['', Validators.required],
+      isPartial: [false]
     });
   }
 
@@ -205,6 +225,36 @@ export class AdminBookingsComponent implements OnInit {
     this.selectedBooking.set(null);
   }
 
+  openRefundModal(booking: Booking): void {
+    this.selectedBooking.set(booking);
+    this.refundForm.patchValue({
+      amount: booking.totalPrice,
+      reason: '',
+      isPartial: false
+    });
+    this.showRefundModal.set(true);
+  }
+
+  closeRefundModal(): void {
+    this.showRefundModal.set(false);
+    this.selectedBooking.set(null);
+    this.refundForm.reset();
+    this.processingRefund.set(false);
+  }
+
+  onPartialRefundChange(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    const isPartial = checkbox.checked;
+    this.refundForm.patchValue({ isPartial });
+
+    if (!isPartial) {
+      const booking = this.selectedBooking();
+      if (booking) {
+        this.refundForm.patchValue({ amount: booking.totalPrice });
+      }
+    }
+  }
+
   updateBookingStatus(): void {
     const booking = this.selectedBooking();
     if (!booking) return;
@@ -233,6 +283,44 @@ export class AdminBookingsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error cancelling booking:', error);
+      }
+    });
+  }
+
+  processRefund(): void {
+    if (this.refundForm.invalid) {
+      Object.keys(this.refundForm.controls).forEach(key => {
+        this.refundForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    const booking = this.selectedBooking();
+    if (!booking || !booking.paymentTransactionId) {
+      return;
+    }
+
+    this.processingRefund.set(true);
+
+    const formValue = this.refundForm.value;
+    const refundRequest: RefundRequest = {
+      paymentTransactionId: booking.paymentTransactionId,
+      amount: formValue.isPartial ? formValue.amount : undefined,
+      reason: formValue.reason
+    };
+
+    this.paymentService.processRefund(refundRequest).subscribe({
+      next: (response) => {
+        console.log('Refund processed successfully:', response);
+        // Reload bookings to reflect updated payment status
+        this.loadBookings();
+        this.closeRefundModal();
+        alert(`Refund processed successfully!\n\nRefund ID: ${response.refundId}\nAmount: ${this.formatCurrency(response.amount)}`);
+      },
+      error: (error) => {
+        console.error('Error processing refund:', error);
+        this.processingRefund.set(false);
+        alert('Failed to process refund. Please try again.');
       }
     });
   }
