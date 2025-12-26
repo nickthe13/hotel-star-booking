@@ -619,7 +619,7 @@
 .btn-back {
   background: none;
   border: none;
-  color: $primary;
+  color: $primary-500;
   font-size: $font-size-base;
   font-weight: 600;
   cursor: pointer;
@@ -628,7 +628,7 @@
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba($primary, 0.1);
+    background-color: rgba($primary-500, 0.1);
   }
 }
 
