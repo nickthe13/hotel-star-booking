@@ -187,6 +187,21 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
       throw new Error('Please enter complete card details');
     }
 
+    // Check if this is a mock payment intent (for testing without backend)
+    if (this.clientSecret.startsWith('pi_mock_secret_')) {
+      console.log('Mock payment mode - simulating successful payment');
+      // Simulate a delay for realistic UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Extract mock payment intent ID from client secret
+      const mockPaymentIntentId = this.clientSecret.replace('pi_mock_secret_', 'pi_');
+
+      this.processing.set(false);
+      this.paymentSuccess.emit(mockPaymentIntentId);
+      return;
+    }
+
+    // Real Stripe payment confirmation
     const result = await this.stripe.confirmCardPayment(this.clientSecret, {
       payment_method: {
         card: this.cardElement
@@ -210,6 +225,21 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
       throw new Error('Stripe not initialized');
     }
 
+    // Check if this is a mock payment intent (for testing without backend)
+    if (this.clientSecret.startsWith('pi_mock_secret_')) {
+      console.log('Mock payment mode - simulating successful payment with saved card');
+      // Simulate a delay for realistic UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Extract mock payment intent ID from client secret
+      const mockPaymentIntentId = this.clientSecret.replace('pi_mock_secret_', 'pi_');
+
+      this.processing.set(false);
+      this.paymentSuccess.emit(mockPaymentIntentId);
+      return;
+    }
+
+    // Real Stripe payment confirmation
     const result = await this.stripe.confirmCardPayment(this.clientSecret, {
       payment_method: paymentMethodId
     });
