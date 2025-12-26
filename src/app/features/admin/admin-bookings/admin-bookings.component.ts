@@ -134,6 +134,7 @@ export class AdminBookingsComponent implements OnInit {
   ];
 
   bookingStatuses = [
+    BookingStatus.PENDING_PAYMENT,
     BookingStatus.PENDING,
     BookingStatus.CONFIRMED,
     BookingStatus.COMPLETED,
@@ -244,6 +245,7 @@ export class AdminBookingsComponent implements OnInit {
 
   getStatusBadge(status: BookingStatus): string {
     const badges: Record<BookingStatus, string> = {
+      [BookingStatus.PENDING_PAYMENT]: '<span class="badge badge--warning">Pending Payment</span>',
       [BookingStatus.PENDING]: '<span class="badge badge--warning">Pending</span>',
       [BookingStatus.CONFIRMED]: '<span class="badge badge--success">Confirmed</span>',
       [BookingStatus.CANCELLED]: '<span class="badge badge--danger">Cancelled</span>',
@@ -254,6 +256,8 @@ export class AdminBookingsComponent implements OnInit {
 
   getStatusBadgeClass(status: BookingStatus): string {
     switch (status) {
+      case BookingStatus.PENDING_PAYMENT:
+        return 'badge--warning';
       case BookingStatus.CONFIRMED:
         return 'badge--success';
       case BookingStatus.PENDING:
