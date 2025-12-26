@@ -73,9 +73,16 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   async ngAfterViewInit(): Promise<void> {
+    // Wait for Stripe to be fully loaded
+    if (!this.stripe) {
+      this.stripe = await this.paymentService.getStripe();
+    }
+
     // Mount card element if using new card
     if (this.useNewCard()) {
-      await this.mountCardElement();
+      setTimeout(async () => {
+        await this.mountCardElement();
+      }, 100);
     }
   }
 
@@ -86,44 +93,64 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   async mountCardElement(): Promise<void> {
-    if (!this.stripe || !this.cardElementRef) {
+    if (!this.stripe) {
+      console.error('Stripe not initialized');
+      this.error.set('Payment system not initialized. Please refresh the page.');
       return;
     }
 
-    // Create elements if not exists
-    if (!this.elements) {
-      this.elements = this.stripe.elements();
+    if (!this.cardElementRef) {
+      console.error('Card element ref not available');
+      return;
     }
 
-    // Create card element
-    const style = {
-      base: {
-        color: '#32325d',
-        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-        fontSmoothing: 'antialiased',
-        fontSize: '16px',
-        '::placeholder': {
-          color: '#aab7c4'
+    try {
+      // Create elements if not exists
+      if (!this.elements) {
+        this.elements = this.stripe.elements();
+      }
+
+      // Destroy existing card element if any
+      if (this.cardElement) {
+        this.cardElement.unmount();
+        this.cardElement.destroy();
+      }
+
+      // Create card element
+      const style = {
+        base: {
+          color: '#32325d',
+          fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+          fontSmoothing: 'antialiased',
+          fontSize: '16px',
+          '::placeholder': {
+            color: '#aab7c4'
+          }
+        },
+        invalid: {
+          color: '#fa755a',
+          iconColor: '#fa755a'
         }
-      },
-      invalid: {
-        color: '#fa755a',
-        iconColor: '#fa755a'
-      }
-    };
+      };
 
-    this.cardElement = this.elements.create('card', { style });
-    this.cardElement.mount(this.cardElementRef.nativeElement);
+      this.cardElement = this.elements.create('card', { style });
+      this.cardElement.mount(this.cardElementRef.nativeElement);
 
-    // Listen for card element changes
-    this.cardElement.on('change', (event) => {
-      this.cardComplete.set(event.complete);
-      if (event.error) {
-        this.error.set(event.error.message);
-      } else {
-        this.error.set('');
-      }
-    });
+      console.log('Stripe card element mounted successfully');
+
+      // Listen for card element changes
+      this.cardElement.on('change', (event) => {
+        this.cardComplete.set(event.complete);
+        if (event.error) {
+          this.error.set(event.error.message);
+        } else {
+          this.error.set('');
+        }
+      });
+    } catch (error) {
+      console.error('Error mounting card element:', error);
+      this.error.set('Failed to load payment form. Please refresh the page.');
+    }
   }
 
   async onSubmit(): Promise<void> {
