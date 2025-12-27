@@ -60,16 +60,7 @@ export class PaymentService {
    * Create payment intent
    */
   createPaymentIntent(request: CreatePaymentIntentRequest): Observable<CreatePaymentIntentResponse> {
-    // In production, this would call the backend API:
-    // return this.http.post<CreatePaymentIntentResponse>(`${this.API_URL}/payment/create-intent`, request);
-
-    // Mock implementation for development
-    const mockResponse: CreatePaymentIntentResponse = {
-      clientSecret: `pi_mock_secret_${Date.now()}`,
-      paymentIntentId: `pi_${Date.now()}`
-    };
-
-    return of(mockResponse);
+    return this.http.post<CreatePaymentIntentResponse>(`${this.API_URL}/payments/create-intent`, request);
   }
 
   /**
@@ -100,6 +91,16 @@ export class PaymentService {
       }
 
       if (result.paymentIntent?.status === 'succeeded') {
+        // Notify backend about successful payment
+        try {
+          await this.http.post(`${this.API_URL}/payments/confirm`, {
+            paymentIntentId: result.paymentIntent.id,
+            paymentMethodId: result.paymentIntent.payment_method
+          }).toPromise();
+        } catch (err) {
+          console.error('Failed to confirm payment with backend:', err);
+        }
+
         return {
           success: true,
           paymentIntentId: result.paymentIntent.id
@@ -140,11 +141,7 @@ export class PaymentService {
    * Get user's saved payment methods
    */
   getUserPaymentMethods(): Observable<SavedPaymentMethod[]> {
-    // In production:
-    // return this.http.get<SavedPaymentMethod[]>(`${this.API_URL}/payment/methods`);
-
-    // Mock implementation
-    return of(this.mockPaymentMethods);
+    return this.http.get<SavedPaymentMethod[]>(`${this.API_URL}/payments/saved-methods`);
   }
 
   /**
@@ -214,11 +211,7 @@ export class PaymentService {
    * Get user's payment history
    */
   getUserPaymentHistory(): Observable<PaymentTransaction[]> {
-    // In production:
-    // return this.http.get<PaymentTransaction[]>(`${this.API_URL}/payment/history`);
-
-    // Mock implementation
-    return of(this.mockTransactions.filter(tx => tx.userId === '1'));
+    return this.http.get<PaymentTransaction[]>(`${this.API_URL}/payments/history`);
   }
 
   /**
@@ -240,40 +233,11 @@ export class PaymentService {
    * Process refund (admin only)
    */
   processRefund(request: RefundRequest): Observable<RefundResponse> {
-    // In production:
-    // return this.http.post<RefundResponse>(`${this.API_URL}/payment/refund`, request);
-
-    // Mock implementation
-    const transaction = this.mockTransactions.find(
-      tx => tx.id === request.paymentTransactionId
-    );
-
-    if (!transaction) {
-      return throwError(() => new Error('Transaction not found'));
-    }
-
-    if (transaction.status !== PaymentStatus.SUCCEEDED) {
-      return throwError(() => new Error('Can only refund successful payments'));
-    }
-
-    const refundAmount = request.amount || transaction.amount;
-
-    // Update transaction
-    transaction.status = request.amount && request.amount < transaction.amount
-      ? PaymentStatus.PARTIALLY_REFUNDED
-      : PaymentStatus.REFUNDED;
-    transaction.refundedAt = new Date();
-    transaction.refundAmount = refundAmount;
-    transaction.refundReason = request.reason;
-    transaction.updatedAt = new Date();
-
-    const response: RefundResponse = {
-      refundId: `re_${Date.now()}`,
-      amount: refundAmount,
-      status: 'succeeded'
-    };
-
-    return of(response);
+    return this.http.post<RefundResponse>(`${this.API_URL}/payments/refund`, {
+      paymentIntentId: request.paymentTransactionId,
+      amount: request.amount,
+      reason: request.reason
+    });
   }
 
   /**

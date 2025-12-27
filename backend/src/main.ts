@@ -3,12 +3,27 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
+import { json } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true, // Enable raw body for webhooks
+  });
 
   // Cookie parser middleware for httpOnly cookies
   app.use(cookieParser());
+
+  // Configure JSON body parser with raw body for webhooks
+  app.use(
+    json({
+      verify: (req: any, res, buf) => {
+        // Store raw body for webhook signature verification
+        if (req.url === '/api/v1/payments/webhook') {
+          req.rawBody = buf;
+        }
+      },
+    }),
+  );
 
   // Enhanced security headers with strict CSP
   app.use(
