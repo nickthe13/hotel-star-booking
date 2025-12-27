@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum RoomType {
+  STANDARD
+  DELUXE
+  SUITE
+  PRESIDENTIAL
+}
+
+// Models
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  bookings          Booking[]
+  reviews           Review[]
+  favoriteHotels    FavoriteHotel[]
+  paymentMethods    PaymentMethod[]
+
+  @@map("users")
+}
+
+model Hotel {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  address     String
+  city        String
+  country     String
+  zipCode     String?  @map("zip_code")
+  phone       String?
+  email       String?
+  website     String?
+  rating      Float    @default(0)
+  latitude    Float?
+  longitude   Float?
+  images      String[] // Array of image URLs
+  amenities   String[] // Array of amenities
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  rooms           Room[]
+  reviews         Review[]
+  favoriteBy      FavoriteHotel[]
+
+  @@map("hotels")
+}
+
+model Room {
+  id            String   @id @default(cuid())
+  hotelId       String   @map("hotel_id")
+  type          RoomType
+  name          String
+  description   String?  @db.Text
+  price         Float
+  capacity      Int      @default(2)
+  size          Float?   // in square meters
+  bedType       String?  @map("bed_type")
+  amenities     String[] // Array of room amenities
+  images        String[] // Array of image URLs
+  isAvailable   Boolean  @default(true) @map("is_available")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  hotel    Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id                    String        @id @default(cuid())
+  userId                String        @map("user_id")
+  roomId                String        @map("room_id")
+  checkIn               DateTime      @map("check_in")
+  checkOut              DateTime      @map("check_out")
+  guestName             String        @map("guest_name")
+  guestEmail            String        @map("guest_email")
+  guestPhone            String?       @map("guest_phone")
+  numberOfGuests        Int           @default(1) @map("number_of_guests")
+  specialRequests       String?       @db.Text @map("special_requests")
+  status                BookingStatus @default(PENDING_PAYMENT)
+  totalPrice            Float         @map("total_price")
+  paymentTransactionId  String?       @map("payment_transaction_id")
+  paymentStatus         PaymentStatus @default(PENDING)
+  isPaid                Boolean       @default(false) @map("is_paid")
+  paidAt                DateTime?     @map("paid_at")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  user              User               @relation(fields: [userId], references: [id])
+  room              Room               @relation(fields: [roomId], references: [id])
+  paymentTransaction PaymentTransaction?
+
+  @@map("bookings")
+}
+
+model PaymentTransaction {
+  id                  String        @id @default(cuid())
+  bookingId           String        @unique @map("booking_id")
+  amount              Float
+  currency            String        @default("usd")
+  status              PaymentStatus @default(PENDING)
+  stripePaymentIntentId String?     @unique @map("stripe_payment_intent_id")
+  stripeChargeId      String?       @map("stripe_charge_id")
+  paymentMethod       String?       @map("payment_method") // card, bank_transfer, etc.
+  cardLast4           String?       @map("card_last4")
+  cardBrand           String?       @map("card_brand")
+  refundAmount        Float?        @default(0) @map("refund_amount")
+  refundReason        String?       @map("refund_reason")
+  metadata            Json?
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("payment_transactions")
+}
+
+model PaymentMethod {
+  id                  String   @id @default(cuid())
+  userId              String   @map("user_id")
+  stripePaymentMethodId String @unique @map("stripe_payment_method_id")
+  type                String   // card, bank_account, etc.
+  cardLast4           String?  @map("card_last4")
+  cardBrand           String?  @map("card_brand")
+  cardExpMonth        Int?     @map("card_exp_month")
+  cardExpYear         Int?     @map("card_exp_year")
+  isDefault           Boolean  @default(false) @map("is_default")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payment_methods")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  hotelId   String   @map("hotel_id")
+  rating    Float
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hotel Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, hotelId])
+  @@map("reviews")
+}
+
+model FavoriteHotel {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  hotelId   String   @map("hotel_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hotel Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, hotelId])
+  @@map("favorite_hotels")
+}
