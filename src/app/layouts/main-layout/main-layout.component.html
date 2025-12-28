@@ -34,6 +34,16 @@
               >Profile</a
             >
           </li>
+          @if (authService.isAdmin()) {
+            <li class="nav__item">
+              <a
+                routerLink="/admin"
+                routerLinkActive="nav__link--active"
+                class="nav__link nav__link--admin"
+                >Admin</a
+              >
+            </li>
+          }
         }
       </ul>
     </nav>

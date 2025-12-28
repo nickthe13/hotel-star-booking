@@ -83,6 +83,26 @@
       color: $primary-500;
       font-weight: $font-weight-semibold;
     }
+
+    &--admin {
+      color: $white;
+      background: linear-gradient(135deg, $accent-500, darken($accent-500, 10%));
+      font-weight: $font-weight-semibold;
+      padding: $spacing-sm $spacing-md;
+      box-shadow: 0 2px 4px rgba($accent-500, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, darken($accent-500, 5%), darken($accent-500, 15%));
+        color: $white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba($accent-500, 0.4);
+      }
+
+      &.nav__link--active {
+        color: $white;
+        background: linear-gradient(135deg, darken($accent-500, 10%), darken($accent-500, 20%));
+      }
+    }
   }
 }
 
