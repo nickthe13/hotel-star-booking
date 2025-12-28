@@ -64,9 +64,73 @@
     }
   }
 
+  &--outline {
+    background: transparent;
+    color: $primary-500;
+    border: 2px solid $primary-500;
+    padding: $spacing-sm $spacing-lg;
+    font-weight: $font-weight-semibold;
+
+    &:hover {
+      background: $primary-500;
+      color: $white;
+    }
+  }
+
   &--large {
     padding: $spacing-md $spacing-xl;
     font-size: $font-size-lg;
+  }
+}
+
+// Loyalty Rewards Banner
+.loyalty-banner {
+  background: linear-gradient(135deg, $primary-50 0%, rgba($primary-100, 0.8) 100%);
+  padding: $spacing-lg 0;
+  border-bottom: 1px solid rgba($primary-100, 0.5);
+
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-lg;
+
+    @include respond-to('mobile') {
+      flex-direction: column;
+      text-align: center;
+      gap: $spacing-md;
+    }
+  }
+
+  &__icon {
+    font-size: 2.5rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  &__text {
+    flex: 0 1 auto;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0 0 $spacing-xs 0;
+  }
+
+  &__description {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
   }
 }
 
