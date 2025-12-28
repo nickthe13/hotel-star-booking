@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingService } from '../../core/services/booking.service';
 import { HotelService } from '../../core/services/hotel.service';
@@ -48,6 +49,7 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     public authService: AuthService,
     private bookingService: BookingService,
     private hotelService: HotelService
@@ -59,6 +61,14 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.loadFavorites();
     this.populateProfileForm();
+
+    // Check for tab query parameter
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'] as ProfileTab;
+      if (tab && ['profile', 'payment-methods', 'payment-history', 'loyalty'].includes(tab)) {
+        this.activeTab.set(tab);
+      }
+    });
   }
 
   initForms(): void {

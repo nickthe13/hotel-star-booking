@@ -17,12 +17,23 @@
     <div class="loyalty-banner__content">
       <div class="loyalty-banner__icon">⭐</div>
       <div class="loyalty-banner__text">
-        <h3 class="loyalty-banner__title">Join Our Loyalty Rewards Program</h3>
-        <p class="loyalty-banner__description">
-          Earn 1 point for every $1 spent. Redeem points for discounts on future bookings!
-        </p>
+        @if (authService.isAuthenticated()) {
+          <h3 class="loyalty-banner__title">Welcome to Our Loyalty Rewards!</h3>
+          <p class="loyalty-banner__description">
+            You're earning points on every booking. Check your rewards and redeem for discounts!
+          </p>
+        } @else {
+          <h3 class="loyalty-banner__title">Join Our Loyalty Rewards Program</h3>
+          <p class="loyalty-banner__description">
+            Earn 1 point for every $1 spent. Redeem points for discounts on future bookings!
+          </p>
+        }
       </div>
-      <a routerLink="/auth/register" class="btn btn--outline">Join Now</a>
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/profile" [queryParams]="{tab: 'loyalty'}" class="btn btn--outline">View My Rewards</a>
+      } @else {
+        <a routerLink="/auth/register" class="btn btn--outline">Join Now</a>
+      }
     </div>
   </div>
 </section>
