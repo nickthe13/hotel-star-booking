@@ -10,6 +10,22 @@
       <p class="dashboard__subtitle">Monitor your hotel booking statistics</p>
     </div>
 
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a routerLink="/admin/hotels" class="quick-action-btn">
+        <span class="quick-action-btn__icon">🏨</span>
+        <span class="quick-action-btn__text">Manage Hotels</span>
+      </a>
+      <a routerLink="/admin/rooms" class="quick-action-btn">
+        <span class="quick-action-btn__icon">🚪</span>
+        <span class="quick-action-btn__text">Manage Rooms</span>
+      </a>
+      <a routerLink="/admin/bookings" class="quick-action-btn">
+        <span class="quick-action-btn__icon">📅</span>
+        <span class="quick-action-btn__text">Manage Bookings</span>
+      </a>
+    </div>
+
     <!-- Statistics Cards -->
     <div class="stats-grid">
       <div class="stat-card stat-card--primary">
@@ -43,6 +59,22 @@
           <div class="stat-card__label">Active Bookings</div>
         </div>
       </div>
+
+      <div class="stat-card stat-card--accent">
+        <div class="stat-card__icon">💵</div>
+        <div class="stat-card__content">
+          <div class="stat-card__value">{{ formatCurrency(statistics().averageBookingValue) }}</div>
+          <div class="stat-card__label">Average Booking Value</div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--completed">
+        <div class="stat-card__icon">✅</div>
+        <div class="stat-card__content">
+          <div class="stat-card__value">{{ statistics().completedBookings }}</div>
+          <div class="stat-card__label">Completed Bookings</div>
+        </div>
+      </div>
     </div>
 
     <!-- Booking Status Breakdown -->
@@ -50,28 +82,68 @@
       <h3 class="section__title">Booking Status Breakdown</h3>
       <div class="status-grid">
         <div class="status-item">
-          <span class="status-item__label">Pending</span>
-          <span class="status-item__value status-item__value--warning">
-            {{ pendingBookings() }}
-          </span>
+          <div class="status-item__header">
+            <span class="status-item__label">Pending</span>
+            <span class="status-item__value status-item__value--warning">
+              {{ pendingBookings() }}
+            </span>
+          </div>
+          @if (statistics().totalBookings > 0) {
+            <div class="progress-bar">
+              <div
+                class="progress-bar__fill progress-bar__fill--warning"
+                [style.width.%]="(pendingBookings() / statistics().totalBookings) * 100"
+              ></div>
+            </div>
+          }
         </div>
         <div class="status-item">
-          <span class="status-item__label">Confirmed</span>
-          <span class="status-item__value status-item__value--success">
-            {{ confirmedBookings() }}
-          </span>
+          <div class="status-item__header">
+            <span class="status-item__label">Confirmed</span>
+            <span class="status-item__value status-item__value--success">
+              {{ confirmedBookings() }}
+            </span>
+          </div>
+          @if (statistics().totalBookings > 0) {
+            <div class="progress-bar">
+              <div
+                class="progress-bar__fill progress-bar__fill--success"
+                [style.width.%]="(confirmedBookings() / statistics().totalBookings) * 100"
+              ></div>
+            </div>
+          }
         </div>
         <div class="status-item">
-          <span class="status-item__label">Completed</span>
-          <span class="status-item__value status-item__value--info">
-            {{ statistics().completedBookings }}
-          </span>
+          <div class="status-item__header">
+            <span class="status-item__label">Completed</span>
+            <span class="status-item__value status-item__value--info">
+              {{ statistics().completedBookings }}
+            </span>
+          </div>
+          @if (statistics().totalBookings > 0) {
+            <div class="progress-bar">
+              <div
+                class="progress-bar__fill progress-bar__fill--info"
+                [style.width.%]="(statistics().completedBookings / statistics().totalBookings) * 100"
+              ></div>
+            </div>
+          }
         </div>
         <div class="status-item">
-          <span class="status-item__label">Cancelled</span>
-          <span class="status-item__value status-item__value--danger">
-            {{ statistics().cancelledBookings }}
-          </span>
+          <div class="status-item__header">
+            <span class="status-item__label">Cancelled</span>
+            <span class="status-item__value status-item__value--danger">
+              {{ statistics().cancelledBookings }}
+            </span>
+          </div>
+          @if (statistics().totalBookings > 0) {
+            <div class="progress-bar">
+              <div
+                class="progress-bar__fill progress-bar__fill--danger"
+                [style.width.%]="(statistics().cancelledBookings / statistics().totalBookings) * 100"
+              ></div>
+            </div>
+          }
         </div>
       </div>
     </div>

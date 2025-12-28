@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { HotelService } from '../../../core/services/hotel.service';
 import { Booking, BookingStatus } from '../../../core/models/booking.model';
@@ -8,7 +9,7 @@ import { DashboardStatistics, PopularHotel } from '../../../core/models/admin.mo
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
