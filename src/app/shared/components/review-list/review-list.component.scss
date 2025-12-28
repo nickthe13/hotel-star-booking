@@ -1,0 +1,134 @@
+@import '../../../../assets/styles/variables';
+@import '../../../../assets/styles/mixins';
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: $spacing-3xl;
+  color: $text-secondary;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.review-card {
+  background: $white;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  transition: box-shadow $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-sm;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+    gap: $spacing-md;
+
+    @include respond-to('mobile') {
+      flex-direction: column;
+    }
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
+  &__rating {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: $spacing-xs;
+
+    @include respond-to('mobile') {
+      align-items: flex-start;
+    }
+  }
+
+  &__content {
+    margin-bottom: $spacing-md;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-color-light;
+  }
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $primary-500, $primary-600);
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.user-name {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0;
+}
+
+.review-date {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+  font-size: $font-size-lg;
+
+  span {
+    opacity: 0.2;
+    filter: grayscale(100%);
+
+    &.filled {
+      opacity: 1;
+      filter: grayscale(0%);
+    }
+  }
+}
+
+.rating-value {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $primary-500;
+}
+
+.review-comment {
+  font-size: $font-size-base;
+  line-height: $line-height-relaxed;
+  color: $text-primary;
+  margin: 0;
+}
+
+.btn--sm {
+  padding: $spacing-xs $spacing-md;
+  font-size: $font-size-sm;
+}

@@ -79,7 +79,7 @@
           </section>
 
           <!-- Available Rooms -->
-          @if (hotel()?.rooms && hotel()!.rooms.length > 0) {
+          @if ((hotel()?.rooms?.length ?? 0) > 0) {
             <section class="section">
               <h2 class="section__title">Available Rooms</h2>
               <div class="rooms-list">
@@ -128,9 +128,23 @@
           }
 
           <!-- Reviews -->
-          @if (hotel()!.averageRating && hotel()!.totalReviews) {
-            <section class="section">
+          <section class="section">
+            <div class="section__header">
               <h2 class="section__title">Guest Reviews</h2>
+              @if (authService.isAuthenticated()) {
+                <button class="btn btn--primary" (click)="openReviewModal()" type="button">
+                  @if (userReview()) {
+                    ✏️ Edit My Review
+                  } @else {
+                    ✍️ Write a Review
+                  }
+                </button>
+              } @else {
+                <a routerLink="/auth/login" class="btn btn--primary">Sign in to Review</a>
+              }
+            </div>
+
+            @if (hotel()!.averageRating && hotel()!.totalReviews) {
               <div class="reviews-summary">
                 <div class="reviews-summary__score">
                   <span class="score">{{ hotel()!.averageRating }}</span>
@@ -140,45 +154,18 @@
                   <p>Based on {{ hotel()!.totalReviews }} verified reviews</p>
                 </div>
               </div>
+            }
 
-              <!-- Rate This Hotel -->
-              <div class="rate-hotel">
-                <h3 class="rate-hotel__title">
-                  @if (hasRated()) {
-                    Your rating
-                  } @else {
-                    Rate this hotel
-                  }
-                </h3>
-                @if (authService.isAuthenticated()) {
-                  <p class="rate-hotel__subtitle">
-                    @if (hasRated()) {
-                      Click to change your rating
-                    } @else {
-                      Share your experience with other travelers
-                    }
-                  </p>
-                  <div class="star-rating-input" (mouseleave)="clearHover()">
-                    @for (star of [1, 2, 3, 4, 5]; track star) {
-                      <button
-                        class="star-button"
-                        [class.filled]="getDisplayRating(star)"
-                        (mouseenter)="hoverRating(star)"
-                        (click)="setRating(star)"
-                        [attr.aria-label]="'Rate ' + star + ' stars'"
-                      >
-                        ⭐
-                      </button>
-                    }
-                  </div>
-                } @else {
-                  <p class="rate-hotel__auth-message">
-                    <a routerLink="/auth/login" class="link">Sign in</a> to rate this hotel
-                  </p>
-                }
-              </div>
-            </section>
-          }
+            <!-- Reviews List -->
+            <div class="reviews-container">
+              <app-review-list
+                [reviews]="reviews()"
+                [loading]="reviewsLoading()"
+                (onEdit)="editReview($event)"
+                (onDelete)="deleteReview($event)"
+              ></app-review-list>
+            </div>
+          </section>
 
           <!-- Location -->
           <section class="section">
@@ -234,6 +221,22 @@
       </div>
     </div>
   </div>
+
+  <!-- Review Modal -->
+  <app-modal
+    [title]="userReview() ? 'Edit Your Review' : 'Write a Review'"
+    [isOpen]="showReviewModal()"
+    size="md"
+    (onClose)="closeReviewModal()"
+  >
+    <app-review-form
+      [hotelId]="id"
+      [existingReview]="editingReview()"
+      [submitButtonText]="userReview() ? 'Update Review' : 'Submit Review'"
+      (onSubmit)="submitReview($event)"
+      (onCancel)="closeReviewModal()"
+    ></app-review-form>
+  </app-modal>
 } @else {
   <div class="container">
     <div class="error-message">

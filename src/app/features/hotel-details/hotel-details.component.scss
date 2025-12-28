@@ -139,9 +139,26 @@
   .section {
     margin-bottom: $spacing-3xl;
 
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-lg;
+      gap: $spacing-md;
+
+      @include respond-to('mobile') {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
     &__title {
       font-size: $font-size-2xl;
       margin-bottom: $spacing-lg;
+
+      .section__header & {
+        margin-bottom: 0;
+      }
     }
 
     &__text {
@@ -185,11 +202,16 @@
   }
 }
 
+.reviews-container {
+  margin-top: $spacing-xl;
+}
+
 .reviews-summary {
   @include card($spacing-lg);
   display: flex;
   gap: $spacing-lg;
   align-items: center;
+  margin-bottom: $spacing-xl;
 
   &__score {
     display: flex;

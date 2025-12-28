@@ -1,0 +1,70 @@
+<form [formGroup]="reviewForm" (ngSubmit)="handleSubmit()" class="review-form">
+  <!-- Rating Input -->
+  <div class="form-group">
+    <label class="form-label">
+      Your Rating <span class="required">*</span>
+    </label>
+    <div class="star-rating-input" (mouseleave)="clearHover()">
+      @for (star of [1, 2, 3, 4, 5]; track star) {
+        <button
+          type="button"
+          class="star-button"
+          [class.filled]="getDisplayRating(star)"
+          (mouseenter)="hoverRating(star)"
+          (click)="setRating(star)"
+          [attr.aria-label]="'Rate ' + star + ' stars'"
+        >
+          ⭐
+        </button>
+      }
+    </div>
+    @if (getFieldError('rating')) {
+      <span class="form-error">{{ getFieldError('rating') }}</span>
+    }
+  </div>
+
+  <!-- Comment Input -->
+  <div class="form-group">
+    <label class="form-label" for="comment">
+      Your Review
+      <span class="optional">(optional)</span>
+    </label>
+    <textarea
+      id="comment"
+      class="form-textarea"
+      formControlName="comment"
+      rows="5"
+      placeholder="Share your experience with other travelers..."
+      maxlength="1000"
+    ></textarea>
+    <div class="char-count">
+      {{ reviewForm.get('comment')?.value?.length || 0 }}/1000
+    </div>
+    @if (getFieldError('comment')) {
+      <span class="form-error">{{ getFieldError('comment') }}</span>
+    }
+  </div>
+
+  <!-- Form Actions -->
+  <div class="form-actions">
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="handleCancel()"
+      [disabled]="submitting"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="btn btn--primary"
+      [disabled]="submitting || reviewForm.invalid"
+    >
+      @if (submitting) {
+        Submitting...
+      } @else {
+        {{ submitButtonText }}
+      }
+    </button>
+  </div>
+</form>

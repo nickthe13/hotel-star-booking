@@ -91,7 +91,7 @@
 
 <!-- Status Update Modal -->
 <app-modal
-  [isOpen]="showStatusModal"
+  [isOpen]="showStatusModal()"
   [title]="'Update Booking Status'"
   (onClose)="closeStatusModal()"
 >
@@ -134,7 +134,7 @@
 
 <!-- Cancel Booking Confirmation Dialog -->
 <app-confirmation-dialog
-  [isOpen]="showCancelDialog"
+  [isOpen]="showCancelDialog()"
   [title]="'Cancel Booking'"
   [message]="'Are you sure you want to cancel this booking? This action cannot be undone.'"
   [confirmText]="'Yes, Cancel Booking'"
@@ -146,7 +146,7 @@
 
 <!-- Refund Modal -->
 <app-modal
-  [isOpen]="showRefundModal"
+  [isOpen]="showRefundModal()"
   [title]="'Process Refund'"
   (onClose)="closeRefundModal()"
 >

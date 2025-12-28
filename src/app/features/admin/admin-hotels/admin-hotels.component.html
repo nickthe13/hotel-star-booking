@@ -20,7 +20,7 @@
   <!-- Add/Edit Hotel Modal -->
   <app-modal
     [title]="isEditMode() ? 'Edit Hotel' : 'Add New Hotel'"
-    [isOpen]="showHotelModal"
+    [isOpen]="showHotelModal()"
     size="lg"
     (onClose)="closeModal()"
     (onConfirm)="saveHotel()"
@@ -208,7 +208,7 @@
   <app-confirmation-dialog
     [title]="'Delete Hotel'"
     [message]="'Are you sure you want to delete ' + selectedHotel()?.name + '? This action cannot be undone.'"
-    [isOpen]="showDeleteDialog"
+    [isOpen]="showDeleteDialog()"
     [confirmText]="'Delete'"
     [cancelText]="'Cancel'"
     [variant]="'danger'"
