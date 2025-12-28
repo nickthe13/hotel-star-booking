@@ -100,21 +100,13 @@
                           <span class="info-item__icon">👥</span>
                           <span class="info-item__text">Up to {{ room.capacity }} guests</span>
                         </div>
-                        @if (room.size) {
-                          <div class="info-item">
-                            <span class="info-item__icon">📏</span>
-                            <span class="info-item__text">{{ room.size }} m²</span>
-                          </div>
-                        }
-                        @if (room.bedType) {
-                          <div class="info-item">
-                            <span class="info-item__icon">🛏️</span>
-                            <span class="info-item__text">{{ room.bedType }}</span>
-                          </div>
-                        }
+                        <div class="info-item">
+                          <span class="info-item__icon">💰</span>
+                          <span class="info-item__text">${{ room.pricePerNight }} per night</span>
+                        </div>
                       </div>
 
-                      @if (room.amenities && room.amenities.length > 0) {
+                      @if (room.amenities?.length > 0) {
                         <div class="room-card__amenities">
                           <h4 class="amenities-title">Room Amenities:</h4>
                           <div class="amenities-tags">
@@ -128,12 +120,6 @@
                         </div>
                       }
 
-                      <div class="room-card__footer">
-                        <div class="room-card__price">
-                          <span class="price-amount">${{ room.pricePerNight }}</span>
-                          <span class="price-period">per night</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 }
