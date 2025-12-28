@@ -404,6 +404,8 @@
   padding: $spacing-lg;
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   &:hover:not(&--unavailable) {
     border-color: $primary-500;
@@ -517,6 +519,7 @@
     font-weight: $font-weight-semibold;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-top: auto;
 
     &:hover:not(:disabled) {
       background: $primary-500;
