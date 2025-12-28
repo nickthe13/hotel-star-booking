@@ -53,6 +53,10 @@
 
   &__content {
     padding: $spacing-md;
+
+    @include respond-to('mobile') {
+      padding: $spacing-sm;
+    }
   }
 
   &__header {
@@ -64,6 +68,10 @@
     font-weight: $font-weight-semibold;
     margin-bottom: $spacing-xs;
     @include line-clamp(2);
+
+    @include respond-to('mobile') {
+      font-size: $font-size-base;
+    }
   }
 
   &__rating {
@@ -121,6 +129,12 @@
     align-items: flex-end;
     padding-top: $spacing-md;
     border-top: 1px solid $border-color-light;
+
+    @include respond-to('mobile') {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-sm;
+    }
   }
 
   &__reviews {
@@ -150,6 +164,10 @@
   &__price {
     text-align: right;
 
+    @include respond-to('mobile') {
+      text-align: left;
+    }
+
     .price-label {
       display: block;
       font-size: $font-size-xs;
@@ -162,6 +180,10 @@
       font-size: $font-size-2xl;
       font-weight: $font-weight-bold;
       color: $primary-500;
+
+      @include respond-to('mobile') {
+        font-size: $font-size-xl;
+      }
     }
 
     .price-period {
