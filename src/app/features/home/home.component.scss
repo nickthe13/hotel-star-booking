@@ -65,11 +65,18 @@
   }
 
   &--outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     color: $primary-500;
     border: 2px solid $primary-500;
     padding: $spacing-sm $spacing-lg;
     font-weight: $font-weight-semibold;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: $radius-md;
+    transition: all $transition-base;
 
     &:hover {
       background: $primary-500;
