@@ -78,6 +78,69 @@
             </div>
           </section>
 
+          <!-- Available Rooms -->
+          @if (hotel()!.rooms && hotel()!.rooms.length > 0) {
+            <section class="section">
+              <h2 class="section__title">Available Rooms</h2>
+              <div class="rooms-list">
+                @for (room of hotel()!.rooms; track room.id) {
+                  <div class="room-card" [class.room-card--unavailable]="!room.available">
+                    <div class="room-card__header">
+                      <h3 class="room-card__title">{{ room.roomType }}</h3>
+                      @if (!room.available) {
+                        <span class="room-card__badge room-card__badge--unavailable">Unavailable</span>
+                      } @else {
+                        <span class="room-card__badge room-card__badge--available">Available</span>
+                      }
+                    </div>
+
+                    <div class="room-card__content">
+                      <div class="room-card__info">
+                        <div class="info-item">
+                          <span class="info-item__icon">👥</span>
+                          <span class="info-item__text">Up to {{ room.capacity }} guests</span>
+                        </div>
+                        @if (room.size) {
+                          <div class="info-item">
+                            <span class="info-item__icon">📏</span>
+                            <span class="info-item__text">{{ room.size }} m²</span>
+                          </div>
+                        }
+                        @if (room.bedType) {
+                          <div class="info-item">
+                            <span class="info-item__icon">🛏️</span>
+                            <span class="info-item__text">{{ room.bedType }}</span>
+                          </div>
+                        }
+                      </div>
+
+                      @if (room.amenities && room.amenities.length > 0) {
+                        <div class="room-card__amenities">
+                          <h4 class="amenities-title">Room Amenities:</h4>
+                          <div class="amenities-tags">
+                            @for (amenity of room.amenities.slice(0, 4); track amenity) {
+                              <span class="amenity-tag">{{ amenity }}</span>
+                            }
+                            @if (room.amenities.length > 4) {
+                              <span class="amenity-tag amenity-tag--more">+{{ room.amenities.length - 4 }} more</span>
+                            }
+                          </div>
+                        </div>
+                      }
+
+                      <div class="room-card__footer">
+                        <div class="room-card__price">
+                          <span class="price-amount">${{ room.pricePerNight }}</span>
+                          <span class="price-period">per night</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
           <!-- Reviews -->
           @if (hotel()!.averageRating && hotel()!.totalReviews) {
             <section class="section">
