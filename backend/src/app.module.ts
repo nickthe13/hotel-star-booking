@@ -13,6 +13,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EmailModule } from './email/email.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -48,6 +49,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     PaymentsModule,
     EmailModule,
     ReviewsModule,
+    LoyaltyModule,
   ],
   controllers: [AppController],
   providers: [

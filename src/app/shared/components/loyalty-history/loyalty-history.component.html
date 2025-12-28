@@ -1,0 +1,75 @@
+<div class="loyalty-history">
+  <div class="history-header">
+    <h3>Transaction History</h3>
+    <span class="total-count" *ngIf="total() > 0">{{ total() }} transactions</span>
+  </div>
+
+  <div class="transactions-list" *ngIf="!loading() && transactions().length > 0">
+    <div
+      class="transaction-item"
+      *ngFor="let txn of transactions()"
+      [ngClass]="getTransactionClass(txn.type)"
+    >
+      <div class="transaction-icon">
+        <span>{{ getTransactionIcon(txn.type) }}</span>
+      </div>
+
+      <div class="transaction-details">
+        <div class="transaction-main">
+          <span class="transaction-label">{{ getTransactionLabel(txn.type) }}</span>
+          <span class="transaction-points" [class.positive]="txn.points > 0" [class.negative]="txn.points < 0">
+            {{ formatPoints(txn.points) }}
+          </span>
+        </div>
+
+        <p class="transaction-description" *ngIf="txn.description">
+          {{ txn.description }}
+        </p>
+
+        <div class="transaction-booking" *ngIf="txn.booking">
+          <span class="booking-hotel">{{ txn.booking.room?.hotel?.name }}</span>
+          <span class="booking-dates">
+            {{ formatDate(txn.booking.checkIn) }} - {{ formatDate(txn.booking.checkOut) }}
+          </span>
+        </div>
+
+        <div class="transaction-meta">
+          <span class="transaction-date">{{ formatDate(txn.createdAt) }}</span>
+          <span class="transaction-time">{{ formatTime(txn.createdAt) }}</span>
+          <span class="transaction-balance">Balance: {{ txn.balanceAfter.toLocaleString() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading() && transactions().length === 0">
+    <div class="empty-icon">&#128176;</div>
+    <h4>No transactions yet</h4>
+    <p>Start booking to earn loyalty points!</p>
+  </div>
+
+  <div class="loading-state" *ngIf="loading()">
+    <div class="loading-spinner"></div>
+    <span>Loading transactions...</span>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages() > 1 && !loading()">
+    <button
+      class="page-btn"
+      (click)="prevPage()"
+      [disabled]="currentPage() === 1"
+    >
+      &larr; Previous
+    </button>
+    <span class="page-info">
+      Page {{ currentPage() }} of {{ totalPages() }}
+    </span>
+    <button
+      class="page-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage() === totalPages()"
+    >
+      Next &rarr;
+    </button>
+  </div>
+</div>

@@ -564,3 +564,25 @@
     transform: rotate(360deg);
   }
 }
+
+// Loyalty Tab
+.loyalty-tab {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2xl;
+}
+
+.loyalty-tab__card-section {
+  max-width: 500px;
+
+  @include respond-to('mobile') {
+    max-width: 100%;
+  }
+}
+
+.loyalty-tab__history-section {
+  background: $white;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-md;
+}

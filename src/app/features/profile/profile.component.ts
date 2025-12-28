@@ -8,12 +8,21 @@ import { User } from '../../core/models/user.model';
 import { Hotel } from '../../core/models';
 import { PaymentHistoryComponent } from './payment-history/payment-history.component';
 import { SavedPaymentMethodsComponent } from './saved-payment-methods/saved-payment-methods.component';
+import { LoyaltyCardComponent } from '../../shared/components/loyalty-card/loyalty-card.component';
+import { LoyaltyHistoryComponent } from '../../shared/components/loyalty-history/loyalty-history.component';
 
-type ProfileTab = 'profile' | 'payment-methods' | 'payment-history';
+type ProfileTab = 'profile' | 'payment-methods' | 'payment-history' | 'loyalty';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, ReactiveFormsModule, PaymentHistoryComponent, SavedPaymentMethodsComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PaymentHistoryComponent,
+    SavedPaymentMethodsComponent,
+    LoyaltyCardComponent,
+    LoyaltyHistoryComponent,
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })

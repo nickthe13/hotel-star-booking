@@ -1,0 +1,261 @@
+.loyalty-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px;
+  padding: 24px;
+  color: #fff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  &.compact {
+    padding: 16px;
+
+    .loyalty-card__header {
+      margin-bottom: 12px;
+    }
+
+    .points-display {
+      .points-value {
+        font-size: 28px;
+      }
+    }
+  }
+
+  &.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    gap: 16px;
+  }
+}
+
+.loyalty-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tier-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+
+  .tier-icon {
+    font-size: 16px;
+  }
+}
+
+.member-info {
+  .member-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+}
+
+.loyalty-card__body {
+  position: relative;
+  z-index: 1;
+}
+
+.points-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.points-display {
+  display: flex;
+  flex-direction: column;
+
+  .points-value {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .points-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+  }
+}
+
+.points-worth {
+  text-align: right;
+
+  .worth-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    color: #4ade80;
+  }
+
+  .worth-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.tier-progress {
+  margin-bottom: 20px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+
+  .multiplier {
+    color: #fbbf24;
+    font-weight: 600;
+  }
+
+  .lifetime {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.progress-bar-container {
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.next-tier-info {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  padding: 8px 0;
+}
+
+.max-tier-info {
+  text-align: center;
+  padding: 8px 0;
+
+  .max-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+.tier-benefits {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+
+  .benefits-header {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+
+      .benefit-icon {
+        color: #4ade80;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .loyalty-card {
+    padding: 16px;
+  }
+
+  .points-display .points-value {
+    font-size: 32px;
+  }
+
+  .points-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .points-worth {
+    text-align: left;
+  }
+}

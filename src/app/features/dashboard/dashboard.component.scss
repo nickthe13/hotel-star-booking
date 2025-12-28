@@ -37,6 +37,15 @@
   }
 }
 
+.loyalty-section {
+  margin-bottom: $spacing-3xl;
+  max-width: 500px;
+
+  @include respond-to('mobile') {
+    max-width: 100%;
+  }
+}
+
 .loading-state {
   @include flex-center;
   flex-direction: column;

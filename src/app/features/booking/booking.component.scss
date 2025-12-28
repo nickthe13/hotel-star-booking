@@ -565,6 +565,30 @@
       font-weight: $font-weight-semibold;
     }
   }
+
+  &__row--discount {
+    color: $success;
+
+    .discount-value {
+      font-weight: $font-weight-bold;
+      color: $success;
+    }
+  }
+}
+
+.discount-value {
+  color: $success !important;
+  font-weight: $font-weight-bold;
+}
+
+.summary-row.discount {
+  .label, .value {
+    color: $success;
+  }
+}
+
+.confirmation-row .discount-value {
+  color: $success;
 }
 
 .alert {

@@ -61,6 +61,15 @@
       <span class="tab__icon">📊</span>
       <span class="tab__label">Payment History</span>
     </button>
+    <button
+      class="tab"
+      [class.tab--active]="activeTab() === 'loyalty'"
+      (click)="setActiveTab('loyalty')"
+      type="button"
+    >
+      <span class="tab__icon">⭐</span>
+      <span class="tab__label">Loyalty Rewards</span>
+    </button>
   </div>
 
   <!-- Tab Content -->
@@ -329,5 +338,17 @@
   <!-- Payment History Tab -->
   @if (activeTab() === 'payment-history') {
     <app-payment-history></app-payment-history>
+  }
+
+  <!-- Loyalty Rewards Tab -->
+  @if (activeTab() === 'loyalty') {
+    <div class="loyalty-tab">
+      <div class="loyalty-tab__card-section">
+        <app-loyalty-card></app-loyalty-card>
+      </div>
+      <div class="loyalty-tab__history-section">
+        <app-loyalty-history></app-loyalty-history>
+      </div>
+    </div>
   }
 </div>

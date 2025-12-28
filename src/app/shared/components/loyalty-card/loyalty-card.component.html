@@ -1,0 +1,68 @@
+<div class="loyalty-card" [class.compact]="compact" *ngIf="!loading()">
+  <div class="loyalty-card__header" *ngIf="loyaltyAccount() as account">
+    <div class="tier-badge" [style.background-color]="getTierColor(account.tier)">
+      <span class="tier-icon">&#9733;</span>
+      <span class="tier-name">{{ getTierName(account.tier) }}</span>
+    </div>
+    <div class="member-info" *ngIf="!compact">
+      <span class="member-label">Loyalty Member</span>
+    </div>
+  </div>
+
+  <div class="loyalty-card__body" *ngIf="loyaltyAccount() as account">
+    <div class="points-section">
+      <div class="points-display">
+        <span class="points-value">{{ formatPoints(account.currentPoints) }}</span>
+        <span class="points-label">Available Points</span>
+      </div>
+      <div class="points-worth" *ngIf="!compact">
+        <span class="worth-value">{{ formatCurrency(account.currentPoints / 100) }}</span>
+        <span class="worth-label">Reward Value</span>
+      </div>
+    </div>
+
+    <div class="tier-progress" *ngIf="tierProgress() as progress">
+      <div class="progress-header" *ngIf="!compact">
+        <span class="multiplier">{{ progress.tierMultiplier }}x Points</span>
+        <span class="lifetime">{{ formatCurrency(progress.currentSpending) }} lifetime</span>
+      </div>
+
+      <div class="progress-bar-container" *ngIf="progress.nextTier">
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            [style.width.%]="progress.progressPercentage"
+            [style.background-color]="getTierColor(progress.nextTier)"
+          ></div>
+        </div>
+        <div class="progress-labels">
+          <span class="current-tier">{{ getTierName(account.tier) }}</span>
+          <span class="next-tier">{{ getTierName(progress.nextTier) }}</span>
+        </div>
+      </div>
+
+      <div class="next-tier-info" *ngIf="progress.nextTier && progress.amountToNextTier && !compact">
+        <span>Spend {{ formatCurrency(progress.amountToNextTier) }} more to reach {{ getTierName(progress.nextTier) }}</span>
+      </div>
+
+      <div class="max-tier-info" *ngIf="!progress.nextTier && !compact">
+        <span class="max-tier-badge">&#10003; Maximum Tier Achieved</span>
+      </div>
+    </div>
+
+    <div class="tier-benefits" *ngIf="tierProgress()?.tierBenefits && !compact">
+      <div class="benefits-header">Your Benefits</div>
+      <ul class="benefits-list">
+        <li *ngFor="let benefit of tierProgress()?.tierBenefits">
+          <span class="benefit-icon">&#10003;</span>
+          {{ benefit }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="loyalty-card loading" *ngIf="loading()">
+  <div class="loading-spinner"></div>
+  <span>Loading loyalty info...</span>
+</div>

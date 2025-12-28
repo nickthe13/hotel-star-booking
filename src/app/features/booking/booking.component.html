@@ -226,11 +226,18 @@
                   <span>${{ selectedRoom()!.pricePerNight * calculateNights() }}</span>
                 </div>
 
+                @if (pointsDiscount() > 0) {
+                  <div class="price-summary__row price-summary__row--discount">
+                    <span>Points Discount</span>
+                    <span class="discount-value">-${{ pointsDiscount().toFixed(2) }}</span>
+                  </div>
+                }
+
                 <div class="price-summary__divider"></div>
 
                 <div class="price-summary__total">
                   <span>Total</span>
-                  <span>${{ calculateTotalPrice() }}</span>
+                  <span>${{ calculateFinalPrice().toFixed(2) }}</span>
                 </div>
               } @else {
                 <p class="price-summary__note">
@@ -243,6 +250,14 @@
               </p>
             }
           </div>
+
+          <!-- Loyalty Points Redemption -->
+          @if (calculateNights() > 0 && selectedRoom()) {
+            <app-points-redemption
+              [bookingAmount]="calculateTotalPrice()"
+              (pointsChanged)="onPointsRedemptionChange($event)"
+            ></app-points-redemption>
+          }
 
           <div class="booking-info">
             <h4 class="booking-info__title">Good to know</h4>
@@ -290,16 +305,26 @@
                   <span class="label">Nights:</span>
                   <span class="value">{{ calculateNights() }}</span>
                 </div>
+                <div class="summary-row">
+                  <span class="label">Subtotal:</span>
+                  <span class="value">${{ calculateTotalPrice().toFixed(2) }}</span>
+                </div>
+                @if (pointsDiscount() > 0) {
+                  <div class="summary-row discount">
+                    <span class="label">Points Discount:</span>
+                    <span class="value discount-value">-${{ pointsDiscount().toFixed(2) }}</span>
+                  </div>
+                }
                 <div class="summary-row total">
                   <span class="label">Total:</span>
-                  <span class="value">${{ calculateTotalPrice() }}</span>
+                  <span class="value">${{ calculateFinalPrice().toFixed(2) }}</span>
                 </div>
               </div>
 
               <!-- Stripe Payment Component -->
               <app-stripe-payment
                 [clientSecret]="paymentIntent()!.clientSecret"
-                [amount]="calculateTotalPrice()"
+                [amount]="calculateFinalPrice()"
                 [savedPaymentMethods]="savedPaymentMethods()"
                 [allowSavePaymentMethod]="true"
                 (paymentSuccess)="onPaymentSuccess($event)"
@@ -350,9 +375,15 @@
               <span class="label">Guests:</span>
               <span class="value">{{ bookingForm.value.guests }}</span>
             </div>
+            @if (pointsDiscount() > 0) {
+              <div class="confirmation-row">
+                <span class="label">Points Discount:</span>
+                <span class="value discount-value">-${{ pointsDiscount().toFixed(2) }}</span>
+              </div>
+            }
             <div class="confirmation-row total">
               <span class="label">Total Amount:</span>
-              <span class="value">${{ calculateTotalPrice() }}</span>
+              <span class="value">${{ calculateFinalPrice().toFixed(2) }}</span>
             </div>
           </div>
 

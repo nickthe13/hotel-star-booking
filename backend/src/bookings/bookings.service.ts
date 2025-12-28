@@ -3,15 +3,22 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { BookingStatus, UserRole, PaymentStatus } from '@prisma/client';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 
 @Injectable()
 export class BookingsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    @Inject(forwardRef(() => LoyaltyService))
+    private loyaltyService: LoyaltyService,
+  ) {}
 
   /**
    * Create a new booking
@@ -300,13 +307,23 @@ export class BookingsService {
   async confirmPayment(bookingId: string, paymentTransactionId: string) {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
+      include: {
+        room: {
+          include: {
+            hotel: true,
+          },
+        },
+      },
     });
 
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
 
-    return this.prismaService.booking.update({
+    // Calculate actual amount paid (totalPrice - discountFromPoints)
+    const amountPaid = booking.totalPrice - (booking.discountFromPoints || 0);
+
+    const updatedBooking = await this.prismaService.booking.update({
       where: { id: bookingId },
       data: {
         status: BookingStatus.CONFIRMED,
@@ -324,6 +341,57 @@ export class BookingsService {
         user: true,
       },
     });
+
+    // Award loyalty points for the actual amount paid
+    try {
+      await this.loyaltyService.awardPoints(
+        booking.userId,
+        bookingId,
+        amountPaid,
+        `Points earned for booking at ${booking.room.hotel.name}`,
+      );
+    } catch (error) {
+      // Log error but don't fail the payment confirmation
+      console.error('Failed to award loyalty points:', error);
+    }
+
+    return updatedBooking;
+  }
+
+  /**
+   * Apply loyalty points redemption to a booking
+   */
+  async applyPointsRedemption(
+    bookingId: string,
+    userId: string,
+    pointsToRedeem: number,
+  ): Promise<{ discountAmount: number; newTotal: number }> {
+    const booking = await this.prismaService.booking.findUnique({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.userId !== userId) {
+      throw new ForbiddenException('Booking does not belong to user');
+    }
+
+    if (booking.status !== BookingStatus.PENDING_PAYMENT) {
+      throw new BadRequestException('Can only apply points to pending bookings');
+    }
+
+    const result = await this.loyaltyService.redeemPoints(
+      userId,
+      bookingId,
+      pointsToRedeem,
+    );
+
+    return {
+      discountAmount: result.discountAmount,
+      newTotal: booking.totalPrice - result.discountAmount,
+    };
   }
 
   /**

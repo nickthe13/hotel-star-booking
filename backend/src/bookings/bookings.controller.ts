@@ -123,6 +123,30 @@ export class BookingsController {
     return this.bookingsService.cancel(id, user.id, user.role);
   }
 
+  @Post(':id/apply-points')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Apply loyalty points redemption to booking' })
+  @ApiParam({ name: 'id', description: 'Booking ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Points applied successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid points or booking status',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Booking not found',
+  })
+  applyPoints(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Body() dto: { points: number },
+  ) {
+    return this.bookingsService.applyPointsRedemption(id, user.id, dto.points);
+  }
+
   @Post(':id/check-in')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)

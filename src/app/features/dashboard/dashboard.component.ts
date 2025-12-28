@@ -5,10 +5,11 @@ import { BookingService } from '../../core/services/booking.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Booking, BookingStatus } from '../../core/models/booking.model';
 import { PaymentStatus } from '../../core/models/payment.model';
+import { LoyaltyCardComponent } from '../../shared/components/loyalty-card/loyalty-card.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LoyaltyCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

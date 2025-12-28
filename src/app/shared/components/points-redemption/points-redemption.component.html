@@ -1,0 +1,98 @@
+<div class="points-redemption" *ngIf="!loading() && loyaltyAccount() as account">
+  <div class="redemption-header">
+    <div class="header-content">
+      <span class="header-title">Loyalty Points</span>
+      <span class="available-points">{{ formatPoints(account.currentPoints) }} points available</span>
+    </div>
+    <label class="toggle-switch">
+      <input
+        type="checkbox"
+        [checked]="usePoints()"
+        (change)="onToggleUsePoints()"
+        [disabled]="disabled || account.currentPoints === 0"
+      />
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+
+  <div class="redemption-body" *ngIf="usePoints() && redemptionInfo() as info">
+    <div class="points-slider-section">
+      <div class="slider-header">
+        <span>Redeem Points</span>
+        <div class="quick-actions">
+          <button type="button" class="action-btn" (click)="clearPoints()" [disabled]="disabled">Clear</button>
+          <button type="button" class="action-btn primary" (click)="setMaxPoints()" [disabled]="disabled">Use Max</button>
+        </div>
+      </div>
+
+      <div class="slider-container">
+        <input
+          type="range"
+          min="0"
+          [max]="info.maxPoints"
+          [value]="selectedPoints()"
+          (input)="onSliderChange($event)"
+          [disabled]="disabled"
+          class="points-slider"
+        />
+        <div class="slider-labels">
+          <span>0</span>
+          <span>{{ formatPoints(info.maxPoints) }}</span>
+        </div>
+      </div>
+
+      <div class="points-input-row">
+        <div class="input-group">
+          <label>Points to redeem:</label>
+          <input
+            type="number"
+            [value]="selectedPoints()"
+            (input)="onPointsChange($event)"
+            [disabled]="disabled"
+            min="0"
+            [max]="info.maxPoints"
+            class="points-input"
+          />
+        </div>
+        <div class="discount-display">
+          <span class="discount-label">Discount:</span>
+          <span class="discount-value">-{{ formatCurrency(getDiscountAmount()) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="redemption-info">
+      <div class="info-item">
+        <span class="info-label">Max redeemable</span>
+        <span class="info-value">{{ formatPoints(info.maxPoints) }} points ({{ formatCurrency(info.maxDiscount) }})</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Points remaining after</span>
+        <span class="info-value">{{ formatPoints(info.currentPoints - selectedPoints()) }} points</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="points-earn-preview">
+    <div class="earn-header">
+      <span class="earn-icon">&#9733;</span>
+      <span class="earn-title">Points you'll earn</span>
+    </div>
+    <div class="earn-details">
+      <span class="earn-points">+{{ formatPoints(getPointsToEarn()) }} points</span>
+      <span class="earn-multiplier" *ngIf="getTierMultiplier(account.tier) > 1">
+        ({{ getTierMultiplier(account.tier) }}x {{ getTierName(account.tier) }} bonus)
+      </span>
+    </div>
+  </div>
+
+  <div class="no-points-message" *ngIf="account.currentPoints === 0">
+    <span class="message-icon">&#128161;</span>
+    <span>Complete this booking to start earning points!</span>
+  </div>
+</div>
+
+<div class="points-redemption loading" *ngIf="loading()">
+  <div class="loading-spinner"></div>
+  <span>Loading loyalty info...</span>
+</div>

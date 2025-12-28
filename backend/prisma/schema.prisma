@@ -41,6 +41,20 @@ enum RoomType {
   PRESIDENTIAL
 }
 
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum LoyaltyTransactionType {
+  EARN
+  REDEEM
+  BONUS
+  ADJUSTMENT
+}
+
 // Models
 model User {
   id        String   @id @default(cuid())
@@ -56,6 +70,7 @@ model User {
   reviews           Review[]
   favoriteHotels    FavoriteHotel[]
   paymentMethods    PaymentMethod[]
+  loyaltyAccount    LoyaltyAccount?
 
   @@map("users")
 }
@@ -130,10 +145,16 @@ model Booking {
   createdAt             DateTime      @default(now()) @map("created_at")
   updatedAt             DateTime      @updatedAt @map("updated_at")
 
+  // Loyalty fields
+  pointsEarned        Int?    @default(0) @map("points_earned")
+  pointsRedeemed      Int?    @default(0) @map("points_redeemed")
+  discountFromPoints  Float?  @default(0) @map("discount_from_points")
+
   // Relations
-  user              User               @relation(fields: [userId], references: [id])
-  room              Room               @relation(fields: [roomId], references: [id])
-  paymentTransaction PaymentTransaction?
+  user                User               @relation(fields: [userId], references: [id])
+  room                Room               @relation(fields: [roomId], references: [id])
+  paymentTransaction  PaymentTransaction?
+  loyaltyTransactions LoyaltyTransaction[]
 
   @@map("bookings")
 }
@@ -209,4 +230,40 @@ model FavoriteHotel {
 
   @@unique([userId, hotelId])
   @@map("favorite_hotels")
+}
+
+model LoyaltyAccount {
+  id               String      @id @default(cuid())
+  userId           String      @unique @map("user_id")
+  currentPoints    Int         @default(0) @map("current_points")
+  lifetimePoints   Int         @default(0) @map("lifetime_points")
+  lifetimeSpending Float       @default(0) @map("lifetime_spending")
+  tier             LoyaltyTier @default(BRONZE)
+  tierUpdatedAt    DateTime?   @map("tier_updated_at")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions LoyaltyTransaction[]
+
+  @@map("loyalty_accounts")
+}
+
+model LoyaltyTransaction {
+  id               String                 @id @default(cuid())
+  loyaltyAccountId String                 @map("loyalty_account_id")
+  bookingId        String?                @map("booking_id")
+  type             LoyaltyTransactionType
+  points           Int
+  description      String?
+  balanceAfter     Int                    @map("balance_after")
+  metadata         Json?
+  createdAt        DateTime               @default(now()) @map("created_at")
+
+  // Relations
+  loyaltyAccount LoyaltyAccount @relation(fields: [loyaltyAccountId], references: [id], onDelete: Cascade)
+  booking        Booking?       @relation(fields: [bookingId], references: [id])
+
+  @@map("loyalty_transactions")
 }

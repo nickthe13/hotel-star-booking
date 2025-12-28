@@ -6,12 +6,14 @@ import { HotelService } from '../../core/services/hotel.service';
 import { BookingService } from '../../core/services/booking.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { EmailService } from '../../core/services/email.service';
+import { LoyaltyService } from '../../core/services/loyalty.service';
 import { Hotel, Room, CreatePaymentIntentRequest, CreatePaymentIntentResponse, SavedPaymentMethod } from '../../core/models';
 import { StripePaymentComponent } from '../../shared/components/stripe-payment/stripe-payment.component';
+import { PointsRedemptionComponent } from '../../shared/components/points-redemption/points-redemption.component';
 
 @Component({
   selector: 'app-booking',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, StripePaymentComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, StripePaymentComponent, PointsRedemptionComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.scss'
 })
@@ -33,6 +35,10 @@ export class BookingComponent implements OnInit {
   processingPayment = signal<boolean>(false);
   paymentError = signal<string>('');
 
+  // Loyalty points signals
+  pointsToRedeem = signal<number>(0);
+  pointsDiscount = signal<number>(0);
+
   minDate: string;
   minCheckoutDate: string = '';
 
@@ -49,7 +55,8 @@ export class BookingComponent implements OnInit {
     private hotelService: HotelService,
     private bookingService: BookingService,
     private paymentService: PaymentService,
-    private emailService: EmailService
+    private emailService: EmailService,
+    private loyaltyService: LoyaltyService
   ) {
     // Set minimum date to today
     const today = new Date();
@@ -149,6 +156,15 @@ export class BookingComponent implements OnInit {
     return room.pricePerNight * nights;
   }
 
+  calculateFinalPrice(): number {
+    return this.calculateTotalPrice() - this.pointsDiscount();
+  }
+
+  onPointsRedemptionChange(data: { points: number; discount: number }): void {
+    this.pointsToRedeem.set(data.points);
+    this.pointsDiscount.set(data.discount);
+  }
+
   onSubmit(): void {
     if (this.bookingForm.invalid) {
       Object.keys(this.bookingForm.controls).forEach(key => {
@@ -180,10 +196,10 @@ export class BookingComponent implements OnInit {
       return;
     }
 
-    const totalPrice = this.calculateTotalPrice();
+    const finalPrice = this.calculateFinalPrice();
 
     const paymentRequest: CreatePaymentIntentRequest = {
-      amount: totalPrice * 100, // Convert to cents
+      amount: finalPrice * 100, // Convert to cents
       currency: 'usd',
       savePaymentMethod: this.savePaymentMethod(),
       paymentMethodId: this.selectedPaymentMethodId() || undefined,
