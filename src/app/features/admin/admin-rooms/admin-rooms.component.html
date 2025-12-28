@@ -47,6 +47,7 @@
   <app-modal
     [title]="isEditMode() ? 'Edit Room' : 'Add New Room'"
     [isOpen]="showRoomModal"
+    [confirmText]="isEditMode() ? 'Save Changes' : 'Add Room'"
     size="lg"
     (onClose)="closeModal()"
     (onConfirm)="saveRoom()"

@@ -117,6 +117,18 @@
   }
 }
 
+.btn {
+  @include button-base;
+
+  &--primary {
+    @include button-primary;
+  }
+
+  &--secondary {
+    @include button-secondary;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
