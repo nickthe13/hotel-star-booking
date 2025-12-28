@@ -1,4 +1,4 @@
-@if (isOpen()) {
+@if (isOpen) {
   <div class="dialog-backdrop" (click)="onBackdropClick($event)">
     <div class="dialog" [class]="'dialog--' + variant" (click)="$event.stopPropagation()">
       <div class="dialog-icon">

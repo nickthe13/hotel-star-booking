@@ -46,7 +46,7 @@
   <!-- Add/Edit Room Modal -->
   <app-modal
     [title]="isEditMode() ? 'Edit Room' : 'Add New Room'"
-    [isOpen]="showRoomModal"
+    [isOpen]="showRoomModal()"
     [confirmText]="isEditMode() ? 'Save Changes' : 'Add Room'"
     size="lg"
     (onClose)="closeModal()"
@@ -181,7 +181,7 @@
   <app-confirmation-dialog
     [title]="'Delete Room'"
     [message]="'Are you sure you want to delete this ' + selectedRoom()?.roomType + '? This action cannot be undone.'"
-    [isOpen]="showDeleteDialog"
+    [isOpen]="showDeleteDialog()"
     [confirmText]="'Delete'"
     [cancelText]="'Cancel'"
     [variant]="'danger'"

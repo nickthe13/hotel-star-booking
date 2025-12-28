@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 export class ConfirmationDialogComponent {
   @Input({ required: true }) title!: string;
   @Input({ required: true }) message!: string;
-  @Input() isOpen = signal<boolean>(false);
+  @Input() isOpen: boolean = false;
   @Input() confirmText = 'Confirm';
   @Input() cancelText = 'Cancel';
   @Input() variant: 'danger' | 'warning' | 'info' = 'warning';

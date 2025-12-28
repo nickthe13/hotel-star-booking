@@ -1,4 +1,4 @@
-@if (isOpen()) {
+@if (isOpen) {
   <div class="modal-backdrop" (click)="onBackdropClick($event)">
     <div class="modal-dialog" [class]="'modal-dialog--' + size" (click)="$event.stopPropagation()">
       <div class="modal-header">

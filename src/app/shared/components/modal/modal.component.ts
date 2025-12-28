@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ModalComponent implements AfterContentInit {
   @Input({ required: true }) title!: string;
-  @Input() isOpen = signal<boolean>(false);
+  @Input() isOpen: boolean = false;
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() confirmText: string = 'Confirm';
   @Input() cancelText: string = 'Cancel';
