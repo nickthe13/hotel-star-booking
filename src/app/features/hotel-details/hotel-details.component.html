@@ -198,8 +198,29 @@
               </div>
             }
 
-            <button class="btn btn--primary btn--large" (click)="bookNow()">
-              Book Now
+            <!-- Availability Calendar -->
+            <div class="booking-card__calendar">
+              <h3 class="calendar-title">Select Your Dates</h3>
+              <app-availability-calendar
+                [pricePerNight]="hotel()!.pricePerNight"
+                [compact]="true"
+                [showPrice]="false"
+                (dateRangeSelected)="onDateRangeSelected($event)"
+                (dateRangeCleared)="onDateRangeCleared()"
+              ></app-availability-calendar>
+            </div>
+
+            <button
+              class="btn btn--primary btn--large"
+              (click)="bookNow()"
+              [disabled]="!canBookNow()"
+              [class.btn--disabled]="!canBookNow()"
+            >
+              @if (canBookNow()) {
+                Book Now
+              } @else {
+                Select dates to book
+              }
             </button>
 
             <div class="booking-card__features">

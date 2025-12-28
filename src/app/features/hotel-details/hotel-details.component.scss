@@ -337,6 +337,19 @@
     font-size: $font-size-lg;
   }
 
+  &__calendar {
+    padding-bottom: $spacing-lg;
+    border-bottom: 1px solid $border-color-light;
+
+    .calendar-title {
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin: 0 0 $spacing-md 0;
+      text-align: center;
+    }
+  }
+
   &__features {
     display: flex;
     flex-direction: column;
@@ -365,6 +378,11 @@
         color: $text-secondary;
       }
     }
+  }
+
+  .btn--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 

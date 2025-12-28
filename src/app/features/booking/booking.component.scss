@@ -195,6 +195,19 @@
   color: $error;
 }
 
+.calendar-section {
+  margin-bottom: $spacing-xl;
+  padding: $spacing-lg;
+  background: $neutral-50;
+  border-radius: $radius-lg;
+  border: 1px solid $border-color-light;
+
+  .form-error {
+    text-align: center;
+    margin-top: $spacing-md;
+  }
+}
+
 .form-actions {
   display: flex;
   gap: $spacing-md;

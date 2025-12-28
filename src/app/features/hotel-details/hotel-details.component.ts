@@ -4,15 +4,16 @@ import { Router, RouterLink } from '@angular/router';
 import { HotelService } from '../../core/services/hotel.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReviewService } from '../../core/services/review.service';
-import { Hotel, Review } from '../../core/models';
+import { Hotel, Review, DateRange } from '../../core/models';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ReviewListComponent } from '../../shared/components/review-list/review-list.component';
 import { ReviewFormComponent, ReviewFormData } from '../../shared/components/review-form/review-form.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { AvailabilityCalendarComponent } from '../../shared/components/availability-calendar/availability-calendar.component';
 
 @Component({
   selector: 'app-hotel-details',
-  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent],
+  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent, AvailabilityCalendarComponent],
   templateUrl: './hotel-details.component.html',
   styleUrl: './hotel-details.component.scss'
 })
@@ -34,6 +35,10 @@ export class HotelDetailsComponent implements OnInit {
   userReview = signal<Review | undefined>(undefined);
   showReviewModal = signal<boolean>(false);
   editingReview = signal<Review | undefined>(undefined);
+
+  // Calendar / Date Selection
+  selectedCheckIn = signal<string | null>(null);
+  selectedCheckOut = signal<string | null>(null);
 
   constructor(
     private hotelService: HotelService,
@@ -123,8 +128,29 @@ export class HotelDetailsComponent implements OnInit {
 
   bookNow(): void {
     if (this.hotel()) {
-      this.router.navigate(['/booking', this.hotel()!.id]);
+      const queryParams: any = {};
+      if (this.selectedCheckIn()) {
+        queryParams.checkIn = this.selectedCheckIn();
+      }
+      if (this.selectedCheckOut()) {
+        queryParams.checkOut = this.selectedCheckOut();
+      }
+      this.router.navigate(['/booking', this.hotel()!.id], { queryParams });
     }
+  }
+
+  onDateRangeSelected(dateRange: DateRange): void {
+    this.selectedCheckIn.set(dateRange.checkIn);
+    this.selectedCheckOut.set(dateRange.checkOut);
+  }
+
+  onDateRangeCleared(): void {
+    this.selectedCheckIn.set(null);
+    this.selectedCheckOut.set(null);
+  }
+
+  canBookNow(): boolean {
+    return this.selectedCheckIn() !== null && this.selectedCheckOut() !== null;
   }
 
   hoverRating(rating: number): void {

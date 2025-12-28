@@ -1,0 +1,103 @@
+<div class="availability-calendar" [class.compact]="compact">
+  <!-- Calendar Header -->
+  <div class="calendar-header">
+    <button
+      class="nav-btn"
+      (click)="previousMonth()"
+      [disabled]="!canGoToPreviousMonth()"
+      type="button"
+      aria-label="Previous month"
+    >
+      <span class="nav-icon">&#8249;</span>
+    </button>
+    <span class="month-year">{{ monthName() }} {{ currentYear() }}</span>
+    <button
+      class="nav-btn"
+      (click)="nextMonth()"
+      type="button"
+      aria-label="Next month"
+    >
+      <span class="nav-icon">&#8250;</span>
+    </button>
+  </div>
+
+  <!-- Day Names -->
+  <div class="calendar-weekdays">
+    @for (day of dayNames; track day) {
+      <span class="weekday">{{ day }}</span>
+    }
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="calendar-grid">
+    @for (day of calendarDays(); track day.date.getTime()) {
+      <button
+        type="button"
+        [class]="getDayClasses(day)"
+        [disabled]="day.isPast || day.isBooked || !day.isCurrentMonth"
+        (click)="onDayClick(day)"
+        [attr.aria-label]="day.dayOfMonth + ' ' + monthName()"
+      >
+        <span class="day-number">{{ day.dayOfMonth }}</span>
+        @if (showPrice && day.price && day.isCurrentMonth && !day.isPast && !day.isBooked) {
+          <span class="day-price">${{ day.price }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- Selection Summary -->
+  @if (checkIn() || checkOut()) {
+    <div class="selection-summary">
+      <div class="date-display">
+        <div class="date-item">
+          <span class="date-label">Check-in</span>
+          <span class="date-value">{{ formatDate(checkIn()) || 'Select date' }}</span>
+        </div>
+        <div class="date-separator">→</div>
+        <div class="date-item">
+          <span class="date-label">Check-out</span>
+          <span class="date-value">{{ formatDate(checkOut()) || 'Select date' }}</span>
+        </div>
+      </div>
+
+      @if (checkIn() && checkOut()) {
+        <div class="stay-summary">
+          <span class="nights">{{ selectedNights() }} night{{ selectedNights() > 1 ? 's' : '' }}</span>
+          @if (showPrice && pricePerNight > 0) {
+            <span class="total-price">${{ totalPrice() }}</span>
+          }
+        </div>
+      }
+
+      <button
+        class="clear-btn"
+        (click)="clearSelection()"
+        type="button"
+      >
+        Clear dates
+      </button>
+    </div>
+  }
+
+  <!-- Legend -->
+  <div class="calendar-legend">
+    <div class="legend-item">
+      <span class="legend-color available"></span>
+      <span class="legend-label">Available</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-color booked"></span>
+      <span class="legend-label">Booked</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-color selected"></span>
+      <span class="legend-label">Selected</span>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  @if (isSelectingCheckOut() && checkIn()) {
+    <p class="instructions">Select your check-out date</p>
+  }
+</div>

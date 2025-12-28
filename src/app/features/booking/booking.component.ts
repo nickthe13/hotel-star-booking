@@ -7,13 +7,14 @@ import { BookingService } from '../../core/services/booking.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { EmailService } from '../../core/services/email.service';
 import { LoyaltyService } from '../../core/services/loyalty.service';
-import { Hotel, Room, CreatePaymentIntentRequest, CreatePaymentIntentResponse, SavedPaymentMethod } from '../../core/models';
+import { Hotel, Room, CreatePaymentIntentRequest, CreatePaymentIntentResponse, SavedPaymentMethod, DateRange } from '../../core/models';
 import { StripePaymentComponent } from '../../shared/components/stripe-payment/stripe-payment.component';
 import { PointsRedemptionComponent } from '../../shared/components/points-redemption/points-redemption.component';
+import { AvailabilityCalendarComponent } from '../../shared/components/availability-calendar/availability-calendar.component';
 
 @Component({
   selector: 'app-booking',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, StripePaymentComponent, PointsRedemptionComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, StripePaymentComponent, PointsRedemptionComponent, AvailabilityCalendarComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.scss'
 })
@@ -38,6 +39,10 @@ export class BookingComponent implements OnInit {
   // Loyalty points signals
   pointsToRedeem = signal<number>(0);
   pointsDiscount = signal<number>(0);
+
+  // Calendar dates (from query params)
+  initialCheckIn = signal<string | null>(null);
+  initialCheckOut = signal<string | null>(null);
 
   minDate: string;
   minCheckoutDate: string = '';
@@ -107,6 +112,18 @@ export class BookingComponent implements OnInit {
     } else {
       this.error.set('No hotel selected');
     }
+
+    // Read query parameters for pre-selected dates
+    this.route.queryParams.subscribe(params => {
+      if (params['checkIn']) {
+        this.initialCheckIn.set(params['checkIn']);
+        this.bookingForm.patchValue({ checkIn: params['checkIn'] });
+      }
+      if (params['checkOut']) {
+        this.initialCheckOut.set(params['checkOut']);
+        this.bookingForm.patchValue({ checkOut: params['checkOut'] });
+      }
+    });
 
     // Load saved payment methods
     this.loadSavedPaymentMethods();
@@ -286,5 +303,18 @@ export class BookingComponent implements OnInit {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400'; // Fallback image
+  }
+
+  onDateRangeSelected(dateRange: DateRange): void {
+    if (dateRange.checkIn) {
+      this.bookingForm.patchValue({ checkIn: dateRange.checkIn });
+    }
+    if (dateRange.checkOut) {
+      this.bookingForm.patchValue({ checkOut: dateRange.checkOut });
+    }
+  }
+
+  onDateRangeCleared(): void {
+    this.bookingForm.patchValue({ checkIn: '', checkOut: '' });
   }
 }

@@ -1,0 +1,380 @@
+@import '../../../../assets/styles/variables';
+
+.availability-calendar {
+  background: $white;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-md;
+
+  &.compact {
+    padding: $spacing-md;
+
+    .calendar-header {
+      margin-bottom: $spacing-sm;
+    }
+
+    .calendar-day {
+      padding: $spacing-xs;
+
+      .day-price {
+        display: none;
+      }
+    }
+
+    .selection-summary {
+      padding: $spacing-sm;
+    }
+
+    .calendar-legend {
+      display: none;
+    }
+  }
+}
+
+// Calendar Header
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid $border-color;
+  background: $white;
+  border-radius: $radius-md;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: $primary-50;
+    border-color: $primary-500;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    color: $text-primary;
+    line-height: 1;
+  }
+}
+
+.month-year {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+}
+
+// Weekday Headers
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: $spacing-sm;
+}
+
+.weekday {
+  text-align: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  padding: $spacing-xs 0;
+}
+
+// Calendar Grid
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: $white;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: $spacing-xs;
+  position: relative;
+
+  .day-number {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+  }
+
+  .day-price {
+    font-size: 9px;
+    color: $text-secondary;
+    margin-top: 2px;
+  }
+
+  // Available day
+  &.available {
+    &:hover {
+      background: $primary-50;
+      border-color: $primary-300;
+    }
+  }
+
+  // Other month days
+  &.other-month {
+    .day-number {
+      color: $neutral-300;
+    }
+  }
+
+  // Today
+  &.today {
+    border: 2px solid $primary-500;
+
+    .day-number {
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  // Past dates
+  &.past {
+    cursor: not-allowed;
+
+    .day-number {
+      color: $neutral-300;
+    }
+  }
+
+  // Booked dates
+  &.booked {
+    background: rgba($error, 0.1);
+    cursor: not-allowed;
+
+    .day-number {
+      color: $error;
+      text-decoration: line-through;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 2px;
+      background: rgba($error, 0.3);
+    }
+  }
+
+  // Selected (check-in or check-out)
+  &.selected {
+    background: $primary-500;
+
+    .day-number {
+      color: $white;
+      font-weight: $font-weight-bold;
+    }
+
+    .day-price {
+      color: rgba($white, 0.8);
+    }
+  }
+
+  // Check-in specific
+  &.check-in {
+    border-radius: $radius-md 0 0 $radius-md;
+  }
+
+  // Check-out specific
+  &.check-out {
+    border-radius: 0 $radius-md $radius-md 0;
+  }
+
+  // In range (between check-in and check-out)
+  &.in-range {
+    background: $primary-100;
+    border-radius: 0;
+
+    .day-number {
+      color: $primary-700;
+    }
+  }
+}
+
+// Selection Summary
+.selection-summary {
+  margin-top: $spacing-lg;
+  padding: $spacing-md;
+  background: $neutral-50;
+  border-radius: $radius-md;
+}
+
+.date-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.date-item {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  flex: 1;
+}
+
+.date-label {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-value {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+}
+
+.date-separator {
+  color: $text-secondary;
+  padding: 0 $spacing-md;
+  font-size: $font-size-lg;
+}
+
+.stay-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-top: 1px solid $border-color;
+  margin-bottom: $spacing-sm;
+}
+
+.nights {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.total-price {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $primary-500;
+}
+
+.clear-btn {
+  width: 100%;
+  padding: $spacing-sm;
+  background: transparent;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $neutral-100;
+    color: $text-primary;
+  }
+}
+
+// Legend
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-lg;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid $border-color-light;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: $radius-sm;
+  border: 1px solid $border-color;
+
+  &.available {
+    background: $white;
+  }
+
+  &.booked {
+    background: rgba($error, 0.1);
+    border-color: $error;
+  }
+
+  &.selected {
+    background: $primary-500;
+    border-color: $primary-500;
+  }
+}
+
+.legend-label {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+}
+
+// Instructions
+.instructions {
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $primary-500;
+  margin-top: $spacing-md;
+  font-weight: $font-weight-medium;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .availability-calendar {
+    padding: $spacing-md;
+  }
+
+  .calendar-day {
+    .day-price {
+      display: none;
+    }
+  }
+
+  .date-display {
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  .date-separator {
+    transform: rotate(90deg);
+    padding: 0;
+  }
+
+  .calendar-legend {
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
+}
