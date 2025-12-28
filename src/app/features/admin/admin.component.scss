@@ -19,6 +19,7 @@
 .admin-panel__header-content {
   max-width: 1400px;
   margin: 0 auto;
+  text-align: center;
 }
 
 .admin-panel__title {
@@ -41,6 +42,7 @@
 // Tab Navigation
 .admin-panel__tabs {
   display: flex;
+  justify-content: center;
   gap: $spacing-xs;
   background: $white;
   border-bottom: 2px solid $border-color;
@@ -49,6 +51,7 @@
 
   @include respond-to('mobile') {
     padding: 0 $spacing-lg;
+    justify-content: flex-start;
   }
 }
 
