@@ -1,0 +1,350 @@
+@import '../../../../assets/styles/variables';
+
+.booking-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+// Stepper Header
+.stepper-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+}
+
+.step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $spacing-xs;
+  transition: all 0.2s ease;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:not(:disabled):hover {
+    .step-number {
+      background: $primary-100;
+      border-color: $primary-400;
+    }
+  }
+
+  &.active {
+    .step-number {
+      background: $primary-500;
+      border-color: $primary-500;
+      color: $white;
+    }
+
+    .step-label {
+      color: $primary-500;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &.completed {
+    .step-number {
+      background: $success;
+      border-color: $success;
+      color: $white;
+    }
+
+    .step-label {
+      color: $success;
+    }
+  }
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid $border-color;
+  background: $white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  transition: all 0.2s ease;
+}
+
+.check-icon {
+  font-size: $font-size-xs;
+}
+
+.step-label {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  transition: all 0.2s ease;
+}
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background: $border-color;
+  margin: 0 $spacing-xs;
+  transition: background 0.2s ease;
+
+  &.completed {
+    background: $success;
+  }
+}
+
+// Step Content
+.stepper-content {
+  min-height: 200px;
+}
+
+.step-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.step-title {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0;
+  text-align: center;
+}
+
+// Date Summary (Step 2)
+.date-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $neutral-50;
+  border-radius: $radius-md;
+}
+
+.date-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.date-label {
+  font-size: 10px;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-value {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+}
+
+.date-arrow {
+  color: $text-secondary;
+  font-size: $font-size-lg;
+}
+
+// Form Elements
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.form-label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: $spacing-sm;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-500;
+  }
+
+  &::placeholder {
+    color: $text-disabled;
+  }
+}
+
+// Guests Input
+.guests-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  padding: $spacing-sm 0;
+}
+
+.guests-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid $border-color;
+  border-radius: 50%;
+  background: $white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: $primary-50;
+    border-color: $primary-500;
+    color: $primary-500;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.guests-count {
+  min-width: 40px;
+  text-align: center;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+}
+
+.capacity-note {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  text-align: center;
+}
+
+// Booking Summary (Step 3)
+.booking-summary {
+  background: $neutral-50;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-xs 0;
+  border-bottom: 1px solid $border-color-light;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.summary-label {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.summary-value {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+// Price Breakdown
+.price-breakdown {
+  margin-top: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 2px solid $border-color;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  padding: $spacing-xs 0;
+}
+
+.price-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: $spacing-sm;
+  margin-top: $spacing-xs;
+  border-top: 1px solid $border-color;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+}
+
+.total-amount {
+  color: $primary-500;
+  font-size: $font-size-lg;
+}
+
+// Warning Message
+.warning-message {
+  padding: $spacing-sm;
+  background: rgba($warning, 0.1);
+  border: 1px solid rgba($warning, 0.3);
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: darken($warning, 20%);
+  text-align: center;
+}
+
+// Buttons
+.btn {
+  padding: $spacing-sm $spacing-md;
+  border: none;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &--primary {
+    background: $primary-500;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: $primary-600;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &--full {
+    width: 100%;
+  }
+
+  &--large {
+    padding: $spacing-md;
+    font-size: $font-size-base;
+  }
+}
+
+// Confirm Note
+.confirm-note {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  text-align: center;
+  margin: 0;
+}

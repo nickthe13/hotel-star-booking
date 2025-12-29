@@ -1,0 +1,219 @@
+<div class="booking-stepper">
+  <!-- Step Headers -->
+  <div class="stepper-header">
+    <!-- Step 1 -->
+    <button
+      class="step-indicator"
+      [class.active]="currentStep() === 1"
+      [class.completed]="step1Complete() && currentStep() !== 1"
+      (click)="goToStep(1)"
+      type="button"
+    >
+      <span class="step-number">
+        @if (step1Complete() && currentStep() !== 1) {
+          <span class="check-icon">&#10003;</span>
+        } @else {
+          1
+        }
+      </span>
+      <span class="step-label">Dates</span>
+    </button>
+
+    <div class="step-connector" [class.completed]="step1Complete()"></div>
+
+    <!-- Step 2 -->
+    <button
+      class="step-indicator"
+      [class.active]="currentStep() === 2"
+      [class.completed]="step2Complete() && currentStep() !== 2"
+      [disabled]="!step1Complete()"
+      (click)="goToStep(2)"
+      type="button"
+    >
+      <span class="step-number">
+        @if (step2Complete() && currentStep() !== 2) {
+          <span class="check-icon">&#10003;</span>
+        } @else {
+          2
+        }
+      </span>
+      <span class="step-label">Guests</span>
+    </button>
+
+    <div class="step-connector" [class.completed]="step2Complete()"></div>
+
+    <!-- Step 3 -->
+    <button
+      class="step-indicator"
+      [class.active]="currentStep() === 3"
+      [disabled]="!step2Complete()"
+      (click)="goToStep(3)"
+      type="button"
+    >
+      <span class="step-number">3</span>
+      <span class="step-label">Review</span>
+    </button>
+  </div>
+
+  <!-- Step Content -->
+  <div class="stepper-content">
+    <!-- Step 1: Select Dates -->
+    @if (currentStep() === 1) {
+      <div class="step-panel">
+        <h3 class="step-title">Select Your Dates</h3>
+        <app-availability-calendar
+          [pricePerNight]="pricePerNight()"
+          [compact]="true"
+          [showPrice]="false"
+          [initialCheckIn]="checkIn"
+          [initialCheckOut]="checkOut"
+          (dateRangeSelected)="onDateRangeSelected($event)"
+          (dateRangeCleared)="onDateRangeCleared()"
+        ></app-availability-calendar>
+
+        @if (step1Complete()) {
+          <button
+            class="btn btn--primary btn--full"
+            (click)="continueToNext()"
+            type="button"
+          >
+            Continue
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Step 2: Guest Details -->
+    @if (currentStep() === 2) {
+      <div class="step-panel">
+        <h3 class="step-title">Guest Details</h3>
+
+        <!-- Date Summary -->
+        <div class="date-summary">
+          <div class="date-item">
+            <span class="date-label">Check-in</span>
+            <span class="date-value">{{ formatDate(checkIn) }}</span>
+          </div>
+          <span class="date-arrow">&#8594;</span>
+          <div class="date-item">
+            <span class="date-label">Check-out</span>
+            <span class="date-value">{{ formatDate(checkOut) }}</span>
+          </div>
+        </div>
+
+        <!-- Guests Input -->
+        <div class="form-group">
+          <label class="form-label">Number of Guests</label>
+          <div class="guests-input">
+            <button
+              class="guests-btn"
+              [disabled]="guests() <= 1"
+              (click)="updateGuests(guests() - 1)"
+              type="button"
+            >
+              -
+            </button>
+            <span class="guests-count">{{ guests() }}</span>
+            <button
+              class="guests-btn"
+              [disabled]="guests() >= (selectedRoom?.capacity ?? 10)"
+              (click)="updateGuests(guests() + 1)"
+              type="button"
+            >
+              +
+            </button>
+          </div>
+          @if (selectedRoom) {
+            <span class="capacity-note">Max {{ selectedRoom.capacity }} guests for {{ selectedRoom.roomType }}</span>
+          }
+        </div>
+
+        <!-- Special Requests -->
+        <div class="form-group">
+          <label class="form-label">Special Requests (Optional)</label>
+          <textarea
+            class="form-textarea"
+            placeholder="Any special requests or requirements..."
+            [value]="specialRequests()"
+            (input)="updateSpecialRequests($any($event.target).value)"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <button
+          class="btn btn--primary btn--full"
+          (click)="continueToNext()"
+          type="button"
+        >
+          Continue to Review
+        </button>
+      </div>
+    }
+
+    <!-- Step 3: Review & Book -->
+    @if (currentStep() === 3) {
+      <div class="step-panel">
+        <h3 class="step-title">Review Your Booking</h3>
+
+        <div class="booking-summary">
+          <!-- Room -->
+          @if (selectedRoom) {
+            <div class="summary-row">
+              <span class="summary-label">Room</span>
+              <span class="summary-value">{{ selectedRoom.roomType }}</span>
+            </div>
+          }
+
+          <!-- Dates -->
+          <div class="summary-row">
+            <span class="summary-label">Check-in</span>
+            <span class="summary-value">{{ formatDate(checkIn) }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Check-out</span>
+            <span class="summary-value">{{ formatDate(checkOut) }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Duration</span>
+            <span class="summary-value">{{ nights() }} night{{ nights() > 1 ? 's' : '' }}</span>
+          </div>
+
+          <!-- Guests -->
+          <div class="summary-row">
+            <span class="summary-label">Guests</span>
+            <span class="summary-value">{{ guests() }} guest{{ guests() > 1 ? 's' : '' }}</span>
+          </div>
+
+          <!-- Price Breakdown -->
+          <div class="price-breakdown">
+            <div class="price-row">
+              <span>${{ pricePerNight() }} x {{ nights() }} night{{ nights() > 1 ? 's' : '' }}</span>
+              <span>${{ totalPrice() }}</span>
+            </div>
+            <div class="price-total">
+              <span>Total</span>
+              <span class="total-amount">${{ totalPrice() }}</span>
+            </div>
+          </div>
+        </div>
+
+        @if (!selectedRoom) {
+          <div class="warning-message">
+            Please select a room before confirming your booking.
+          </div>
+        }
+
+        <button
+          class="btn btn--primary btn--full btn--large"
+          [disabled]="!canConfirm()"
+          (click)="onConfirmBooking()"
+          type="button"
+        >
+          Confirm & Pay
+        </button>
+
+        <p class="confirm-note">You won't be charged until you complete payment</p>
+      </div>
+    }
+  </div>
+</div>
