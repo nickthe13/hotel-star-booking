@@ -493,3 +493,188 @@
     transform: scale(0.95);
   }
 }
+
+// Cancel Modal with Refund Styles
+.modal--cancel {
+  max-width: 480px;
+}
+
+.cancel-booking-summary {
+  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-lg;
+  border-bottom: 1px solid $border-color-light;
+
+  &__hotel {
+    display: flex;
+    gap: $spacing-md;
+    align-items: center;
+  }
+
+  &__image {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: $radius-md;
+  }
+
+  &__info {
+    flex: 1;
+
+    h4 {
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin: 0 0 $spacing-xs 0;
+    }
+
+    p {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  &__price {
+    font-size: $font-size-lg !important;
+    font-weight: $font-weight-bold;
+    color: $primary-500 !important;
+    margin-top: $spacing-xs !important;
+  }
+}
+
+.refund-info {
+  background: $neutral-50;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0 0 $spacing-md 0;
+  }
+
+  &__note {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    margin-top: $spacing-md !important;
+    margin-bottom: 0 !important;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-color-light;
+  }
+}
+
+.cancellation-policy {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: rgba($success, 0.08);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+  border-left: 4px solid $success;
+
+  &--warning {
+    background: rgba($warning, 0.08);
+    border-left-color: $warning;
+
+    .cancellation-policy__icon {
+      background: $warning;
+    }
+  }
+
+  &__icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    background: $success;
+    color: $white;
+    border-radius: $radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+  }
+
+  &__content {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin-bottom: $spacing-xs;
+    }
+
+    p {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+      margin: 0;
+      line-height: $line-height-relaxed;
+    }
+  }
+}
+
+.refund-breakdown {
+  background: $white;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-sm 0;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid $border-color-light;
+    }
+
+    &--fee {
+      color: $error;
+    }
+
+    &--total {
+      padding-top: $spacing-md;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      font-size: $font-size-base;
+
+      .refund-amount {
+        color: $success;
+        font-size: $font-size-lg;
+      }
+    }
+  }
+}
+
+.cancel-notice {
+  background: $neutral-100;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+
+  p {
+    margin: 0;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+}
+
+// Button spinner for processing state
+.btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($white, 0.3);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: $spacing-xs;
+  vertical-align: middle;
+}

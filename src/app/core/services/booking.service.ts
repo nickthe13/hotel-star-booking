@@ -1,10 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, delay, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
-import { Booking, BookingRequest, BookingConfirmation, BookingStatus } from '../models/booking.model';
+import { Booking, BookingRequest, BookingConfirmation, BookingStatus, CancelBookingResult } from '../models/booking.model';
 import { PaymentTransaction, PaymentStatus } from '../models/payment.model';
 import { AuthService } from './auth.service';
 import { HotelService } from './hotel.service';
@@ -18,7 +18,7 @@ export class BookingService {
   loading = signal<boolean>(false);
   private nextBookingNumber = 3; // Start from 3 since we have 2 initial bookings
 
-  // Mock bookings data
+  // Mock bookings data - includes paid bookings to demonstrate refund flow
   private mockBookings: Booking[] = [
     {
       id: '1',
@@ -35,7 +35,16 @@ export class BookingService {
         name: 'Grand Plaza Hotel',
         image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
         location: 'New York, USA'
-      }
+      },
+      room: {
+        roomType: 'Deluxe Suite'
+      },
+      // Payment info for refund demo
+      isPaid: true,
+      paidAt: new Date('2025-12-01'),
+      paymentTransactionId: 'txn_mock_001',
+      stripePaymentIntentId: 'pi_mock_3MqEWFx9K8k4Y2Z',
+      paymentStatus: PaymentStatus.SUCCEEDED
     },
     {
       id: '2',
@@ -52,7 +61,15 @@ export class BookingService {
         name: 'Sunset Beach Resort',
         image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400',
         location: 'Miami, USA'
-      }
+      },
+      room: {
+        roomType: 'Ocean View'
+      },
+      isPaid: true,
+      paidAt: new Date('2025-11-01'),
+      paymentTransactionId: 'txn_mock_002',
+      stripePaymentIntentId: 'pi_mock_2AbCDx7H9k3L5N',
+      paymentStatus: PaymentStatus.SUCCEEDED
     }
   ];
 
@@ -264,6 +281,75 @@ export class BookingService {
       booking.status = BookingStatus.CANCELLED;
     }
     return of(undefined);
+  }
+
+  /**
+   * Cancel booking and process Stripe refund
+   * This demonstrates the full transaction lifecycle
+   */
+  cancelBookingWithRefund(id: string, refundAmount: number): Observable<CancelBookingResult> {
+    // In production, this would call the backend which handles both cancellation and refund:
+    // return this.http.post<CancelBookingResult>(`${this.API_URL}${API_ENDPOINTS.bookings}/${id}/cancel-with-refund`, {
+    //   refundAmount
+    // });
+
+    // Mock implementation that simulates Stripe refund API call
+    const booking = this.mockBookings.find(b => b.id === id);
+
+    if (!booking) {
+      return throwError(() => new Error('Booking not found'));
+    }
+
+    if (!booking.isPaid) {
+      return throwError(() => new Error('Booking has not been paid'));
+    }
+
+    if (booking.status === BookingStatus.CANCELLED) {
+      return throwError(() => new Error('Booking is already cancelled'));
+    }
+
+    // Simulate API delay for realistic UX (shows "Processing refund..." state)
+    return of(null).pipe(
+      delay(1500), // Simulate Stripe API call
+      map(() => {
+        // Update booking status
+        booking.status = BookingStatus.CANCELLED;
+        booking.paymentStatus = refundAmount === booking.totalPrice
+          ? PaymentStatus.REFUNDED
+          : PaymentStatus.PARTIALLY_REFUNDED;
+        booking.refundedAt = new Date();
+        booking.refundAmount = refundAmount;
+
+        // Generate mock refund response (mimics Stripe refund object)
+        const refundResult: CancelBookingResult = {
+          booking: booking,
+          refund: {
+            refundId: `re_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            amount: refundAmount,
+            status: 'succeeded'
+          },
+          message: refundAmount === booking.totalPrice
+            ? 'Full refund processed successfully'
+            : 'Partial refund processed successfully (late cancellation policy applied)'
+        };
+
+        // Update the payment transaction in PaymentService
+        if (booking.paymentTransactionId) {
+          const transactions = this.paymentService.getMockTransactions();
+          const transaction = transactions.find(t => t.id === booking.paymentTransactionId);
+          if (transaction) {
+            transaction.status = booking.paymentStatus;
+            transaction.refundAmount = refundAmount;
+            transaction.refundedAt = new Date();
+            transaction.refundReason = refundAmount < booking.totalPrice
+              ? 'Late cancellation - 50% refund per cancellation policy'
+              : 'Customer requested cancellation';
+          }
+        }
+
+        return refundResult;
+      })
+    );
   }
 
   updateBooking(id: string, updates: Partial<BookingRequest>): Observable<Booking> {

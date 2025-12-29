@@ -21,10 +21,13 @@ export interface Booking {
     roomType: string;
   };
   paymentTransactionId?: string;
+  stripePaymentIntentId?: string;
   paymentStatus?: PaymentStatus;
   paymentMethod?: SavedPaymentMethodInfo;
   isPaid?: boolean;
   paidAt?: Date;
+  refundedAt?: Date;
+  refundAmount?: number;
 }
 
 export enum BookingStatus {
@@ -51,4 +54,14 @@ export interface BookingConfirmation {
   message: string;
   paymentTransaction?: PaymentTransaction;
   requiresPayment?: boolean;
+}
+
+export interface CancelBookingResult {
+  booking: Booking;
+  refund?: {
+    refundId: string;
+    amount: number;
+    status: string;
+  };
+  message: string;
 }

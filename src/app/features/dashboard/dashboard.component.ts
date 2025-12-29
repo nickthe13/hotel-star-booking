@@ -1,10 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BookingService } from '../../core/services/booking.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PaymentService } from '../../core/services/payment.service';
 import { Booking, BookingStatus } from '../../core/models/booking.model';
-import { PaymentStatus } from '../../core/models/payment.model';
+import { PaymentStatus, RefundResponse } from '../../core/models/payment.model';
 import { LoyaltyCardComponent } from '../../shared/components/loyalty-card/loyalty-card.component';
 
 @Component({
@@ -21,12 +22,39 @@ export class DashboardComponent implements OnInit {
   successMessage = signal<string>('');
   showCancelModal = signal<boolean>(false);
   bookingToCancel = signal<string | null>(null);
+  refundResult = signal<RefundResponse | null>(null);
+  processingRefund = signal<boolean>(false);
   BookingStatus = BookingStatus;
   PaymentStatus = PaymentStatus;
 
+  // Computed property to get the booking being cancelled
+  bookingToCancelDetails = computed(() => {
+    const bookingId = this.bookingToCancel();
+    if (!bookingId) return null;
+    return this.bookings().find(b => b.id === bookingId) || null;
+  });
+
+  // Check if cancellation is within 24 hours of check-in
+  isWithin24Hours = computed(() => {
+    const booking = this.bookingToCancelDetails();
+    if (!booking) return false;
+    const checkInDate = new Date(booking.checkIn);
+    const now = new Date();
+    const hoursUntilCheckIn = (checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return hoursUntilCheckIn < 24 && hoursUntilCheckIn > 0;
+  });
+
+  // Calculate refund amount (full refund if > 24hrs, 50% if within 24hrs)
+  refundAmount = computed(() => {
+    const booking = this.bookingToCancelDetails();
+    if (!booking || !booking.isPaid) return 0;
+    return this.isWithin24Hours() ? booking.totalPrice * 0.5 : booking.totalPrice;
+  });
+
   constructor(
     private bookingService: BookingService,
-    public authService: AuthService
+    public authService: AuthService,
+    private paymentService: PaymentService
   ) {}
 
   ngOnInit(): void {
@@ -57,41 +85,72 @@ export class DashboardComponent implements OnInit {
   closeCancelModal(): void {
     this.showCancelModal.set(false);
     this.bookingToCancel.set(null);
+    this.refundResult.set(null);
+    this.processingRefund.set(false);
   }
 
   confirmCancelBooking(): void {
     const bookingId = this.bookingToCancel();
-    if (!bookingId) return;
+    const booking = this.bookingToCancelDetails();
+    if (!bookingId || !booking) return;
 
     this.cancellingBookingId.set(bookingId);
     this.error.set('');
 
-    this.bookingService.cancelBooking(bookingId).subscribe({
-      next: () => {
-        this.cancellingBookingId.set(null);
-        this.closeCancelModal();
-        this.successMessage.set('Booking cancelled successfully! It will be removed shortly.');
-        this.loadBookings();
+    // If booking is paid, process refund first
+    if (booking.isPaid && booking.stripePaymentIntentId) {
+      this.processingRefund.set(true);
+      const refundAmount = this.refundAmount();
 
-        // Remove the cancelled booking after 3 seconds
-        setTimeout(() => {
-          this.bookingService.removeBooking(bookingId).subscribe({
-            next: () => {
-              this.loadBookings();
-            }
-          });
-        }, 3000);
+      this.bookingService.cancelBookingWithRefund(bookingId, refundAmount).subscribe({
+        next: (result) => {
+          this.cancellingBookingId.set(null);
+          this.processingRefund.set(false);
+          this.refundResult.set(result.refund || null);
 
-        // Clear success message after 5 seconds
-        setTimeout(() => {
-          this.successMessage.set('');
-        }, 5000);
-      },
-      error: () => {
-        this.cancellingBookingId.set(null);
-        this.error.set('Failed to cancel booking. Please try again.');
-      }
-    });
+          const refundMessage = this.isWithin24Hours()
+            ? `Booking cancelled. 50% refund of ${this.formatCurrency(refundAmount)} processed (late cancellation fee applied).`
+            : `Booking cancelled. Full refund of ${this.formatCurrency(refundAmount)} processed.`;
+
+          this.successMessage.set(refundMessage);
+          this.loadBookings();
+          this.closeCancelModal();
+
+          // Clear success message after 8 seconds (longer to read refund details)
+          setTimeout(() => {
+            this.successMessage.set('');
+          }, 8000);
+        },
+        error: (err) => {
+          this.cancellingBookingId.set(null);
+          this.processingRefund.set(false);
+          this.error.set(err.message || 'Failed to process refund. Please contact support.');
+        }
+      });
+    } else {
+      // No payment to refund, just cancel
+      this.bookingService.cancelBooking(bookingId).subscribe({
+        next: () => {
+          this.cancellingBookingId.set(null);
+          this.closeCancelModal();
+          this.successMessage.set('Booking cancelled successfully!');
+          this.loadBookings();
+
+          // Clear success message after 5 seconds
+          setTimeout(() => {
+            this.successMessage.set('');
+          }, 5000);
+        },
+        error: () => {
+          this.cancellingBookingId.set(null);
+          this.error.set('Failed to cancel booking. Please try again.');
+        }
+      });
+    }
+  }
+
+  getRefundPercentage(): number {
+    return this.isWithin24Hours() ? 50 : 100;
   }
 
   getStatusClass(status: BookingStatus): string {

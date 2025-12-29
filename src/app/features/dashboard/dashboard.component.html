@@ -155,16 +155,82 @@
   </div>
 </div>
 
-<!-- Cancel Confirmation Modal -->
+<!-- Cancel Confirmation Modal with Refund Details -->
 @if (showCancelModal()) {
   <div class="modal-overlay" (click)="closeCancelModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal--cancel" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h3 class="modal__title">Cancel Booking</h3>
-        <button class="modal__close" (click)="closeCancelModal()">×</button>
+        <button class="modal__close" (click)="closeCancelModal()" [disabled]="processingRefund()">×</button>
       </div>
       <div class="modal__body">
-        <p>Are you sure you want to cancel this booking?</p>
+        <!-- Booking Summary -->
+        @if (bookingToCancelDetails(); as booking) {
+          <div class="cancel-booking-summary">
+            <div class="cancel-booking-summary__hotel">
+              @if (booking.hotel) {
+                <img [src]="booking.hotel.image" [alt]="booking.hotel.name" class="cancel-booking-summary__image" />
+                <div class="cancel-booking-summary__info">
+                  <h4>{{ booking.hotel.name }}</h4>
+                  <p>{{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}</p>
+                  <p class="cancel-booking-summary__price">{{ formatCurrency(booking.totalPrice) }}</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Refund Information (for paid bookings) -->
+          @if (booking.isPaid) {
+            <div class="refund-info">
+              <h4 class="refund-info__title">Refund Details</h4>
+
+              <!-- Cancellation Policy -->
+              <div class="cancellation-policy" [class.cancellation-policy--warning]="isWithin24Hours()">
+                @if (isWithin24Hours()) {
+                  <span class="cancellation-policy__icon">!</span>
+                  <div class="cancellation-policy__content">
+                    <strong>Late Cancellation</strong>
+                    <p>Cancelling within 24 hours of check-in. A 50% cancellation fee applies.</p>
+                  </div>
+                } @else {
+                  <span class="cancellation-policy__icon cancellation-policy__icon--success">OK</span>
+                  <div class="cancellation-policy__content">
+                    <strong>Free Cancellation</strong>
+                    <p>You're cancelling more than 24 hours before check-in. Full refund applies.</p>
+                  </div>
+                }
+              </div>
+
+              <!-- Refund Breakdown -->
+              <div class="refund-breakdown">
+                <div class="refund-breakdown__row">
+                  <span>Original Payment</span>
+                  <span>{{ formatCurrency(booking.totalPrice) }}</span>
+                </div>
+                @if (isWithin24Hours()) {
+                  <div class="refund-breakdown__row refund-breakdown__row--fee">
+                    <span>Late Cancellation Fee (50%)</span>
+                    <span>-{{ formatCurrency(booking.totalPrice * 0.5) }}</span>
+                  </div>
+                }
+                <div class="refund-breakdown__row refund-breakdown__row--total">
+                  <span>Refund Amount</span>
+                  <span class="refund-amount">{{ formatCurrency(refundAmount()) }}</span>
+                </div>
+              </div>
+
+              <p class="refund-info__note">
+                Refund will be processed to your original payment method within 5-10 business days.
+              </p>
+            </div>
+          } @else {
+            <!-- Non-paid booking -->
+            <div class="cancel-notice">
+              <p>This booking has not been paid yet. No refund is required.</p>
+            </div>
+          }
+        }
+
         <p class="modal__warning">This action cannot be undone.</p>
       </div>
       <div class="modal__footer">
@@ -180,8 +246,13 @@
           (click)="confirmCancelBooking()"
           [disabled]="cancellingBookingId() !== null"
         >
-          @if (cancellingBookingId()) {
+          @if (processingRefund()) {
+            <span class="btn-spinner"></span>
+            Processing Refund...
+          } @else if (cancellingBookingId()) {
             Cancelling...
+          } @else if (bookingToCancelDetails()?.isPaid) {
+            Cancel & Refund {{ formatCurrency(refundAmount()) }}
           } @else {
             Yes, Cancel Booking
           }
