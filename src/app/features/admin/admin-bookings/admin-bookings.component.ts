@@ -336,8 +336,11 @@ export class AdminBookingsComponent implements OnInit {
       [BookingStatus.PENDING_PAYMENT]: '<span class="badge badge--warning">Pending Payment</span>',
       [BookingStatus.PENDING]: '<span class="badge badge--warning">Pending</span>',
       [BookingStatus.CONFIRMED]: '<span class="badge badge--success">Confirmed</span>',
+      [BookingStatus.CHECKED_IN]: '<span class="badge badge--primary">Checked In</span>',
+      [BookingStatus.CHECKED_OUT]: '<span class="badge badge--info">Checked Out</span>',
       [BookingStatus.CANCELLED]: '<span class="badge badge--danger">Cancelled</span>',
-      [BookingStatus.COMPLETED]: '<span class="badge badge--info">Completed</span>'
+      [BookingStatus.COMPLETED]: '<span class="badge badge--info">Completed</span>',
+      [BookingStatus.NO_SHOW]: '<span class="badge badge--danger">No Show</span>'
     };
     return badges[status] || status;
   }
@@ -350,10 +353,16 @@ export class AdminBookingsComponent implements OnInit {
         return 'badge--success';
       case BookingStatus.PENDING:
         return 'badge--warning';
+      case BookingStatus.CHECKED_IN:
+        return 'badge--primary';
+      case BookingStatus.CHECKED_OUT:
+        return 'badge--info';
       case BookingStatus.CANCELLED:
         return 'badge--danger';
       case BookingStatus.COMPLETED:
         return 'badge--info';
+      case BookingStatus.NO_SHOW:
+        return 'badge--danger';
       default:
         return '';
     }

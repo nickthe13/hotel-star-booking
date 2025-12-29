@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   LoyaltyAccount,
@@ -20,228 +20,241 @@ import {
   providedIn: 'root',
 })
 export class LoyaltyService {
-  private readonly API_URL = `${environment.apiUrl}/${environment.apiVersion}`;
+  private readonly API_URL = environment.apiUrl;
 
   loyaltyAccount = signal<LoyaltyAccount | null>(null);
   tierProgress = signal<TierProgress | null>(null);
   loading = signal<boolean>(false);
 
-  // Mock data for development
-  private mockAccount: LoyaltyAccount = {
-    id: 'loyalty-1',
-    userId: '1',
-    currentPoints: 1250,
-    lifetimePoints: 3500,
-    lifetimeSpending: 2150,
-    tier: LoyaltyTier.GOLD,
-    tierUpdatedAt: '2025-10-15T10:00:00Z',
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-12-28T00:00:00Z',
-  };
-
-  private mockTransactions: LoyaltyTransaction[] = [
-    {
-      id: 'txn-1',
-      loyaltyAccountId: 'loyalty-1',
-      bookingId: '1',
-      type: LoyaltyTransactionType.EARN,
-      points: 188,
-      description: 'Points earned for booking at Grand Plaza Hotel',
-      balanceAfter: 1250,
-      createdAt: '2025-12-15T14:30:00Z',
-      booking: {
-        id: '1',
-        checkIn: '2025-12-15',
-        checkOut: '2025-12-20',
-        room: {
-          name: 'Deluxe Suite',
-          hotel: { name: 'Grand Plaza Hotel' },
-        },
-      },
-    },
-    {
-      id: 'txn-2',
-      loyaltyAccountId: 'loyalty-1',
-      type: LoyaltyTransactionType.BONUS,
-      points: 0,
-      description: 'Tier upgraded from Silver to Gold',
-      balanceAfter: 1062,
-      createdAt: '2025-10-15T10:00:00Z',
-      metadata: { previousTier: 'SILVER', newTier: 'GOLD' },
-    },
-    {
-      id: 'txn-3',
-      loyaltyAccountId: 'loyalty-1',
-      bookingId: '2',
-      type: LoyaltyTransactionType.REDEEM,
-      points: -500,
-      description: 'Redeemed 500 points for $5.00 discount',
-      balanceAfter: 1062,
-      createdAt: '2025-11-10T09:00:00Z',
-      booking: {
-        id: '2',
-        checkIn: '2025-11-10',
-        checkOut: '2025-11-15',
-        room: {
-          name: 'Ocean View Room',
-          hotel: { name: 'Sunset Beach Resort' },
-        },
-      },
-    },
-    {
-      id: 'txn-4',
-      loyaltyAccountId: 'loyalty-1',
-      bookingId: '2',
-      type: LoyaltyTransactionType.EARN,
-      points: 1125,
-      description: 'Points earned for booking at Sunset Beach Resort',
-      balanceAfter: 1562,
-      createdAt: '2025-11-10T09:00:00Z',
-      booking: {
-        id: '2',
-        checkIn: '2025-11-10',
-        checkOut: '2025-11-15',
-        room: {
-          name: 'Ocean View Room',
-          hotel: { name: 'Sunset Beach Resort' },
-        },
-      },
-    },
-  ];
-
   constructor(private http: HttpClient) {}
 
-  getAccount(): Observable<LoyaltyAccount> {
-    // In production:
-    // return this.http.get<LoyaltyAccount>(`${this.API_URL}/loyalty/account`).pipe(
-    //   tap(account => this.loyaltyAccount.set(account))
-    // );
+  private mapAccountFromApi(apiAccount: any): LoyaltyAccount {
+    return {
+      id: apiAccount.id,
+      userId: apiAccount.userId,
+      currentPoints: apiAccount.currentPoints || 0,
+      lifetimePoints: apiAccount.lifetimePoints || 0,
+      lifetimeSpending: apiAccount.lifetimeSpending || 0,
+      tier: apiAccount.tier as LoyaltyTier,
+      tierUpdatedAt: apiAccount.tierUpdatedAt,
+      createdAt: apiAccount.createdAt,
+      updatedAt: apiAccount.updatedAt,
+    };
+  }
 
-    this.loyaltyAccount.set(this.mockAccount);
-    return of(this.mockAccount);
+  private mapTransactionFromApi(apiTransaction: any): LoyaltyTransaction {
+    return {
+      id: apiTransaction.id,
+      loyaltyAccountId: apiTransaction.loyaltyAccountId,
+      bookingId: apiTransaction.bookingId,
+      type: apiTransaction.type as LoyaltyTransactionType,
+      points: apiTransaction.points,
+      description: apiTransaction.description,
+      balanceAfter: apiTransaction.balanceAfter,
+      createdAt: apiTransaction.createdAt,
+      metadata: apiTransaction.metadata,
+      booking: apiTransaction.booking ? {
+        id: apiTransaction.booking.id,
+        checkIn: apiTransaction.booking.checkIn,
+        checkOut: apiTransaction.booking.checkOut,
+        room: apiTransaction.booking.room ? {
+          name: apiTransaction.booking.room.name,
+          hotel: apiTransaction.booking.room.hotel ? {
+            name: apiTransaction.booking.room.hotel.name
+          } : undefined
+        } : undefined
+      } : undefined
+    };
+  }
+
+  getAccount(): Observable<LoyaltyAccount> {
+    this.loading.set(true);
+
+    return this.http.get<any>(`${this.API_URL}/loyalty/account`).pipe(
+      map(response => this.mapAccountFromApi(response)),
+      tap(account => {
+        this.loyaltyAccount.set(account);
+        this.loading.set(false);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.loading.set(false);
+        // Return a default account for new users
+        const defaultAccount: LoyaltyAccount = {
+          id: '',
+          userId: '',
+          currentPoints: 0,
+          lifetimePoints: 0,
+          lifetimeSpending: 0,
+          tier: LoyaltyTier.BRONZE,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        this.loyaltyAccount.set(defaultAccount);
+        return of(defaultAccount);
+      })
+    );
   }
 
   getAccountWithDetails(): Observable<LoyaltyAccountWithDetails> {
-    // In production:
-    // return this.http.get<LoyaltyAccountWithDetails>(`${this.API_URL}/loyalty/account/details`);
+    this.loading.set(true);
 
-    const tierProgress = this.calculateTierProgress(this.mockAccount);
-    const recentTransactions = this.mockTransactions.slice(0, 5);
+    return this.http.get<any>(`${this.API_URL}/loyalty/account`).pipe(
+      map(response => {
+        const account = this.mapAccountFromApi(response);
+        const tierProgress = this.calculateTierProgress(account);
+        const recentTransactions = (response.transactions || [])
+          .slice(0, 5)
+          .map((t: any) => this.mapTransactionFromApi(t));
 
-    return of({
-      ...this.mockAccount,
-      tierProgress,
-      recentTransactions,
-    });
+        return {
+          ...account,
+          tierProgress,
+          recentTransactions,
+        };
+      }),
+      tap(() => this.loading.set(false)),
+      catchError((error: HttpErrorResponse) => {
+        this.loading.set(false);
+        // Return default for new users
+        const defaultAccount: LoyaltyAccountWithDetails = {
+          id: '',
+          userId: '',
+          currentPoints: 0,
+          lifetimePoints: 0,
+          lifetimeSpending: 0,
+          tier: LoyaltyTier.BRONZE,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tierProgress: this.calculateTierProgress({
+            id: '',
+            userId: '',
+            currentPoints: 0,
+            lifetimePoints: 0,
+            lifetimeSpending: 0,
+            tier: LoyaltyTier.BRONZE,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }),
+          recentTransactions: [],
+        };
+        return of(defaultAccount);
+      })
+    );
   }
 
   getTierProgress(): Observable<TierProgress> {
-    // In production:
-    // return this.http.get<TierProgress>(`${this.API_URL}/loyalty/tier-progress`).pipe(
-    //   tap(progress => this.tierProgress.set(progress))
-    // );
-
-    const progress = this.calculateTierProgress(this.mockAccount);
-    this.tierProgress.set(progress);
-    return of(progress);
+    return this.getAccount().pipe(
+      map(account => {
+        const progress = this.calculateTierProgress(account);
+        this.tierProgress.set(progress);
+        return progress;
+      })
+    );
   }
 
-  getTransactions(
-    page = 1,
-    limit = 20
-  ): Observable<PaginatedTransactions> {
-    // In production:
-    // return this.http.get<PaginatedTransactions>(
-    //   `${this.API_URL}/loyalty/transactions?page=${page}&limit=${limit}`
-    // );
-
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const transactions = this.mockTransactions.slice(start, end);
-
-    return of({
-      transactions,
-      total: this.mockTransactions.length,
-      page,
-      totalPages: Math.ceil(this.mockTransactions.length / limit),
-    });
+  getTransactions(page = 1, limit = 20): Observable<PaginatedTransactions> {
+    return this.http.get<any>(`${this.API_URL}/loyalty/transactions`, {
+      params: { page: page.toString(), limit: limit.toString() }
+    }).pipe(
+      map(response => ({
+        transactions: (response.transactions || response.data || []).map((t: any) => this.mapTransactionFromApi(t)),
+        total: response.total || 0,
+        page: response.page || page,
+        totalPages: response.totalPages || Math.ceil((response.total || 0) / limit),
+      })),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error fetching transactions:', error);
+        return of({
+          transactions: [],
+          total: 0,
+          page,
+          totalPages: 0,
+        });
+      })
+    );
   }
 
   calculateRedemption(bookingAmount: number): Observable<RedemptionCalculation> {
-    // In production:
-    // return this.http.post<RedemptionCalculation>(
-    //   `${this.API_URL}/loyalty/calculate-redemption`,
-    //   { bookingAmount }
-    // );
+    return this.http.post<any>(`${this.API_URL}/loyalty/calculate-redemption`, {
+      bookingAmount
+    }).pipe(
+      map(response => ({
+        maxPoints: response.maxPoints || 0,
+        maxDiscount: response.maxDiscount || 0,
+        currentPoints: response.currentPoints || this.loyaltyAccount()?.currentPoints || 0,
+      })),
+      catchError(() => {
+        // Fallback to client-side calculation
+        const currentPoints = this.loyaltyAccount()?.currentPoints || 0;
+        const maxDiscountAllowed = bookingAmount * POINTS_CONFIG.MAX_REDEMPTION_PERCENTAGE;
+        const maxPointsForDiscount = maxDiscountAllowed * POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO;
+        const maxPoints = Math.min(currentPoints, Math.floor(maxPointsForDiscount));
+        const maxDiscount = maxPoints / POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO;
 
-    const currentPoints = this.mockAccount.currentPoints;
-    const maxDiscountAllowed = bookingAmount * POINTS_CONFIG.MAX_REDEMPTION_PERCENTAGE;
-    const maxPointsForDiscount = maxDiscountAllowed * POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO;
-    const maxPoints = Math.min(currentPoints, Math.floor(maxPointsForDiscount));
-    const maxDiscount = maxPoints / POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO;
-
-    return of({
-      maxPoints,
-      maxDiscount,
-      currentPoints,
-    });
+        return of({
+          maxPoints,
+          maxDiscount,
+          currentPoints,
+        });
+      })
+    );
   }
 
   redeemPoints(
     bookingId: string,
     points: number
   ): Observable<{ pointsRedeemed: number; discountAmount: number }> {
-    // In production:
-    // return this.http.post<{ pointsRedeemed: number; discountAmount: number }>(
-    //   `${this.API_URL}/loyalty/redeem`,
-    //   { bookingId, points }
-    // );
-
-    const discountAmount = points / POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO;
-
-    // Update mock data
-    this.mockAccount.currentPoints -= points;
-    this.loyaltyAccount.set({ ...this.mockAccount });
-
-    // Add transaction
-    const newTransaction: LoyaltyTransaction = {
-      id: `txn-${Date.now()}`,
-      loyaltyAccountId: this.mockAccount.id,
+    return this.http.post<any>(`${this.API_URL}/loyalty/redeem`, {
       bookingId,
-      type: LoyaltyTransactionType.REDEEM,
-      points: -points,
-      description: `Redeemed ${points} points for $${discountAmount.toFixed(2)} discount`,
-      balanceAfter: this.mockAccount.currentPoints,
-      createdAt: new Date().toISOString(),
-    };
-    this.mockTransactions.unshift(newTransaction);
-
-    return of({
-      pointsRedeemed: points,
-      discountAmount,
-    });
+      points
+    }).pipe(
+      tap(response => {
+        // Update local account after redemption
+        const account = this.loyaltyAccount();
+        if (account) {
+          this.loyaltyAccount.set({
+            ...account,
+            currentPoints: account.currentPoints - points,
+          });
+        }
+      }),
+      map(response => ({
+        pointsRedeemed: response.pointsRedeemed || points,
+        discountAmount: response.discountAmount || (points / POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO),
+      })),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to redeem points';
+        return throwError(() => new Error(message));
+      })
+    );
   }
 
   applyPointsToBooking(
     bookingId: string,
     points: number
   ): Observable<{ discountAmount: number; newTotal: number }> {
-    // In production:
-    // return this.http.post<{ discountAmount: number; newTotal: number }>(
-    //   `${this.API_URL}/bookings/${bookingId}/apply-points`,
-    //   { points }
-    // );
-
-    const discountAmount = points / POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO;
-
-    // Update mock data
-    this.mockAccount.currentPoints -= points;
-    this.loyaltyAccount.set({ ...this.mockAccount });
-
-    return of({
-      discountAmount,
-      newTotal: 0, // Would be calculated based on actual booking
-    });
+    return this.http.post<any>(`${this.API_URL}/bookings/${bookingId}/apply-points`, {
+      points
+    }).pipe(
+      tap(response => {
+        // Update local account after redemption
+        const account = this.loyaltyAccount();
+        if (account) {
+          this.loyaltyAccount.set({
+            ...account,
+            currentPoints: account.currentPoints - points,
+          });
+        }
+      }),
+      map(response => ({
+        discountAmount: response.discountAmount || (points / POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO),
+        newTotal: response.newTotal || 0,
+      })),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to apply points';
+        return throwError(() => new Error(message));
+      })
+    );
   }
 
   // Helper methods

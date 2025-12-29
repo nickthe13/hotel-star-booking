@@ -28,14 +28,21 @@ export interface Booking {
   paidAt?: Date;
   refundedAt?: Date;
   refundAmount?: number;
+  // Loyalty fields
+  pointsEarned?: number;
+  pointsRedeemed?: number;
+  discountFromPoints?: number;
 }
 
 export enum BookingStatus {
-  PENDING_PAYMENT = 'pending_payment',
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed'
+  PENDING_PAYMENT = 'PENDING_PAYMENT',
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CHECKED_IN = 'CHECKED_IN',
+  CHECKED_OUT = 'CHECKED_OUT',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED',
+  NO_SHOW = 'NO_SHOW'
 }
 
 export interface BookingRequest {
@@ -45,6 +52,9 @@ export interface BookingRequest {
   checkOut: string;
   guests: number;
   specialRequests?: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
 }
 
 export interface BookingConfirmation {

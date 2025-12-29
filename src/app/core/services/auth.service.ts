@@ -1,7 +1,8 @@
 import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of, delay, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { map, catchError, tap } from 'rxjs/operators';
 import { User, AuthResponse, LoginRequest, RegisterRequest, UserRole } from '../models';
 import { STORAGE_KEYS } from '../constants/api.constants';
 import { SecureStorageService } from '../security/secure-storage.service';
@@ -9,13 +10,16 @@ import { RateLimiterService } from '../security/rate-limiter.service';
 import { InputSanitizer } from '../security/input-sanitizer';
 import { SecurityMessages, SecurityConfig } from '../security/security.config';
 import { LoggerService } from './logger.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly API_URL = environment.apiUrl;
   private currentUser = signal<User | null>(null);
   private token = signal<string | null>(null);
+  private refreshTokenValue = signal<string | null>(null);
 
   // Public computed signals
   readonly user = computed(() => this.currentUser());
@@ -23,6 +27,7 @@ export class AuthService {
   readonly isAdmin = computed(() => this.currentUser()?.role === UserRole.ADMIN);
 
   constructor(
+    private http: HttpClient,
     private router: Router,
     private secureStorage: SecureStorageService,
     private rateLimiter: RateLimiterService,
@@ -33,24 +38,26 @@ export class AuthService {
 
   private loadUserFromStorage(): void {
     try {
-      // Use secure storage instead of localStorage
       const storedUser = this.secureStorage.getItem<User>(STORAGE_KEYS.USER);
       const storedToken = this.secureStorage.getItem<string>(STORAGE_KEYS.TOKEN);
+      const storedRefreshToken = this.secureStorage.getItem<string>(STORAGE_KEYS.REFRESH_TOKEN);
 
       if (storedUser && storedToken) {
-        // Validate stored data integrity
         if (!this.validateUserData(storedUser)) {
           throw new Error('Invalid user data');
         }
 
         this.currentUser.set(storedUser);
         this.token.set(storedToken);
+        this.refreshTokenValue.set(storedRefreshToken);
 
-        // Check if token is expired
-        if (this.isTokenExpired()) {
-          this.logger.warn('Stored token is expired, logging out...');
-          this.logout();
-        }
+        // Verify token is still valid by calling /auth/me
+        this.verifyToken().subscribe({
+          error: () => {
+            this.logger.warn('Token verification failed, attempting refresh...');
+            this.tryRefreshToken();
+          }
+        });
       }
     } catch (error) {
       this.logger.error('Error loading user from storage:', error);
@@ -66,6 +73,32 @@ export class AuthService {
       user.name &&
       user.role
     );
+  }
+
+  private verifyToken(): Observable<User> {
+    return this.http.get<User>(`${this.API_URL}/auth/me`).pipe(
+      tap(user => {
+        this.currentUser.set(user);
+        this.secureStorage.setItem(STORAGE_KEYS.USER, user);
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+
+  private tryRefreshToken(): void {
+    const refreshToken = this.refreshTokenValue();
+    if (refreshToken) {
+      this.refreshToken().subscribe({
+        error: () => {
+          this.logger.warn('Token refresh failed, logging out...');
+          this.logout();
+        }
+      });
+    } else {
+      this.logout();
+    }
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
@@ -85,44 +118,30 @@ export class AuthService {
         return throwError(() => new Error('Invalid credentials'));
       }
 
-      // Simulate API call
-      return of(null).pipe(
-        delay(800),
-        map(() => {
-          // Mock successful login
-          if (sanitizedEmail && credentials.password) {
-            const user: User = {
-              id: '1',
-              email: sanitizedEmail,
-              name: InputSanitizer.sanitizeString(sanitizedEmail.split('@')[0]),
-              role: sanitizedEmail.includes('admin') ? UserRole.ADMIN : UserRole.USER,
-              createdAt: new Date()
-            };
+      // Make API call to backend
+      return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, {
+        email: sanitizedEmail,
+        password: credentials.password
+      }).pipe(
+        tap(response => {
+          // Reset rate limiter on successful login
+          this.rateLimiter.resetLoginAttempts(sanitizedEmail);
 
-            const token = this.generateMockToken();
-            const refreshToken = this.generateMockToken();
+          // Map backend response to our User model
+          const user: User = {
+            id: response.user.id,
+            email: response.user.email,
+            name: response.user.name,
+            role: response.user.role as UserRole,
+            createdAt: new Date(response.user.createdAt)
+          };
 
-            const authResponse: AuthResponse = {
-              user,
-              token,
-              refreshToken
-            };
-
-            // Reset rate limiter on successful login
-            this.rateLimiter.resetLoginAttempts(sanitizedEmail);
-
-            this.setAuthData(user, token);
-            return authResponse;
-          }
-
-          // Record failed login
-          this.rateLimiter.recordFailedLogin(sanitizedEmail);
-          throw new Error('Invalid credentials');
+          this.setAuthData(user, response.token, response.refreshToken);
         }),
-        catchError(error => {
-          // Record failed login on error
+        catchError((error: HttpErrorResponse) => {
           this.rateLimiter.recordFailedLogin(sanitizedEmail);
-          return throwError(() => error);
+          const message = error.error?.message || 'Invalid email or password';
+          return throwError(() => new Error(message));
         })
       );
     } catch (error) {
@@ -142,38 +161,27 @@ export class AuthService {
         return throwError(() => new Error(passwordValidation.errors.join('. ')));
       }
 
-      // Simulate API call
-      return of(null).pipe(
-        delay(800),
-        map(() => {
-          // Check if user already exists (mock)
-          const existingUser = this.secureStorage.getItem<any>(`user_${sanitizedEmail}`);
-          if (existingUser) {
-            throw new Error('User already exists');
-          }
-
+      // Make API call to backend
+      return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, {
+        email: sanitizedEmail,
+        name: sanitizedName,
+        password: data.password
+      }).pipe(
+        tap(response => {
+          // Map backend response to our User model
           const user: User = {
-            id: Date.now().toString(),
-            email: sanitizedEmail,
-            name: sanitizedName,
-            role: UserRole.USER,
-            createdAt: new Date()
+            id: response.user.id,
+            email: response.user.email,
+            name: response.user.name,
+            role: response.user.role as UserRole,
+            createdAt: new Date(response.user.createdAt)
           };
 
-          const token = this.generateMockToken();
-          const refreshToken = this.generateMockToken();
-
-          const authResponse: AuthResponse = {
-            user,
-            token,
-            refreshToken
-          };
-
-          // Store user in mock database using secure storage
-          this.secureStorage.setItem(`user_${sanitizedEmail}`, { ...data, user });
-
-          this.setAuthData(user, token);
-          return authResponse;
+          this.setAuthData(user, response.token, response.refreshToken);
+        }),
+        catchError((error: HttpErrorResponse) => {
+          const message = error.error?.message || 'Registration failed. Please try again.';
+          return throwError(() => new Error(message));
         })
       );
     } catch (error) {
@@ -184,6 +192,7 @@ export class AuthService {
   logout(): void {
     this.currentUser.set(null);
     this.token.set(null);
+    this.refreshTokenValue.set(null);
 
     // Clear secure storage
     if (SecurityConfig.dataProtection.clearDataOnLogout) {
@@ -200,14 +209,23 @@ export class AuthService {
     this.router.navigate(['/home']);
   }
 
-  refreshToken(): Observable<string> {
-    // Simulate token refresh
-    return of(this.generateMockToken()).pipe(
-      delay(300),
-      map(newToken => {
-        this.token.set(newToken);
-        this.secureStorage.setItem(STORAGE_KEYS.TOKEN, newToken);
-        return newToken;
+  refreshToken(): Observable<AuthResponse> {
+    const refreshToken = this.refreshTokenValue();
+
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/refresh`, {}, {
+      headers: {
+        'Authorization': `Bearer ${refreshToken}`
+      }
+    }).pipe(
+      tap(response => {
+        this.token.set(response.token);
+        this.refreshTokenValue.set(response.refreshToken);
+        this.secureStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
+        this.secureStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
+      }),
+      catchError(error => {
+        this.logout();
+        return throwError(() => error);
       })
     );
   }
@@ -216,64 +234,73 @@ export class AuthService {
     return this.token();
   }
 
-  private setAuthData(user: User, token: string): void {
+  private setAuthData(user: User, token: string, refreshToken?: string): void {
     this.currentUser.set(user);
     this.token.set(token);
+    if (refreshToken) {
+      this.refreshTokenValue.set(refreshToken);
+    }
 
     // Use secure storage
     this.secureStorage.setItem(STORAGE_KEYS.USER, user);
     this.secureStorage.setItem(STORAGE_KEYS.TOKEN, token);
+    if (refreshToken) {
+      this.secureStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    }
   }
 
-  private generateMockToken(): string {
-    return 'mock_jwt_token_' + Math.random().toString(36).substring(7) + '_' + Date.now();
-  }
-
-  // Check if token is expired (mock implementation)
+  // Check if token is expired based on JWT decode (optional enhancement)
   isTokenExpired(): boolean {
     const token = this.token();
     if (!token) return true;
 
-    // Mock: tokens expire after 1 hour
-    const tokenParts = token.split('_');
-    const timestamp = parseInt(tokenParts[tokenParts.length - 1]);
-    const expiryTime = timestamp + 3600000; // 1 hour
-
-    return Date.now() > expiryTime;
+    try {
+      // Decode JWT payload (base64)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp * 1000; // Convert to milliseconds
+      return Date.now() > expiry;
+    } catch {
+      // If we can't decode, assume expired
+      return true;
+    }
   }
 
   updateProfile(updates: Partial<User>): Observable<User> {
-    return of(null).pipe(
-      delay(500),
-      map(() => {
-        const currentUser = this.currentUser();
-        if (!currentUser) {
-          throw new Error('No user logged in');
-        }
+    // Sanitize inputs
+    const sanitizedUpdates = { ...updates };
 
-        // Sanitize inputs
-        const sanitizedUpdates = { ...updates };
+    if (sanitizedUpdates.name) {
+      sanitizedUpdates.name = InputSanitizer.sanitizeString(sanitizedUpdates.name);
+    }
 
-        if (sanitizedUpdates.name) {
-          sanitizedUpdates.name = InputSanitizer.sanitizeString(sanitizedUpdates.name);
-        }
+    if (sanitizedUpdates.email) {
+      sanitizedUpdates.email = InputSanitizer.sanitizeEmail(sanitizedUpdates.email);
+    }
 
-        if (sanitizedUpdates.email) {
-          sanitizedUpdates.email = InputSanitizer.sanitizeEmail(sanitizedUpdates.email);
-        }
+    return this.http.patch<User>(`${this.API_URL}/users/profile`, sanitizedUpdates).pipe(
+      tap(updatedUser => {
+        const user: User = {
+          ...updatedUser,
+          role: updatedUser.role as UserRole,
+          createdAt: new Date(updatedUser.createdAt)
+        };
 
-        const updatedUser = { ...currentUser, ...sanitizedUpdates };
-
-        // Validate updated user data
-        if (!this.validateUserData(updatedUser)) {
+        if (!this.validateUserData(user)) {
           throw new Error('Invalid user data');
         }
 
-        this.currentUser.set(updatedUser);
-        this.secureStorage.setItem(STORAGE_KEYS.USER, updatedUser);
-
-        return updatedUser;
+        this.currentUser.set(user);
+        this.secureStorage.setItem(STORAGE_KEYS.USER, user);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to update profile';
+        return throwError(() => new Error(message));
       })
     );
+  }
+
+  // Get current user ID helper
+  getCurrentUserId(): string | null {
+    return this.currentUser()?.id || null;
   }
 }

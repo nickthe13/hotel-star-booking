@@ -47,6 +47,9 @@
     "stripe": "^14.25.0",
     "swagger-ui-express": "^5.0.1"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",
     "@nestjs/schematics": "^10.2.3",

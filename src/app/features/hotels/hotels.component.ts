@@ -73,7 +73,10 @@ export class HotelsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.cities.set(this.hotelService.getCities());
+    // Load cities from API
+    this.hotelService.getCities().subscribe(cities => {
+      this.cities.set(cities);
+    });
 
     // Load initial filters from query params
     this.route.queryParams.subscribe(params => {

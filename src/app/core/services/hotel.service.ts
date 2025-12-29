@@ -1,158 +1,161 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map, of } from 'rxjs';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, map, of, catchError, tap } from 'rxjs';
 import { Hotel, HotelSearchParams, Room } from '../models';
-import hotelsData from '../../../assets/data/hotels.json';
+import { environment } from '../../../environments/environment';
+
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class HotelService {
+  private readonly API_URL = environment.apiUrl;
   private hotels = signal<Hotel[]>([]);
   private loading = signal<boolean>(false);
+  private hotelsLoaded = false;
 
-  constructor(private http: HttpClient) {
-    this.loadHotels();
+  constructor(private http: HttpClient) {}
+
+  private mapHotelFromApi(apiHotel: any): Hotel {
+    return {
+      id: apiHotel.id,
+      name: apiHotel.name,
+      description: apiHotel.description || '',
+      location: apiHotel.address || '',
+      city: apiHotel.city,
+      country: apiHotel.country,
+      starRating: Math.round(apiHotel.rating) || 4,
+      images: apiHotel.images || [],
+      amenities: apiHotel.amenities || [],
+      pricePerNight: this.getLowestRoomPrice(apiHotel.rooms) || 100,
+      featured: apiHotel.rating >= 4.7,
+      averageRating: apiHotel.rating || 0,
+      totalReviews: apiHotel._count?.reviews || 0,
+      rooms: apiHotel.rooms?.map((room: any) => this.mapRoomFromApi(room)) || [],
+      createdAt: apiHotel.createdAt ? new Date(apiHotel.createdAt) : new Date()
+    };
   }
 
-  private loadHotels(): void {
-    const baseHotels = hotelsData as Hotel[];
+  private mapRoomFromApi(apiRoom: any): Room {
+    return {
+      id: apiRoom.id,
+      hotelId: apiRoom.hotelId,
+      roomType: apiRoom.name || apiRoom.type,
+      capacity: apiRoom.capacity || 2,
+      pricePerNight: apiRoom.price || 100,
+      amenities: apiRoom.amenities || [],
+      images: apiRoom.images || [],
+      available: apiRoom.isAvailable !== false
+    };
+  }
 
-    // Load persisted ratings from localStorage
-    const storedRatings = localStorage.getItem('hotel_aggregate_ratings');
-    if (storedRatings) {
-      try {
-        const ratings = JSON.parse(storedRatings);
-        const hotelsWithRatings = baseHotels.map(hotel => {
-          const hotelRating = ratings[hotel.id];
-          if (hotelRating) {
-            return {
-              ...hotel,
-              averageRating: hotelRating.averageRating,
-              totalReviews: hotelRating.totalReviews
-            };
-          }
-          return hotel;
-        });
-        this.hotels.set(hotelsWithRatings);
-      } catch (error) {
-        console.error('Error loading hotel ratings:', error);
-        this.hotels.set(baseHotels);
-      }
-    } else {
-      this.hotels.set(baseHotels);
-    }
+  private getLowestRoomPrice(rooms: any[]): number {
+    if (!rooms || rooms.length === 0) return 100;
+    return Math.min(...rooms.map(r => r.price || 100));
   }
 
   getHotels(params?: HotelSearchParams): Observable<Hotel[]> {
     this.loading.set(true);
 
-    let filteredHotels = [...this.hotels()];
+    let httpParams = new HttpParams();
 
     if (params) {
-      // Text search filter
-      if (params.query) {
-        const query = params.query.toLowerCase();
-        filteredHotels = filteredHotels.filter(hotel =>
-          hotel.name.toLowerCase().includes(query) ||
-          hotel.city.toLowerCase().includes(query) ||
-          hotel.location.toLowerCase().includes(query) ||
-          hotel.description.toLowerCase().includes(query)
-        );
-      }
-
-      if (params.city) {
-        filteredHotels = filteredHotels.filter(hotel =>
-          hotel.city.toLowerCase().includes(params.city!.toLowerCase())
-        );
-      }
-
-      if (params.minPrice !== undefined) {
-        filteredHotels = filteredHotels.filter(hotel => hotel.pricePerNight >= params.minPrice!);
-      }
-
-      if (params.maxPrice !== undefined) {
-        filteredHotels = filteredHotels.filter(hotel => hotel.pricePerNight <= params.maxPrice!);
-      }
-
-      if (params.starRating) {
-        filteredHotels = filteredHotels.filter(hotel => hotel.starRating === params.starRating);
-      }
-
-      if (params.amenities && params.amenities.length > 0) {
-        filteredHotels = filteredHotels.filter(hotel =>
-          params.amenities!.every(amenity => hotel.amenities.includes(amenity))
-        );
-      }
-
-      if (params.guestRating) {
-        filteredHotels = filteredHotels.filter(
-          hotel => hotel.averageRating && hotel.averageRating >= params.guestRating!
-        );
-      }
-
-      if (params.sortBy) {
-        filteredHotels.sort((a, b) => {
-          const order = params.sortOrder === 'desc' ? -1 : 1;
-
-          switch (params.sortBy) {
-            case 'price':
-              return (a.pricePerNight - b.pricePerNight) * order;
-            case 'rating':
-              return ((a.averageRating || 0) - (b.averageRating || 0)) * order;
-            case 'popularity':
-              return ((a.totalReviews || 0) - (b.totalReviews || 0)) * order;
-            default:
-              return 0;
-          }
-        });
-      }
+      if (params.query) httpParams = httpParams.set('search', params.query);
+      if (params.city) httpParams = httpParams.set('city', params.city);
+      if (params.minPrice !== undefined) httpParams = httpParams.set('minPrice', params.minPrice.toString());
+      if (params.maxPrice !== undefined) httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
+      if (params.starRating) httpParams = httpParams.set('rating', params.starRating.toString());
+      if (params.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
+      if (params.sortOrder) httpParams = httpParams.set('sortOrder', params.sortOrder);
     }
 
-    return of(filteredHotels).pipe(
-      map(hotels => {
+    return this.http.get<any>(`${this.API_URL}/hotels`, { params: httpParams }).pipe(
+      map(response => {
+        // Handle both paginated and array responses
+        const hotelsData = Array.isArray(response) ? response : response.data || response;
+        const hotels = hotelsData.map((h: any) => this.mapHotelFromApi(h));
+
+        // Apply client-side filtering for amenities (if backend doesn't support it)
+        let filteredHotels = hotels;
+        if (params?.amenities && params.amenities.length > 0) {
+          filteredHotels = hotels.filter((hotel: Hotel) =>
+            params.amenities!.every(amenity => hotel.amenities.includes(amenity))
+          );
+        }
+
+        if (params?.guestRating) {
+          filteredHotels = filteredHotels.filter(
+            (hotel: Hotel) => hotel.averageRating && hotel.averageRating >= params.guestRating!
+          );
+        }
+
+        this.hotels.set(filteredHotels);
+        this.hotelsLoaded = true;
         this.loading.set(false);
-        return hotels;
+        return filteredHotels;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error fetching hotels:', error);
+        this.loading.set(false);
+        // Return cached hotels if available
+        return of(this.hotels());
       })
     );
   }
 
   getHotelById(id: string): Observable<Hotel | undefined> {
     this.loading.set(true);
-    const hotel = this.hotels().find(h => h.id === id);
 
-    return of(hotel).pipe(
-      map(h => {
+    return this.http.get<any>(`${this.API_URL}/hotels/${id}`).pipe(
+      map(apiHotel => {
         this.loading.set(false);
-        return h;
+        return this.mapHotelFromApi(apiHotel);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error fetching hotel:', error);
+        this.loading.set(false);
+        // Try to find in cached hotels
+        const cachedHotel = this.hotels().find(h => h.id === id);
+        return of(cachedHotel);
       })
     );
   }
 
-  getFeaturedHotels(): Observable<Hotel[]> {
-    const featured = this.hotels().filter(hotel => hotel.featured);
-    return of(featured);
+  getFeaturedHotels(limit: number = 6): Observable<Hotel[]> {
+    return this.http.get<any>(`${this.API_URL}/hotels/featured`, {
+      params: new HttpParams().set('limit', limit.toString())
+    }).pipe(
+      map(response => {
+        const hotelsData = Array.isArray(response) ? response : response.data || response;
+        return hotelsData.map((h: any) => this.mapHotelFromApi(h));
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error fetching featured hotels:', error);
+        // Fallback to getting hotels and filtering featured ones
+        return this.getHotels().pipe(
+          map(hotels => hotels.filter(h => h.featured).slice(0, limit))
+        );
+      })
+    );
   }
 
   searchHotels(query: string): Observable<Hotel[]> {
-    this.loading.set(true);
-    const results = this.hotels().filter(hotel =>
-      hotel.name.toLowerCase().includes(query.toLowerCase()) ||
-      hotel.city.toLowerCase().includes(query.toLowerCase()) ||
-      hotel.location.toLowerCase().includes(query.toLowerCase())
-    );
-
-    return of(results).pipe(
-      map(hotels => {
-        this.loading.set(false);
-        return hotels;
-      })
-    );
+    return this.getHotels({ query });
   }
 
-  getCities(): string[] {
-    const cities = [...new Set(this.hotels().map(hotel => hotel.city))];
-    return cities.sort();
+  getCities(): Observable<string[]> {
+    return this.getHotels().pipe(
+      map(hotels => {
+        const cities = [...new Set(hotels.map(hotel => hotel.city))];
+        return cities.sort();
+      })
+    );
   }
 
   isLoading(): boolean {
@@ -172,161 +175,227 @@ export class HotelService {
       return hotel;
     });
     this.hotels.set(updatedHotels);
-
-    // Persist to localStorage
-    const storedRatings = localStorage.getItem('hotel_aggregate_ratings');
-    let ratings: Record<string, { averageRating: number; totalReviews: number }> = {};
-
-    if (storedRatings) {
-      try {
-        ratings = JSON.parse(storedRatings);
-      } catch (error) {
-        console.error('Error parsing hotel ratings:', error);
-      }
-    }
-
-    ratings[hotelId] = { averageRating, totalReviews };
-    localStorage.setItem('hotel_aggregate_ratings', JSON.stringify(ratings));
   }
 
   // Admin CRUD Methods
 
-  addHotel(hotelData: Omit<Hotel, 'id' | 'createdAt'>): Observable<Hotel> {
-    const newHotel: Hotel = {
-      ...hotelData,
-      id: this.generateId(),
-      createdAt: new Date(),
-      rooms: hotelData.rooms || []
+  addHotel(hotelData: Partial<Hotel>): Observable<Hotel> {
+    const createDto = {
+      name: hotelData.name,
+      description: hotelData.description,
+      address: hotelData.location,
+      city: hotelData.city,
+      country: hotelData.country || 'Greece',
+      rating: hotelData.averageRating || 4.5,
+      images: hotelData.images || [],
+      amenities: hotelData.amenities || []
     };
 
-    const updatedHotels = [...this.hotels(), newHotel];
-    this.hotels.set(updatedHotels);
-    this.persistHotels(updatedHotels);
-
-    return of(newHotel);
+    return this.http.post<any>(`${this.API_URL}/hotels`, createDto).pipe(
+      map(response => {
+        const newHotel = this.mapHotelFromApi(response);
+        const updatedHotels = [...this.hotels(), newHotel];
+        this.hotels.set(updatedHotels);
+        return newHotel;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error creating hotel:', error);
+        throw error;
+      })
+    );
   }
 
   updateHotel(id: string, updates: Partial<Hotel>): Observable<Hotel | undefined> {
-    const updatedHotels = this.hotels().map(hotel => {
-      if (hotel.id === id) {
-        return { ...hotel, ...updates };
-      }
-      return hotel;
-    });
+    const updateDto: any = {};
+    if (updates.name) updateDto.name = updates.name;
+    if (updates.description) updateDto.description = updates.description;
+    if (updates.location) updateDto.address = updates.location;
+    if (updates.city) updateDto.city = updates.city;
+    if (updates.country) updateDto.country = updates.country;
+    if (updates.images) updateDto.images = updates.images;
+    if (updates.amenities) updateDto.amenities = updates.amenities;
 
-    this.hotels.set(updatedHotels);
-    this.persistHotels(updatedHotels);
-
-    const updatedHotel = updatedHotels.find(h => h.id === id);
-    return of(updatedHotel);
+    return this.http.patch<any>(`${this.API_URL}/hotels/${id}`, updateDto).pipe(
+      map(response => {
+        const updatedHotel = this.mapHotelFromApi(response);
+        const updatedHotels = this.hotels().map(hotel =>
+          hotel.id === id ? updatedHotel : hotel
+        );
+        this.hotels.set(updatedHotels);
+        return updatedHotel;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error updating hotel:', error);
+        return of(undefined);
+      })
+    );
   }
 
   deleteHotel(id: string): Observable<void> {
-    const updatedHotels = this.hotels().filter(hotel => hotel.id !== id);
-    this.hotels.set(updatedHotels);
-    this.persistHotels(updatedHotels);
-
-    return of(undefined);
+    return this.http.delete<void>(`${this.API_URL}/hotels/${id}`).pipe(
+      tap(() => {
+        const updatedHotels = this.hotels().filter(hotel => hotel.id !== id);
+        this.hotels.set(updatedHotels);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error deleting hotel:', error);
+        throw error;
+      })
+    );
   }
 
-  addRoom(hotelId: string, roomData: Omit<Room, 'id' | 'hotelId'>): Observable<Room | undefined> {
-    const newRoom: Room = {
-      ...roomData,
-      id: this.generateId(),
-      hotelId
+  // Room management methods
+  addRoom(hotelId: string, roomData: Partial<Room>): Observable<Room | undefined> {
+    const createDto = {
+      hotelId,
+      type: this.mapRoomTypeToEnum(roomData.roomType || 'STANDARD'),
+      name: roomData.roomType,
+      description: `${roomData.roomType} - Capacity for ${roomData.capacity} guests`,
+      price: roomData.pricePerNight || 100,
+      capacity: roomData.capacity || 2,
+      amenities: roomData.amenities || [],
+      images: roomData.images || [],
+      isAvailable: roomData.available !== false
     };
 
-    const updatedHotels = this.hotels().map(hotel => {
-      if (hotel.id === hotelId) {
-        const rooms = hotel.rooms || [];
-        return {
-          ...hotel,
-          rooms: [...rooms, newRoom]
-        };
-      }
-      return hotel;
-    });
+    return this.http.post<any>(`${this.API_URL}/rooms`, createDto).pipe(
+      map(response => {
+        const newRoom = this.mapRoomFromApi(response);
 
-    this.hotels.set(updatedHotels);
-    this.persistHotels(updatedHotels);
+        // Update the hotel's rooms in cache
+        const updatedHotels = this.hotels().map(hotel => {
+          if (hotel.id === hotelId) {
+            const rooms = hotel.rooms || [];
+            return { ...hotel, rooms: [...rooms, newRoom] };
+          }
+          return hotel;
+        });
+        this.hotels.set(updatedHotels);
 
-    return of(newRoom);
+        return newRoom;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error creating room:', error);
+        return of(undefined);
+      })
+    );
   }
 
   updateRoom(hotelId: string, roomId: string, updates: Partial<Room>): Observable<Room | undefined> {
-    let updatedRoom: Room | undefined;
+    const updateDto: any = {};
+    if (updates.roomType) {
+      updateDto.type = this.mapRoomTypeToEnum(updates.roomType);
+      updateDto.name = updates.roomType;
+    }
+    if (updates.pricePerNight) updateDto.price = updates.pricePerNight;
+    if (updates.capacity) updateDto.capacity = updates.capacity;
+    if (updates.amenities) updateDto.amenities = updates.amenities;
+    if (updates.images) updateDto.images = updates.images;
+    if (updates.available !== undefined) updateDto.isAvailable = updates.available;
 
-    const updatedHotels = this.hotels().map(hotel => {
-      if (hotel.id === hotelId && hotel.rooms) {
-        const updatedRooms = hotel.rooms.map(room => {
-          if (room.id === roomId) {
-            updatedRoom = { ...room, ...updates };
-            return updatedRoom;
+    return this.http.patch<any>(`${this.API_URL}/rooms/${roomId}`, updateDto).pipe(
+      map(response => {
+        const updatedRoom = this.mapRoomFromApi(response);
+
+        // Update the hotel's rooms in cache
+        const updatedHotels = this.hotels().map(hotel => {
+          if (hotel.id === hotelId && hotel.rooms) {
+            const updatedRooms = hotel.rooms.map(room =>
+              room.id === roomId ? updatedRoom : room
+            );
+            return { ...hotel, rooms: updatedRooms };
           }
-          return room;
+          return hotel;
         });
+        this.hotels.set(updatedHotels);
 
-        return { ...hotel, rooms: updatedRooms };
-      }
-      return hotel;
-    });
-
-    this.hotels.set(updatedHotels);
-    this.persistHotels(updatedHotels);
-
-    return of(updatedRoom);
+        return updatedRoom;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error updating room:', error);
+        return of(undefined);
+      })
+    );
   }
 
   deleteRoom(hotelId: string, roomId: string): Observable<void> {
-    const updatedHotels = this.hotels().map(hotel => {
-      if (hotel.id === hotelId && hotel.rooms) {
-        return {
-          ...hotel,
-          rooms: hotel.rooms.filter(room => room.id !== roomId)
-        };
-      }
-      return hotel;
-    });
-
-    this.hotels.set(updatedHotels);
-    this.persistHotels(updatedHotels);
-
-    return of(undefined);
+    return this.http.delete<void>(`${this.API_URL}/rooms/${roomId}`).pipe(
+      tap(() => {
+        // Update the hotel's rooms in cache
+        const updatedHotels = this.hotels().map(hotel => {
+          if (hotel.id === hotelId && hotel.rooms) {
+            return {
+              ...hotel,
+              rooms: hotel.rooms.filter(room => room.id !== roomId)
+            };
+          }
+          return hotel;
+        });
+        this.hotels.set(updatedHotels);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error deleting room:', error);
+        throw error;
+      })
+    );
   }
 
   toggleRoomAvailability(hotelId: string, roomId: string): Observable<Room | undefined> {
-    let toggledRoom: Room | undefined;
+    // First get current room state
+    const hotel = this.hotels().find(h => h.id === hotelId);
+    const room = hotel?.rooms?.find(r => r.id === roomId);
 
-    const updatedHotels = this.hotels().map(hotel => {
-      if (hotel.id === hotelId && hotel.rooms) {
-        const updatedRooms = hotel.rooms.map(room => {
-          if (room.id === roomId) {
-            toggledRoom = { ...room, available: !room.available };
-            return toggledRoom;
-          }
-          return room;
-        });
-
-        return { ...hotel, rooms: updatedRooms };
-      }
-      return hotel;
-    });
-
-    this.hotels.set(updatedHotels);
-    this.persistHotels(updatedHotels);
-
-    return of(toggledRoom);
-  }
-
-  private generateId(): string {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
-  }
-
-  private persistHotels(hotels: Hotel[]): void {
-    try {
-      localStorage.setItem('admin_hotels', JSON.stringify(hotels));
-    } catch (error) {
-      console.error('Error persisting hotels to localStorage:', error);
+    if (!room) {
+      return of(undefined);
     }
+
+    return this.updateRoom(hotelId, roomId, { available: !room.available });
+  }
+
+  private mapRoomTypeToEnum(roomType: string): string {
+    const typeMap: Record<string, string> = {
+      'Standard': 'STANDARD',
+      'Standard Room': 'STANDARD',
+      'Deluxe': 'DELUXE',
+      'Deluxe Room': 'DELUXE',
+      'Suite': 'SUITE',
+      'Presidential': 'PRESIDENTIAL',
+      'Presidential Suite': 'PRESIDENTIAL'
+    };
+
+    return typeMap[roomType] || 'STANDARD';
+  }
+
+  // Add to favorites
+  addToFavorites(hotelId: string): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/hotels/${hotelId}/favorites`, {}).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error adding to favorites:', error);
+        throw error;
+      })
+    );
+  }
+
+  removeFromFavorites(hotelId: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/hotels/${hotelId}/favorites`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error removing from favorites:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Get hotel availability for date range
+  getHotelAvailability(hotelId: string, checkIn: Date, checkOut: Date): Observable<any> {
+    const params = new HttpParams()
+      .set('checkIn', checkIn.toISOString())
+      .set('checkOut', checkOut.toISOString());
+
+    return this.http.get<any>(`${this.API_URL}/hotels/${hotelId}/availability`, { params }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error fetching availability:', error);
+        return of({ available: true, rooms: [] });
+      })
+    );
   }
 }

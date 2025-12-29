@@ -1,14 +1,10 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { map, switchMap, delay, tap } from 'rxjs/operators';
+import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { API_ENDPOINTS } from '../constants/api.constants';
 import { Booking, BookingRequest, BookingConfirmation, BookingStatus, CancelBookingResult } from '../models/booking.model';
-import { PaymentTransaction, PaymentStatus } from '../models/payment.model';
-import { AuthService } from './auth.service';
-import { HotelService } from './hotel.service';
-import { PaymentService } from './payment.service';
+import { PaymentStatus } from '../models/payment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,380 +12,259 @@ import { PaymentService } from './payment.service';
 export class BookingService {
   private readonly API_URL = environment.apiUrl;
   loading = signal<boolean>(false);
-  private nextBookingNumber = 3; // Start from 3 since we have 2 initial bookings
 
-  // Mock bookings data - includes paid bookings to demonstrate refund flow
-  private mockBookings: Booking[] = [
-    {
-      id: '1',
-      userId: '1',
-      hotelId: '1',
-      roomId: '101',
-      checkIn: new Date('2025-12-15'),
-      checkOut: new Date('2025-12-20'),
-      guests: 3,
-      totalPrice: 1250,
-      status: BookingStatus.CONFIRMED,
-      createdAt: new Date('2025-12-01'),
-      hotel: {
-        name: 'Grand Plaza Hotel',
-        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
-        location: 'New York, USA'
-      },
-      room: {
-        roomType: 'Deluxe Suite'
-      },
-      // Payment info for refund demo
-      isPaid: true,
-      paidAt: new Date('2025-12-01'),
-      paymentTransactionId: 'txn_mock_001',
-      stripePaymentIntentId: 'pi_mock_3MqEWFx9K8k4Y2Z',
-      paymentStatus: PaymentStatus.SUCCEEDED
-    },
-    {
-      id: '2',
-      userId: '1',
-      hotelId: '3',
-      roomId: '201',
-      checkIn: new Date('2025-11-10'),
-      checkOut: new Date('2025-11-15'),
-      guests: 2,
-      totalPrice: 900,
-      status: BookingStatus.COMPLETED,
-      createdAt: new Date('2025-11-01'),
-      hotel: {
-        name: 'Sunset Beach Resort',
-        image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400',
-        location: 'Miami, USA'
-      },
-      room: {
-        roomType: 'Ocean View'
-      },
-      isPaid: true,
-      paidAt: new Date('2025-11-01'),
-      paymentTransactionId: 'txn_mock_002',
-      stripePaymentIntentId: 'pi_mock_2AbCDx7H9k3L5N',
-      paymentStatus: PaymentStatus.SUCCEEDED
-    }
-  ];
+  constructor(private http: HttpClient) {}
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService,
-    private hotelService: HotelService,
-    private paymentService: PaymentService
-  ) {}
+  private mapBookingFromApi(apiBooking: any): Booking {
+    return {
+      id: apiBooking.id,
+      userId: apiBooking.userId,
+      hotelId: apiBooking.room?.hotelId || apiBooking.hotelId,
+      roomId: apiBooking.roomId,
+      checkIn: new Date(apiBooking.checkIn),
+      checkOut: new Date(apiBooking.checkOut),
+      guests: apiBooking.numberOfGuests || apiBooking.guests || 1,
+      totalPrice: apiBooking.totalPrice,
+      status: apiBooking.status as BookingStatus,
+      createdAt: new Date(apiBooking.createdAt),
+      specialRequests: apiBooking.specialRequests,
+      hotel: apiBooking.room?.hotel ? {
+        name: apiBooking.room.hotel.name,
+        image: apiBooking.room.hotel.images?.[0] || '',
+        location: `${apiBooking.room.hotel.city}, ${apiBooking.room.hotel.country}`
+      } : undefined,
+      room: apiBooking.room ? {
+        roomType: apiBooking.room.name || apiBooking.room.type
+      } : undefined,
+      isPaid: apiBooking.isPaid || false,
+      paidAt: apiBooking.paidAt ? new Date(apiBooking.paidAt) : undefined,
+      paymentTransactionId: apiBooking.paymentTransactionId,
+      paymentStatus: apiBooking.paymentStatus as PaymentStatus,
+      pointsEarned: apiBooking.pointsEarned,
+      pointsRedeemed: apiBooking.pointsRedeemed,
+      discountFromPoints: apiBooking.discountFromPoints
+    };
+  }
 
   createBooking(bookingData: BookingRequest): Observable<BookingConfirmation> {
-    // In production, this would be:
-    // return this.http.post<BookingConfirmation>(`${this.API_URL}${API_ENDPOINTS.bookings}`, bookingData);
+    this.loading.set(true);
 
-    // Mock implementation - fetch hotel data and create booking
-    return this.hotelService.getHotelById(bookingData.hotelId).pipe(
-      map(hotel => {
-        if (!hotel) {
-          throw new Error('Hotel not found');
-        }
+    const createDto = {
+      roomId: bookingData.roomId,
+      checkIn: new Date(bookingData.checkIn).toISOString(),
+      checkOut: new Date(bookingData.checkOut).toISOString(),
+      guestName: bookingData.guestName || 'Guest',
+      guestEmail: bookingData.guestEmail || '',
+      guestPhone: bookingData.guestPhone,
+      numberOfGuests: bookingData.guests,
+      specialRequests: bookingData.specialRequests
+    };
 
-        // Find the selected room
-        const selectedRoom = hotel.rooms?.find(room => room.id === bookingData.roomId);
-        if (!selectedRoom) {
-          throw new Error('Room not found');
-        }
-
-        const userId = this.authService.isAuthenticated() ? '1' : '1';
-        const totalPrice = this.calculateTotalPrice(
-          selectedRoom.pricePerNight,
-          new Date(bookingData.checkIn),
-          new Date(bookingData.checkOut)
-        );
-
-        const bookingNumber = this.nextBookingNumber++;
-        const newBooking: Booking = {
-          id: bookingNumber.toString(),
-          userId: userId,
-          hotelId: bookingData.hotelId,
-          roomId: bookingData.roomId,
-          checkIn: new Date(bookingData.checkIn),
-          checkOut: new Date(bookingData.checkOut),
-          guests: bookingData.guests,
-          totalPrice: totalPrice,
-          status: BookingStatus.CONFIRMED,
-          createdAt: new Date(),
-          specialRequests: bookingData.specialRequests,
-          hotel: {
-            name: hotel.name,
-            image: hotel.images[0],
-            location: hotel.location
-          },
-          room: {
-            roomType: selectedRoom.roomType
-          }
-        };
-
-        // Add the new booking to the mock array
-        this.mockBookings.unshift(newBooking);
+    return this.http.post<any>(`${this.API_URL}/bookings`, createDto).pipe(
+      map(response => {
+        this.loading.set(false);
+        const booking = this.mapBookingFromApi(response);
 
         return {
-          booking: newBooking,
-          confirmationNumber: `CONF-${Date.now()}`,
+          booking,
+          confirmationNumber: `CONF-${booking.id}`,
           estimatedCheckInTime: '3:00 PM',
-          message: 'Your booking has been confirmed!'
+          message: 'Your booking has been created! Please complete payment to confirm.',
+          requiresPayment: true
         };
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.loading.set(false);
+        const message = error.error?.message || 'Failed to create booking';
+        return throwError(() => new Error(message));
       })
     );
   }
 
   createBookingWithPayment(bookingData: BookingRequest & { paymentIntentId: string }): Observable<BookingConfirmation> {
-    // In production, this would be:
-    // return this.http.post<BookingConfirmation>(`${this.API_URL}${API_ENDPOINTS.bookings}/with-payment`, bookingData);
+    this.loading.set(true);
 
-    // Mock implementation - fetch hotel data and create booking with payment
-    return this.hotelService.getHotelById(bookingData.hotelId).pipe(
-      switchMap(hotel => {
-        if (!hotel) {
-          throw new Error('Hotel not found');
-        }
+    const createDto = {
+      roomId: bookingData.roomId,
+      checkIn: new Date(bookingData.checkIn).toISOString(),
+      checkOut: new Date(bookingData.checkOut).toISOString(),
+      guestName: bookingData.guestName || 'Guest',
+      guestEmail: bookingData.guestEmail || '',
+      guestPhone: bookingData.guestPhone,
+      numberOfGuests: bookingData.guests,
+      specialRequests: bookingData.specialRequests,
+      paymentIntentId: bookingData.paymentIntentId
+    };
 
-        // Find the selected room
-        const selectedRoom = hotel.rooms?.find(room => room.id === bookingData.roomId);
-        if (!selectedRoom) {
-          throw new Error('Room not found');
-        }
+    return this.http.post<any>(`${this.API_URL}/bookings`, createDto).pipe(
+      map(response => {
+        this.loading.set(false);
+        const booking = this.mapBookingFromApi(response);
 
-        const userId = this.authService.isAuthenticated() ? '1' : '1';
-        const totalPrice = this.calculateTotalPrice(
-          selectedRoom.pricePerNight,
-          new Date(bookingData.checkIn),
-          new Date(bookingData.checkOut)
-        );
-
-        const bookingNumber = this.nextBookingNumber++;
-
-        // Create mock payment transaction
-        const paymentTransaction: PaymentTransaction = {
-          id: `txn_${Date.now()}`,
-          bookingId: bookingNumber.toString(),
-          userId: userId,
-          amount: totalPrice,
-          currency: 'usd',
-          status: PaymentStatus.SUCCEEDED,
-          stripePaymentIntentId: bookingData.paymentIntentId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          metadata: {
-            hotelName: hotel.name,
-            roomType: selectedRoom.roomType,
-            checkIn: bookingData.checkIn,
-            checkOut: bookingData.checkOut
-          }
-        };
-
-        // Store the transaction
-        this.paymentService.createMockTransaction(paymentTransaction);
-
-        const newBooking: Booking = {
-          id: bookingNumber.toString(),
-          userId: userId,
-          hotelId: bookingData.hotelId,
-          roomId: bookingData.roomId,
-          checkIn: new Date(bookingData.checkIn),
-          checkOut: new Date(bookingData.checkOut),
-          guests: bookingData.guests,
-          totalPrice: totalPrice,
-          status: BookingStatus.CONFIRMED,
-          createdAt: new Date(),
-          specialRequests: bookingData.specialRequests,
-          hotel: {
-            name: hotel.name,
-            image: hotel.images[0],
-            location: hotel.location
-          },
-          room: {
-            roomType: selectedRoom.roomType
-          },
-          paymentTransactionId: paymentTransaction.id,
-          paymentStatus: PaymentStatus.SUCCEEDED,
-          isPaid: true,
-          paidAt: new Date()
-        };
-
-        // Add the new booking to the mock array
-        this.mockBookings.unshift(newBooking);
-
-        return of({
-          booking: newBooking,
-          confirmationNumber: `CONF-${Date.now()}`,
+        return {
+          booking,
+          confirmationNumber: `CONF-${booking.id}`,
           estimatedCheckInTime: '3:00 PM',
           message: 'Your booking has been confirmed and payment processed!',
-          paymentTransaction: paymentTransaction,
           requiresPayment: false
-        });
+        };
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.loading.set(false);
+        const message = error.error?.message || 'Failed to create booking';
+        return throwError(() => new Error(message));
       })
     );
   }
 
   getUserBookings(): Observable<Booking[]> {
-    // In production, this would be:
-    // return this.http.get<Booking[]>(`${this.API_URL}${API_ENDPOINTS.bookings}`);
+    this.loading.set(true);
 
-    // Mock implementation
-    const userId = '1'; // Would get from authService.currentUser()?.id
-
-    // Filter bookings for the user
-    const userBookings = this.mockBookings.filter(booking => booking.userId === userId);
-
-    return of(userBookings);
+    return this.http.get<any[]>(`${this.API_URL}/bookings`).pipe(
+      map(response => {
+        this.loading.set(false);
+        return response.map(b => this.mapBookingFromApi(b));
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.loading.set(false);
+        console.error('Error fetching bookings:', error);
+        return of([]);
+      })
+    );
   }
 
   getAllBookings(): Observable<Booking[]> {
-    // In production, this would be:
-    // return this.http.get<Booking[]>(`${this.API_URL}${API_ENDPOINTS.admin.bookings}`);
+    this.loading.set(true);
 
-    // Mock implementation - return all bookings for admin view
-    return of([...this.mockBookings]);
-  }
-
-  removeBooking(id: string): Observable<void> {
-    // Remove booking from the array
-    const index = this.mockBookings.findIndex(b => b.id === id);
-    if (index > -1) {
-      this.mockBookings.splice(index, 1);
-    }
-    return of(undefined);
+    return this.http.get<any[]>(`${this.API_URL}/bookings`).pipe(
+      map(response => {
+        this.loading.set(false);
+        return response.map(b => this.mapBookingFromApi(b));
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.loading.set(false);
+        console.error('Error fetching all bookings:', error);
+        return of([]);
+      })
+    );
   }
 
   getBookingById(id: string): Observable<Booking> {
-    // In production, this would be:
-    // return this.http.get<Booking>(`${this.API_URL}${API_ENDPOINTS.bookings}/${id}`);
-
-    // Mock implementation
-    const booking = this.mockBookings.find(b => b.id === id);
-    if (!booking) {
-      return throwError(() => new Error('Booking not found'));
-    }
-    return of(booking);
+    return this.http.get<any>(`${this.API_URL}/bookings/${id}`).pipe(
+      map(response => this.mapBookingFromApi(response)),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Booking not found';
+        return throwError(() => new Error(message));
+      })
+    );
   }
 
   cancelBooking(id: string): Observable<void> {
-    // In production, this would be:
-    // return this.http.delete<void>(`${this.API_URL}${API_ENDPOINTS.bookings}/${id}`);
-
-    // Mock implementation
-    const booking = this.mockBookings.find(b => b.id === id);
-    if (booking) {
-      booking.status = BookingStatus.CANCELLED;
-    }
-    return of(undefined);
+    return this.http.post<any>(`${this.API_URL}/bookings/${id}/cancel`, {}).pipe(
+      map(() => undefined),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to cancel booking';
+        return throwError(() => new Error(message));
+      })
+    );
   }
 
-  /**
-   * Cancel booking and process Stripe refund
-   * This demonstrates the full transaction lifecycle
-   */
   cancelBookingWithRefund(id: string, refundAmount: number): Observable<CancelBookingResult> {
-    // In production, this would call the backend which handles both cancellation and refund:
-    // return this.http.post<CancelBookingResult>(`${this.API_URL}${API_ENDPOINTS.bookings}/${id}/cancel-with-refund`, {
-    //   refundAmount
-    // });
+    return this.http.post<any>(`${this.API_URL}/bookings/${id}/cancel`, {
+      refundAmount
+    }).pipe(
+      map(response => {
+        const booking = this.mapBookingFromApi(response.booking || response);
 
-    // Mock implementation that simulates Stripe refund API call
-    const booking = this.mockBookings.find(b => b.id === id);
-
-    if (!booking) {
-      return throwError(() => new Error('Booking not found'));
-    }
-
-    if (!booking.isPaid) {
-      return throwError(() => new Error('Booking has not been paid'));
-    }
-
-    if (booking.status === BookingStatus.CANCELLED) {
-      return throwError(() => new Error('Booking is already cancelled'));
-    }
-
-    // Simulate API delay for realistic UX (shows "Processing refund..." state)
-    return of(null).pipe(
-      delay(1500), // Simulate Stripe API call
-      map(() => {
-        // Update booking status
-        booking.status = BookingStatus.CANCELLED;
-        booking.paymentStatus = refundAmount === booking.totalPrice
-          ? PaymentStatus.REFUNDED
-          : PaymentStatus.PARTIALLY_REFUNDED;
-        booking.refundedAt = new Date();
-        booking.refundAmount = refundAmount;
-
-        // Generate mock refund response (mimics Stripe refund object)
-        const refundResult: CancelBookingResult = {
-          booking: booking,
-          refund: {
-            refundId: `re_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        return {
+          booking,
+          refund: response.refund || {
+            refundId: `re_${Date.now()}`,
             amount: refundAmount,
             status: 'succeeded'
           },
-          message: refundAmount === booking.totalPrice
-            ? 'Full refund processed successfully'
-            : 'Partial refund processed successfully (late cancellation policy applied)'
+          message: response.message || 'Booking cancelled and refund processed'
         };
-
-        // Update the payment transaction in PaymentService
-        if (booking.paymentTransactionId) {
-          const transactions = this.paymentService.getMockTransactions();
-          const transaction = transactions.find(t => t.id === booking.paymentTransactionId);
-          if (transaction) {
-            transaction.status = booking.paymentStatus;
-            transaction.refundAmount = refundAmount;
-            transaction.refundedAt = new Date();
-            transaction.refundReason = refundAmount < booking.totalPrice
-              ? 'Late cancellation - 50% refund per cancellation policy'
-              : 'Customer requested cancellation';
-          }
-        }
-
-        return refundResult;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to cancel booking';
+        return throwError(() => new Error(message));
       })
     );
   }
 
   updateBooking(id: string, updates: Partial<BookingRequest>): Observable<Booking> {
-    // In production, this would be:
-    // return this.http.put<Booking>(`${this.API_URL}${API_ENDPOINTS.bookings}/${id}`, updates);
+    const updateDto: any = {};
 
-    // Mock implementation
-    const booking = this.mockBookings.find(b => b.id === id);
-    if (!booking) {
-      return throwError(() => new Error('Booking not found'));
-    }
+    if (updates.checkIn) updateDto.checkIn = new Date(updates.checkIn).toISOString();
+    if (updates.checkOut) updateDto.checkOut = new Date(updates.checkOut).toISOString();
+    if (updates.guests) updateDto.numberOfGuests = updates.guests;
+    if (updates.specialRequests) updateDto.specialRequests = updates.specialRequests;
 
-    // Convert string dates to Date objects
-    const updatedBooking: Booking = {
-      ...booking,
-      ...updates,
-      checkIn: updates.checkIn ? new Date(updates.checkIn) : booking.checkIn,
-      checkOut: updates.checkOut ? new Date(updates.checkOut) : booking.checkOut
-    };
-
-    const index = this.mockBookings.findIndex(b => b.id === id);
-    this.mockBookings[index] = updatedBooking;
-
-    return of(updatedBooking);
+    return this.http.patch<any>(`${this.API_URL}/bookings/${id}`, updateDto).pipe(
+      map(response => this.mapBookingFromApi(response)),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to update booking';
+        return throwError(() => new Error(message));
+      })
+    );
   }
 
   updateBookingStatus(id: string, status: BookingStatus): Observable<void> {
-    // In production, this would be:
-    // return this.http.patch<void>(`${this.API_URL}${API_ENDPOINTS.bookings}/${id}/status`, { status });
+    let endpoint = '';
 
-    // Mock implementation
-    const booking = this.mockBookings.find(b => b.id === id);
-    if (booking) {
-      booking.status = status;
+    switch (status) {
+      case BookingStatus.CHECKED_IN:
+        endpoint = `${this.API_URL}/bookings/${id}/check-in`;
+        break;
+      case BookingStatus.CHECKED_OUT:
+      case BookingStatus.COMPLETED:
+        endpoint = `${this.API_URL}/bookings/${id}/check-out`;
+        break;
+      case BookingStatus.CANCELLED:
+        endpoint = `${this.API_URL}/bookings/${id}/cancel`;
+        break;
+      default:
+        return this.http.patch<any>(`${this.API_URL}/bookings/${id}`, { status }).pipe(
+          map(() => undefined),
+          catchError((error: HttpErrorResponse) => {
+            const message = error.error?.message || 'Failed to update booking status';
+            return throwError(() => new Error(message));
+          })
+        );
     }
-    return of(undefined);
+
+    return this.http.post<any>(endpoint, {}).pipe(
+      map(() => undefined),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to update booking status';
+        return throwError(() => new Error(message));
+      })
+    );
   }
 
+  applyPointsRedemption(id: string, points: number): Observable<Booking> {
+    return this.http.post<any>(`${this.API_URL}/bookings/${id}/apply-points`, { points }).pipe(
+      map(response => this.mapBookingFromApi(response)),
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to apply points';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  removeBooking(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/bookings/${id}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const message = error.error?.message || 'Failed to delete booking';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  // Utility methods
   calculateTotalPrice(pricePerNight: number, checkIn: Date, checkOut: Date): number {
-    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    const nights = this.calculateNights(checkIn, checkOut);
     return pricePerNight * nights;
   }
 
