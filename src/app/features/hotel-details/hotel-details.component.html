@@ -252,6 +252,14 @@
       (onCancel)="closeReviewModal()"
     ></app-review-form>
   </app-modal>
+
+  <!-- Payment Modal -->
+  <app-payment-modal
+    [isOpen]="showPaymentModal()"
+    [bookingData]="paymentModalData()"
+    (closeModal)="closePaymentModal()"
+    (bookingComplete)="onBookingComplete($event)"
+  ></app-payment-modal>
 } @else {
   <div class="container">
     <div class="error-message">

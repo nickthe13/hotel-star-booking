@@ -1,0 +1,198 @@
+<app-modal
+  [isOpen]="isOpen"
+  [title]="modalTitle"
+  size="lg"
+  (onClose)="handleClose()"
+>
+  @if (bookingData) {
+    <div class="payment-modal">
+      <!-- Error Alert -->
+      @if (error()) {
+        <div class="alert alert--error">
+          <span class="alert__icon">!</span>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <!-- Review Step -->
+      @if (paymentStep() === 'review') {
+        <div class="review-step">
+          <!-- Booking Summary -->
+          <div class="booking-summary-card">
+            <h3 class="summary-title">Booking Summary</h3>
+
+            <div class="hotel-info">
+              <img
+                [src]="bookingData.hotel.images[0]"
+                [alt]="bookingData.hotel.name"
+                class="hotel-image"
+              />
+              <div class="hotel-details">
+                <h4 class="hotel-name">{{ bookingData.hotel.name }}</h4>
+                <p class="hotel-location">{{ bookingData.hotel.location }}</p>
+                <p class="room-type">{{ bookingData.room.roomType }}</p>
+              </div>
+            </div>
+
+            <div class="summary-rows">
+              <div class="summary-row">
+                <span class="label">Check-in</span>
+                <span class="value">{{ formatDate(bookingData.checkIn) }}</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Check-out</span>
+                <span class="value">{{ formatDate(bookingData.checkOut) }}</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Duration</span>
+                <span class="value">{{ bookingData.nights }} night{{ bookingData.nights > 1 ? 's' : '' }}</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Guests</span>
+                <span class="value">{{ bookingData.guests }} guest{{ bookingData.guests > 1 ? 's' : '' }}</span>
+              </div>
+            </div>
+
+            <div class="price-breakdown">
+              <div class="price-row">
+                <span>${{ bookingData.room.pricePerNight }} x {{ bookingData.nights }} night{{ bookingData.nights > 1 ? 's' : '' }}</span>
+                <span>${{ bookingData.totalPrice }}</span>
+              </div>
+              @if (pointsDiscount() > 0) {
+                <div class="price-row discount">
+                  <span>Points Discount</span>
+                  <span>-${{ pointsDiscount() }}</span>
+                </div>
+              }
+              <div class="price-total">
+                <span>Total</span>
+                <span class="total-amount">${{ finalPrice() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Points Redemption -->
+          <div class="points-section">
+            <app-points-redemption
+              [bookingAmount]="bookingData.totalPrice"
+              (pointsChanged)="onPointsRedemptionChange($event)"
+            ></app-points-redemption>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button
+              class="btn btn--primary btn--large"
+              (click)="proceedToPayment()"
+              [disabled]="loading()"
+              type="button"
+            >
+              @if (loading()) {
+                Processing...
+              } @else {
+                Proceed to Payment
+              }
+            </button>
+            <button
+              class="btn btn--secondary"
+              (click)="handleClose()"
+              [disabled]="loading()"
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Payment Step -->
+      @if (paymentStep() === 'payment' && paymentIntent()) {
+        <div class="payment-step">
+          <div class="payment-summary">
+            <div class="amount-due">
+              <span class="label">Amount Due</span>
+              <span class="amount">${{ finalPrice() }}</span>
+            </div>
+          </div>
+
+          <app-stripe-payment
+            [clientSecret]="paymentIntent()!.clientSecret"
+            [amount]="finalPrice()"
+            [savedPaymentMethods]="savedPaymentMethods()"
+            (paymentSuccess)="onPaymentSuccess($event)"
+            (paymentError)="onPaymentError($event)"
+          ></app-stripe-payment>
+
+          <div class="action-buttons">
+            <button
+              class="btn btn--secondary"
+              (click)="goBackToReview()"
+              [disabled]="processingPayment()"
+              type="button"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Confirmation Step -->
+      @if (paymentStep() === 'confirmation') {
+        <div class="confirmation-step">
+          <div class="success-icon">
+            <span>&#10003;</span>
+          </div>
+
+          <h2 class="confirmation-title">Booking Confirmed!</h2>
+          <p class="confirmation-message">
+            Your reservation has been confirmed. A confirmation email has been sent to your email address.
+          </p>
+
+          <div class="confirmation-details">
+            <div class="detail-row">
+              <span class="label">Confirmation Number</span>
+              <span class="value highlight">{{ confirmationNumber() }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Hotel</span>
+              <span class="value">{{ bookingData.hotel.name }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Room</span>
+              <span class="value">{{ bookingData.room.roomType }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Check-in</span>
+              <span class="value">{{ formatDate(bookingData.checkIn) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Check-out</span>
+              <span class="value">{{ formatDate(bookingData.checkOut) }}</span>
+            </div>
+            <div class="detail-row total">
+              <span class="label">Total Paid</span>
+              <span class="value">${{ finalPrice() }}</span>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              class="btn btn--primary"
+              (click)="goToDashboard()"
+              type="button"
+            >
+              View My Bookings
+            </button>
+            <button
+              class="btn btn--secondary"
+              (click)="continueBooking()"
+              type="button"
+            >
+              Continue Browsing
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</app-modal>

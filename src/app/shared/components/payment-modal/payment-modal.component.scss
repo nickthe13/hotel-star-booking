@@ -1,0 +1,346 @@
+@import '../../../../assets/styles/variables';
+
+.payment-modal {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+// Alert
+.alert {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+
+  &--error {
+    background: rgba($error, 0.1);
+    border: 1px solid rgba($error, 0.3);
+    color: darken($error, 10%);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: $error;
+    color: $white;
+    border-radius: 50%;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+  }
+}
+
+// Review Step
+.review-step {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.booking-summary-card {
+  background: $neutral-50;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+}
+
+.summary-title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0 0 $spacing-lg 0;
+}
+
+.hotel-info {
+  display: flex;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-lg;
+  border-bottom: 1px solid $border-color;
+}
+
+.hotel-image {
+  width: 100px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.hotel-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hotel-name {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0;
+}
+
+.hotel-location {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.room-type {
+  font-size: $font-size-sm;
+  color: $primary-500;
+  font-weight: $font-weight-medium;
+  margin: 0;
+}
+
+.summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+
+  .label {
+    color: $text-secondary;
+  }
+
+  .value {
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.price-breakdown {
+  padding-top: $spacing-md;
+  border-top: 1px solid $border-color;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  padding: $spacing-xs 0;
+
+  &.discount {
+    color: $success;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.price-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: $spacing-sm;
+  margin-top: $spacing-xs;
+  border-top: 2px solid $border-color;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+}
+
+.total-amount {
+  color: $primary-500;
+}
+
+.points-section {
+  background: $white;
+  border: 1px solid $border-color-light;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+}
+
+// Payment Step
+.payment-step {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.payment-summary {
+  background: $neutral-50;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  text-align: center;
+}
+
+.amount-due {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  .label {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .amount {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $primary-500;
+  }
+}
+
+// Confirmation Step
+.confirmation-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $spacing-lg;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba($success, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $success;
+  font-size: 40px;
+}
+
+.confirmation-title {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin: 0;
+}
+
+.confirmation-message {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  margin: 0;
+  max-width: 400px;
+}
+
+.confirmation-details {
+  background: $neutral-50;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  width: 100%;
+  max-width: 400px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $border-color-light;
+  font-size: $font-size-sm;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.total {
+    margin-top: $spacing-sm;
+    padding-top: $spacing-md;
+    border-top: 2px solid $border-color;
+    border-bottom: none;
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+
+    .value {
+      color: $primary-500;
+    }
+  }
+
+  .label {
+    color: $text-secondary;
+  }
+
+  .value {
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+
+    &.highlight {
+      color: $primary-500;
+      font-weight: $font-weight-bold;
+      font-size: $font-size-base;
+    }
+  }
+}
+
+// Action Buttons
+.action-buttons {
+  display: flex;
+  gap: $spacing-md;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: $spacing-sm $spacing-xl;
+  border: none;
+  border-radius: $radius-md;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+
+  &--primary {
+    background: $primary-500;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: $primary-600;
+    }
+  }
+
+  &--secondary {
+    background: $white;
+    color: $text-primary;
+    border: 1px solid $border-color;
+
+    &:hover:not(:disabled) {
+      background: $neutral-50;
+    }
+  }
+
+  &--large {
+    padding: $spacing-md $spacing-2xl;
+    font-size: $font-size-lg;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .hotel-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hotel-image {
+    width: 150px;
+    height: 100px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

@@ -9,12 +9,12 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 import { ReviewListComponent } from '../../shared/components/review-list/review-list.component';
 import { ReviewFormComponent, ReviewFormData } from '../../shared/components/review-form/review-form.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { AvailabilityCalendarComponent } from '../../shared/components/availability-calendar/availability-calendar.component';
 import { BookingStepperComponent, BookingDetails } from '../../shared/components/booking-stepper/booking-stepper.component';
+import { PaymentModalComponent, PaymentModalData } from '../../shared/components/payment-modal/payment-modal.component';
 
 @Component({
   selector: 'app-hotel-details',
-  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent, AvailabilityCalendarComponent, BookingStepperComponent],
+  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent, BookingStepperComponent, PaymentModalComponent],
   templateUrl: './hotel-details.component.html',
   styleUrl: './hotel-details.component.scss'
 })
@@ -43,6 +43,10 @@ export class HotelDetailsComponent implements OnInit {
 
   // Room Selection
   selectedRoom = signal<Room | undefined>(undefined);
+
+  // Payment Modal
+  showPaymentModal = signal<boolean>(false);
+  paymentModalData = signal<PaymentModalData | null>(null);
 
   constructor(
     private hotelService: HotelService,
@@ -170,20 +174,29 @@ export class HotelDetailsComponent implements OnInit {
   }
 
   onConfirmBooking(bookingDetails: BookingDetails): void {
-    // For now, navigate to booking page with all details
-    // This will be replaced with payment modal in Phase 5
-    if (this.hotel()) {
-      const queryParams: any = {
-        checkIn: bookingDetails.checkIn,
-        checkOut: bookingDetails.checkOut,
-        roomId: bookingDetails.room.id,
-        guests: bookingDetails.guests
-      };
-      if (bookingDetails.specialRequests) {
-        queryParams.specialRequests = bookingDetails.specialRequests;
-      }
-      this.router.navigate(['/booking', this.hotel()!.id], { queryParams });
-    }
+    // Open payment modal with booking details
+    this.paymentModalData.set({
+      hotel: bookingDetails.hotel,
+      room: bookingDetails.room,
+      checkIn: bookingDetails.checkIn,
+      checkOut: bookingDetails.checkOut,
+      guests: bookingDetails.guests,
+      specialRequests: bookingDetails.specialRequests,
+      nights: bookingDetails.nights,
+      totalPrice: bookingDetails.totalPrice
+    });
+    this.showPaymentModal.set(true);
+  }
+
+  closePaymentModal(): void {
+    this.showPaymentModal.set(false);
+    this.paymentModalData.set(null);
+  }
+
+  onBookingComplete(result: { confirmationNumber: string; bookingId: string }): void {
+    // Booking completed successfully - modal will show confirmation
+    // Could add additional logic here like analytics, etc.
+    console.log('Booking completed:', result.confirmationNumber);
   }
 
   canBookNow(): boolean {
