@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HotelService } from '../../core/services/hotel.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReviewService } from '../../core/services/review.service';
+import { FavoritesService } from '../../core/services/favorites.service';
 import { Hotel, Review, DateRange, Room } from '../../core/models';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ReviewListComponent } from '../../shared/components/review-list/review-list.component';
@@ -52,8 +53,31 @@ export class HotelDetailsComponent implements OnInit {
     private hotelService: HotelService,
     public authService: AuthService,
     private reviewService: ReviewService,
+    private favoritesService: FavoritesService,
     private router: Router
   ) {}
+
+  get isFavorite(): boolean {
+    const currentHotel = this.hotel();
+    if (!currentHotel) return false;
+    return this.favoritesService.isFavorite(currentHotel.id);
+  }
+
+  toggleFavorite(): void {
+    const currentHotel = this.hotel();
+    if (!currentHotel) return;
+
+    if (!this.authService.isAuthenticated()) {
+      alert('Please log in to save favorites');
+      return;
+    }
+
+    this.favoritesService.toggleFavorite(currentHotel).subscribe({
+      error: (err) => {
+        console.error('Failed to toggle favorite:', err);
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (this.id) {

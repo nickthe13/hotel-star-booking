@@ -54,6 +54,12 @@ export const routes: Routes = [
       import('./features/profile/profile.component').then((m) => m.ProfileComponent)
   },
   {
+    path: 'favorites',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/favorites/favorites.component').then((m) => m.FavoritesComponent)
+  },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () =>

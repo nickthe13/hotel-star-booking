@@ -84,6 +84,23 @@
       font-weight: $font-weight-semibold;
     }
 
+    &--favorites {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+
+      .nav__icon {
+        color: $error-400;
+        transition: transform $transition-base;
+      }
+
+      &:hover .nav__icon,
+      &.nav__link--active .nav__icon {
+        color: $error-500;
+        transform: scale(1.1);
+      }
+    }
+
     &--admin {
       color: $white;
       background: linear-gradient(135deg, $accent-500, darken($accent-500, 10%));

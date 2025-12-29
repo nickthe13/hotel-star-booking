@@ -1,0 +1,72 @@
+<div class="favorites-page">
+  <div class="container">
+    <!-- Header -->
+    <header class="favorites-header">
+      <div class="favorites-header__content">
+        <h1 class="favorites-header__title">My Favorites</h1>
+        <p class="favorites-header__subtitle">
+          Hotels you've saved for later
+        </p>
+      </div>
+      @if (favoritesCount > 0) {
+        <div class="favorites-header__actions">
+          <span class="favorites-header__count">{{ favoritesCount }} saved</span>
+          <button
+            type="button"
+            class="favorites-header__clear-btn"
+            (click)="clearAllFavorites()"
+          >
+            Clear all
+          </button>
+        </div>
+      }
+    </header>
+
+    <!-- Content -->
+    @if (!authService.isAuthenticated()) {
+      <div class="favorites-empty">
+        <div class="favorites-empty__icon">
+          <svg viewBox="0 0 24 24" width="64" height="64">
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
+          </svg>
+        </div>
+        <h2 class="favorites-empty__title">Sign in to see your favorites</h2>
+        <p class="favorites-empty__text">
+          Log in to save hotels and access them from any device.
+        </p>
+        <a routerLink="/auth/login" class="favorites-empty__btn">Sign In</a>
+      </div>
+    } @else if (loading()) {
+      <app-loader />
+    } @else if (favoritesCount === 0) {
+      <div class="favorites-empty">
+        <div class="favorites-empty__icon">
+          <svg viewBox="0 0 24 24" width="64" height="64">
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
+          </svg>
+        </div>
+        <h2 class="favorites-empty__title">No favorites yet</h2>
+        <p class="favorites-empty__text">
+          Start exploring and save hotels you love by clicking the heart icon.
+        </p>
+        <a routerLink="/hotels" class="favorites-empty__btn">Browse Hotels</a>
+      </div>
+    } @else {
+      <div class="favorites-grid">
+        @for (hotel of favorites(); track hotel.id) {
+          <app-hotel-card [hotel]="hotel" />
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,126 @@
+@import '../../../assets/styles/variables';
+@import '../../../assets/styles/mixins';
+
+.favorites-page {
+  min-height: calc(100vh - 200px);
+  padding: $spacing-2xl 0;
+  background: $neutral-50;
+}
+
+.favorites-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-2xl;
+  padding-bottom: $spacing-xl;
+  border-bottom: 1px solid $border-color-light;
+
+  @include respond-to('mobile') {
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-xs;
+    color: $text-primary;
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $text-secondary;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+  }
+
+  &__count {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    padding: $spacing-xs $spacing-md;
+    background: $white;
+    border-radius: $radius-full;
+    border: 1px solid $border-color-light;
+  }
+
+  &__clear-btn {
+    padding: $spacing-sm $spacing-lg;
+    background: transparent;
+    border: 1px solid $error-500;
+    color: $error-500;
+    border-radius: $radius-md;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    transition: all $transition-base;
+
+    &:hover {
+      background: $error-50;
+    }
+  }
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: $spacing-xl;
+
+  @include respond-to('mobile') {
+    grid-template-columns: 1fr;
+  }
+}
+
+.favorites-empty {
+  text-align: center;
+  padding: $spacing-3xl $spacing-xl;
+  background: $white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+
+  &__icon {
+    margin-bottom: $spacing-xl;
+    color: $neutral-300;
+
+    svg {
+      stroke-width: 1.5;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-md;
+    color: $text-primary;
+  }
+
+  &__text {
+    font-size: $font-size-lg;
+    color: $text-secondary;
+    max-width: 400px;
+    margin: 0 auto $spacing-xl;
+    line-height: $line-height-relaxed;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md $spacing-2xl;
+    background: $primary-500;
+    color: $white;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    text-decoration: none;
+    transition: all $transition-base;
+
+    &:hover {
+      background: $primary-600;
+      transform: translateY(-2px);
+    }
+  }
+}

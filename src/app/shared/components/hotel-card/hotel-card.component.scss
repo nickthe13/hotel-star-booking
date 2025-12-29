@@ -51,6 +51,55 @@
     z-index: 1;
   }
 
+  &__favorite {
+    position: absolute;
+    top: $spacing-md;
+    left: $spacing-md;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba($white, 0.9);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+    transition: all $transition-base;
+    box-shadow: $shadow-md;
+
+    &:hover {
+      background: $white;
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    .heart-icon {
+      color: $neutral-400;
+      transition: all $transition-base;
+
+      &--filled {
+        color: $error-500;
+      }
+    }
+
+    &--active {
+      .heart-icon {
+        color: $error-500;
+        animation: heartBeat 0.3s ease-in-out;
+      }
+    }
+  }
+
+  @keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
   &__content {
     padding: $spacing-md;
 

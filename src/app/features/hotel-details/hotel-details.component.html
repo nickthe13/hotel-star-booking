@@ -17,14 +17,40 @@
     <section class="hero">
       <div class="container">
         <div class="hero__content">
-          <h1 class="hero__title">{{ hotel()!.name }}</h1>
+          <div class="hero__header">
+            <h1 class="hero__title">{{ hotel()!.name }}</h1>
+            <button
+              type="button"
+              class="hero__favorite-btn"
+              [class.hero__favorite-btn--active]="isFavorite"
+              (click)="toggleFavorite()"
+              [title]="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+            >
+              <svg viewBox="0 0 24 24" width="28" height="28">
+                @if (isFavorite) {
+                  <path
+                    fill="currentColor"
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                } @else {
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                }
+              </svg>
+              <span>{{ isFavorite ? 'Saved' : 'Save' }}</span>
+            </button>
+          </div>
           <div class="hero__meta">
             <div class="star-rating">
               @for (star of [1, 2, 3, 4, 5]; track star) {
-                <span [class.filled]="star <= hotel()!.starRating">⭐</span>
+                <span [class.filled]="star <= hotel()!.starRating">&#9733;</span>
               }
             </div>
-            <span class="location">📍 {{ hotel()!.location }}</span>
+            <span class="location">{{ hotel()!.location }}</span>
           </div>
         </div>
       </div>

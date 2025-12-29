@@ -35,9 +35,72 @@
 .hero {
   padding: $spacing-xl 0;
 
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-md;
+
+    @include respond-to('mobile') {
+      flex-direction: column;
+      gap: $spacing-md;
+    }
+  }
+
   &__title {
     font-size: $font-size-4xl;
-    margin-bottom: $spacing-md;
+    margin: 0;
+
+    @include respond-to('mobile') {
+      font-size: $font-size-2xl;
+    }
+  }
+
+  &__favorite-btn {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-lg;
+    background: $white;
+    border: 2px solid $border-color;
+    border-radius: $radius-full;
+    cursor: pointer;
+    transition: all $transition-base;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
+
+    svg {
+      color: $neutral-400;
+      transition: all $transition-base;
+    }
+
+    &:hover {
+      border-color: $error-500;
+      background: $error-50;
+
+      svg {
+        color: $error-500;
+      }
+    }
+
+    &--active {
+      border-color: $error-500;
+      background: $error-50;
+      color: $error-600;
+
+      svg {
+        color: $error-500;
+        animation: heartPulse 0.3s ease-in-out;
+      }
+    }
+  }
+
+  @keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
   }
 
   &__meta {
@@ -51,6 +114,7 @@
     display: flex;
     gap: $spacing-xs;
     font-size: $font-size-lg;
+    color: #FFD700;
 
     span {
       opacity: 0.2;
