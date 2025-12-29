@@ -10,10 +10,11 @@ import { ReviewListComponent } from '../../shared/components/review-list/review-
 import { ReviewFormComponent, ReviewFormData } from '../../shared/components/review-form/review-form.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { AvailabilityCalendarComponent } from '../../shared/components/availability-calendar/availability-calendar.component';
+import { BookingStepperComponent, BookingDetails } from '../../shared/components/booking-stepper/booking-stepper.component';
 
 @Component({
   selector: 'app-hotel-details',
-  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent, AvailabilityCalendarComponent],
+  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent, AvailabilityCalendarComponent, BookingStepperComponent],
   templateUrl: './hotel-details.component.html',
   styleUrl: './hotel-details.component.scss'
 })
@@ -166,6 +167,23 @@ export class HotelDetailsComponent implements OnInit {
 
   isRoomSelected(room: Room): boolean {
     return this.selectedRoom()?.id === room.id;
+  }
+
+  onConfirmBooking(bookingDetails: BookingDetails): void {
+    // For now, navigate to booking page with all details
+    // This will be replaced with payment modal in Phase 5
+    if (this.hotel()) {
+      const queryParams: any = {
+        checkIn: bookingDetails.checkIn,
+        checkOut: bookingDetails.checkOut,
+        roomId: bookingDetails.room.id,
+        guests: bookingDetails.guests
+      };
+      if (bookingDetails.specialRequests) {
+        queryParams.specialRequests = bookingDetails.specialRequests;
+      }
+      this.router.navigate(['/booking', this.hotel()!.id], { queryParams });
+    }
   }
 
   canBookNow(): boolean {

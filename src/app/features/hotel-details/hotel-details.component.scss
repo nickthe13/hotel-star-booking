@@ -131,7 +131,7 @@
   gap: $spacing-xl;
 
   @include respond-to('lg') {
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: 1fr 420px;
   }
 }
 
