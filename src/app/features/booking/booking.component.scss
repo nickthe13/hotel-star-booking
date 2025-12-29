@@ -5,6 +5,7 @@
   min-height: calc(100vh - 64px - 300px);
   padding: $spacing-3xl 0;
   background: $neutral-50;
+  overflow-y: auto; // Ensure page can scroll
 }
 
 .alert {

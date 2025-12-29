@@ -5,6 +5,7 @@
   border-radius: $radius-lg;
   padding: $spacing-lg;
   box-shadow: $shadow-md;
+  touch-action: pan-y; // Allow vertical page scrolling on touch devices
 
   &.compact {
     padding: $spacing-md;
@@ -109,6 +110,7 @@
   transition: all 0.2s ease;
   padding: $spacing-xs;
   position: relative;
+  touch-action: manipulation; // Prevent double-tap zoom, allow scrolling
 
   .day-number {
     font-size: $font-size-sm;

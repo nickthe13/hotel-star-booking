@@ -27,7 +27,7 @@ export class LoginComponent {
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
   }
 
   onSubmit(): void {
