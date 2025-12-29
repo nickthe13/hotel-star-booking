@@ -527,14 +527,30 @@
   padding: $spacing-xl;
   transition: all 0.3s ease;
 
-  &:hover:not(&--unavailable) {
+  &--selectable {
+    cursor: pointer;
+
+    &:hover {
+      border-color: $primary-300;
+      box-shadow: $shadow-md;
+      transform: translateY(-2px);
+    }
+  }
+
+  &--selected {
     border-color: $primary-500;
-    box-shadow: $shadow-md;
+    background: rgba($primary-500, 0.03);
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.15);
+
+    &:hover {
+      border-color: $primary-500;
+    }
   }
 
   &--unavailable {
     opacity: 0.7;
     background: $neutral-50;
+    cursor: not-allowed;
   }
 
   &__header {
@@ -563,6 +579,11 @@
     &--available {
       background: rgba($success, 0.1);
       color: $success;
+    }
+
+    &--selected {
+      background: $primary-500;
+      color: $white;
     }
 
     &--unavailable {

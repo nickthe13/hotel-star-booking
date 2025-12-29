@@ -16,7 +16,10 @@
       "Bash(npx prisma migrate dev:*)",
       "Bash(xargs:*)",
       "Bash(wc:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(cat:*)",
+      "Bash(taskkill:*)",
+      "Bash(ls:*)"
     ]
   }
 }

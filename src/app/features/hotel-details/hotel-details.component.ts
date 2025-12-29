@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HotelService } from '../../core/services/hotel.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReviewService } from '../../core/services/review.service';
-import { Hotel, Review, DateRange } from '../../core/models';
+import { Hotel, Review, DateRange, Room } from '../../core/models';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ReviewListComponent } from '../../shared/components/review-list/review-list.component';
 import { ReviewFormComponent, ReviewFormData } from '../../shared/components/review-form/review-form.component';
@@ -39,6 +39,9 @@ export class HotelDetailsComponent implements OnInit {
   // Calendar / Date Selection
   selectedCheckIn = signal<string | null>(null);
   selectedCheckOut = signal<string | null>(null);
+
+  // Room Selection
+  selectedRoom = signal<Room | undefined>(undefined);
 
   constructor(
     private hotelService: HotelService,
@@ -147,6 +150,22 @@ export class HotelDetailsComponent implements OnInit {
   onDateRangeCleared(): void {
     this.selectedCheckIn.set(null);
     this.selectedCheckOut.set(null);
+  }
+
+  selectRoom(room: Room): void {
+    if (!room.available) {
+      return;
+    }
+    // Toggle selection if clicking the same room
+    if (this.selectedRoom()?.id === room.id) {
+      this.selectedRoom.set(undefined);
+    } else {
+      this.selectedRoom.set(room);
+    }
+  }
+
+  isRoomSelected(room: Room): boolean {
+    return this.selectedRoom()?.id === room.id;
   }
 
   canBookNow(): boolean {

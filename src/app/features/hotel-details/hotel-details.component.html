@@ -84,11 +84,19 @@
               <h2 class="section__title">Available Rooms</h2>
               <div class="rooms-list">
                 @for (room of hotel()!.rooms; track room.id) {
-                  <div class="room-card" [class.room-card--unavailable]="!room.available">
+                  <div
+                    class="room-card"
+                    [class.room-card--unavailable]="!room.available"
+                    [class.room-card--selected]="isRoomSelected(room)"
+                    [class.room-card--selectable]="room.available"
+                    (click)="selectRoom(room)"
+                  >
                     <div class="room-card__header">
                       <h3 class="room-card__title">{{ room.roomType }}</h3>
                       @if (!room.available) {
                         <span class="room-card__badge room-card__badge--unavailable">Unavailable</span>
+                      } @else if (isRoomSelected(room)) {
+                        <span class="room-card__badge room-card__badge--selected">Selected</span>
                       } @else {
                         <span class="room-card__badge room-card__badge--available">Available</span>
                       }
