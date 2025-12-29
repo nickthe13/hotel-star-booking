@@ -8,14 +8,46 @@
   touch-action: pan-y; // Allow vertical page scrolling on touch devices
 
   &.compact {
-    padding: $spacing-md;
+    padding: $spacing-sm;
+    box-shadow: none;
+    border: 1px solid $border-color-light;
 
     .calendar-header {
-      margin-bottom: $spacing-sm;
+      margin-bottom: $spacing-xs;
+    }
+
+    .month-year {
+      font-size: $font-size-base;
+    }
+
+    .nav-btn {
+      width: 28px;
+      height: 28px;
+
+      .nav-icon {
+        font-size: 16px;
+      }
+    }
+
+    .calendar-weekdays {
+      margin-bottom: $spacing-xs;
+    }
+
+    .weekday {
+      font-size: $font-size-xs;
+      padding: 2px 0;
+    }
+
+    .calendar-grid {
+      gap: 1px;
     }
 
     .calendar-day {
-      padding: $spacing-xs;
+      padding: 2px;
+
+      .day-number {
+        font-size: $font-size-xs;
+      }
 
       .day-price {
         display: none;
@@ -24,10 +56,51 @@
 
     .selection-summary {
       padding: $spacing-sm;
+      margin-top: $spacing-sm;
+
+      .date-display {
+        margin-bottom: $spacing-sm;
+      }
+
+      .date-label {
+        font-size: 10px;
+      }
+
+      .date-value {
+        font-size: $font-size-sm;
+      }
+
+      .date-separator {
+        font-size: $font-size-base;
+        padding: 0 $spacing-sm;
+      }
+
+      .stay-summary {
+        padding: $spacing-xs 0;
+        margin-bottom: $spacing-xs;
+      }
+
+      .nights {
+        font-size: $font-size-xs;
+      }
+
+      .total-price {
+        font-size: $font-size-base;
+      }
+
+      .clear-btn {
+        padding: $spacing-xs;
+        font-size: $font-size-xs;
+      }
     }
 
     .calendar-legend {
       display: none;
+    }
+
+    .instructions {
+      font-size: $font-size-xs;
+      margin-top: $spacing-sm;
     }
   }
 }
