@@ -55,9 +55,9 @@ export class BookingsService {
     }
 
     // Validate guest count
-    if (guests > room.maxGuests) {
+    if (guests > room.capacity) {
       throw new BadRequestException(
-        `Room can accommodate maximum ${room.maxGuests} guests`,
+        `Room can accommodate maximum ${room.capacity} guests`,
       );
     }
 
@@ -89,7 +89,7 @@ export class BookingsService {
     const nights = Math.ceil(
       (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24),
     );
-    const totalPrice = room.pricePerNight * nights;
+    const totalPrice = room.price * nights;
 
     // Create booking
     return this.prismaService.booking.create({
@@ -98,7 +98,9 @@ export class BookingsService {
         roomId,
         checkIn: checkInDate,
         checkOut: checkOutDate,
-        guests,
+        numberOfGuests: guests,
+        guestName: '',
+        guestEmail: '',
         totalPrice,
         specialRequests,
         status: BookingStatus.PENDING_PAYMENT,
@@ -216,8 +218,8 @@ export class BookingsService {
 
     // Prevent certain status changes by non-admin users
     if (updateBookingDto.status && userRole !== UserRole.ADMIN) {
-      const allowedStatuses = [BookingStatus.CANCELLED];
-      if (!allowedStatuses.includes(updateBookingDto.status)) {
+      const allowedStatuses: BookingStatus[] = [BookingStatus.CANCELLED];
+      if (!allowedStatuses.includes(updateBookingDto.status as BookingStatus)) {
         throw new ForbiddenException(
           'Only admins can update booking status to this value',
         );

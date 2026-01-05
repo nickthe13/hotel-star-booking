@@ -29,7 +29,7 @@ export class AuthResponseDto {
     email: string;
     name: string;
     role: string;
-    phone?: string;
+    phone?: string | null;
     createdAt: Date;
   };
 

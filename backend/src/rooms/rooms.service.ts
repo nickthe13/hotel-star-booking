@@ -219,7 +219,7 @@ export class RoomsService {
         id: room.id,
         name: room.name,
         type: room.type,
-        pricePerNight: room.pricePerNight,
+        price: room.price,
       },
     };
   }

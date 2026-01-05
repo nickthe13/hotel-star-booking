@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { CreatePaymentIntentDto, ConfirmPaymentDto, RefundPaymentDto } from './dto';
+import { PaymentStatus } from '@prisma/client';
 
 @Injectable()
 export class PaymentsService {
@@ -19,9 +20,7 @@ export class PaymentsService {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }
 
-    this.stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2024-12-18.acacia',
-    });
+    this.stripe = new Stripe(stripeSecretKey);
   }
 
   /**
@@ -48,11 +47,11 @@ export class PaymentsService {
     }
 
     // Check if payment already exists
-    const existingPayment = await this.prisma.payment.findFirst({
+    const existingPayment = await this.prisma.paymentTransaction.findFirst({
       where: {
         bookingId: booking.id,
         status: {
-          in: ['PENDING', 'COMPLETED'],
+          in: [PaymentStatus.PENDING, PaymentStatus.SUCCEEDED],
         },
       },
     });
@@ -77,12 +76,12 @@ export class PaymentsService {
     });
 
     // Create payment record in database
-    const payment = await this.prisma.payment.create({
+    const payment = await this.prisma.paymentTransaction.create({
       data: {
         bookingId: booking.id,
         amount: dto.amount,
-        currency: dto.currency || 'USD',
-        status: 'PENDING',
+        currency: dto.currency || 'usd',
+        status: PaymentStatus.PENDING,
         stripePaymentIntentId: paymentIntent.id,
       },
     });
@@ -108,7 +107,7 @@ export class PaymentsService {
     }
 
     // Find payment in database
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.paymentTransaction.findFirst({
       where: {
         stripePaymentIntentId: dto.paymentIntentId,
       },
@@ -136,11 +135,11 @@ export class PaymentsService {
     }
 
     // Update payment status based on Stripe status
-    const updatedPayment = await this.prisma.payment.update({
+    const updatedPayment = await this.prisma.paymentTransaction.update({
       where: { id: payment.id },
       data: {
-        status: paymentIntent.status === 'succeeded' ? 'COMPLETED' : 'FAILED',
-        stripePaymentMethodId: dto.paymentMethodId,
+        status: paymentIntent.status === 'succeeded' ? PaymentStatus.SUCCEEDED : PaymentStatus.FAILED,
+        paymentMethod: dto.paymentMethodId,
       },
     });
 
@@ -210,7 +209,7 @@ export class PaymentsService {
    * Get payment history for a user
    */
   async getPaymentHistory(userId: string) {
-    const payments = await this.prisma.payment.findMany({
+    const payments = await this.prisma.paymentTransaction.findMany({
       where: {
         booking: {
           userId,
@@ -239,10 +238,9 @@ export class PaymentsService {
    * Get saved payment methods for a user
    */
   async getSavedPaymentMethods(userId: string) {
-    const savedMethods = await this.prisma.savedPaymentMethod.findMany({
+    const savedMethods = await this.prisma.paymentMethod.findMany({
       where: {
         userId,
-        isActive: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -257,7 +255,7 @@ export class PaymentsService {
    */
   async refundPayment(userId: string, dto: RefundPaymentDto) {
     // Find payment
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.paymentTransaction.findFirst({
       where: {
         stripePaymentIntentId: dto.paymentIntentId,
         booking: {
@@ -265,7 +263,16 @@ export class PaymentsService {
         },
       },
       include: {
-        booking: true,
+        booking: {
+          include: {
+            user: true,
+            room: {
+              include: {
+                hotel: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -273,7 +280,7 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found');
     }
 
-    if (payment.status !== 'COMPLETED') {
+    if (payment.status !== PaymentStatus.SUCCEEDED) {
       throw new BadRequestException('Can only refund completed payments');
     }
 
@@ -289,10 +296,12 @@ export class PaymentsService {
 
     // Update payment status
     const isPartialRefund = dto.amount && dto.amount < payment.amount;
-    await this.prisma.payment.update({
+    await this.prisma.paymentTransaction.update({
       where: { id: payment.id },
       data: {
-        status: isPartialRefund ? 'PARTIALLY_REFUNDED' : 'REFUNDED',
+        status: isPartialRefund ? PaymentStatus.PARTIALLY_REFUNDED : PaymentStatus.REFUNDED,
+        refundAmount: dto.amount || payment.amount,
+        refundReason: dto.reason || 'Customer requested refund',
       },
     });
 
@@ -322,7 +331,7 @@ export class PaymentsService {
   // Private helper methods
 
   private async handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.paymentTransaction.findFirst({
       where: {
         stripePaymentIntentId: paymentIntent.id,
       },
@@ -341,9 +350,9 @@ export class PaymentsService {
     });
 
     if (payment) {
-      await this.prisma.payment.update({
+      await this.prisma.paymentTransaction.update({
         where: { id: payment.id },
-        data: { status: 'COMPLETED' },
+        data: { status: PaymentStatus.SUCCEEDED },
       });
 
       await this.prisma.booking.update({
@@ -379,32 +388,32 @@ export class PaymentsService {
   }
 
   private async handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-    const payment = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.paymentTransaction.findFirst({
       where: {
         stripePaymentIntentId: paymentIntent.id,
       },
     });
 
     if (payment) {
-      await this.prisma.payment.update({
+      await this.prisma.paymentTransaction.update({
         where: { id: payment.id },
-        data: { status: 'FAILED' },
+        data: { status: PaymentStatus.FAILED },
       });
     }
   }
 
   private async handleRefund(charge: Stripe.Charge) {
     if (charge.payment_intent) {
-      const payment = await this.prisma.payment.findFirst({
+      const payment = await this.prisma.paymentTransaction.findFirst({
         where: {
           stripePaymentIntentId: charge.payment_intent as string,
         },
       });
 
       if (payment) {
-        await this.prisma.payment.update({
+        await this.prisma.paymentTransaction.update({
           where: { id: payment.id },
-          data: { status: 'REFUNDED' },
+          data: { status: PaymentStatus.REFUNDED },
         });
       }
     }
@@ -421,7 +430,7 @@ export class PaymentsService {
     }
 
     // Save to database
-    await this.prisma.savedPaymentMethod.create({
+    await this.prisma.paymentMethod.create({
       data: {
         userId,
         stripePaymentMethodId: paymentMethodId,
@@ -430,7 +439,7 @@ export class PaymentsService {
         cardLast4: paymentMethod.card?.last4 || null,
         cardExpMonth: paymentMethod.card?.exp_month || null,
         cardExpYear: paymentMethod.card?.exp_year || null,
-        isActive: true,
+        isDefault: false,
       },
     });
   }

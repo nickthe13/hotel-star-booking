@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // Enums
@@ -61,6 +62,7 @@ model User {
   email     String   @unique
   password  String
   name      String
+  phone     String?
   role      UserRole @default(USER)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -111,6 +113,7 @@ model Room {
   price         Float
   capacity      Int      @default(2)
   size          Float?   // in square meters
+  bedCount      Int?     @default(1) @map("bed_count")
   bedType       String?  @map("bed_type")
   amenities     String[] // Array of room amenities
   images        String[] // Array of image URLs

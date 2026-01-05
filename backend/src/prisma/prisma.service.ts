@@ -25,7 +25,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
 
     // Clean all tables in the right order (respecting foreign keys)
-    const models = Reflect.ownKeys(this).filter((key) => key[0] !== '_');
+    const models = Reflect.ownKeys(this).filter((key) => {
+      if (typeof key === 'string') {
+        return !key.startsWith('_');
+      }
+      return false;
+    });
 
     return Promise.all(
       models.map((modelKey) => {

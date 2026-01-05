@@ -128,7 +128,7 @@ export class HotelsService {
           select: {
             rooms: true,
             reviews: true,
-            favoriteByUsers: true,
+            favoriteBy: true,
           },
         },
       },

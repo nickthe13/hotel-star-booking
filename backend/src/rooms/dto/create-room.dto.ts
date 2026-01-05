@@ -52,7 +52,7 @@ export class CreateRoomDto {
   })
   @IsNumber()
   @Min(0, { message: 'Price must be positive' })
-  pricePerNight: number;
+  price: number;
 
   @ApiProperty({
     example: 2,
@@ -61,7 +61,7 @@ export class CreateRoomDto {
   @IsInt()
   @Min(1, { message: 'Must accommodate at least 1 guest' })
   @Max(10, { message: 'Cannot accommodate more than 10 guests' })
-  maxGuests: number;
+  capacity: number;
 
   @ApiProperty({
     example: 450,

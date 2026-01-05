@@ -125,6 +125,9 @@ export class PaymentsController {
     @Headers('stripe-signature') signature: string,
     @Req() request: RawBodyRequest<Request>,
   ) {
+    if (!request.rawBody) {
+      throw new Error('Raw body is required for webhook verification');
+    }
     return this.paymentsService.handleWebhook(
       signature,
       request.rawBody,
