@@ -2,8 +2,8 @@
 // Copy from environment.example.ts and add your actual keys
 
 export const environment = {
-  production: true,
-  apiUrl: 'https://api.hotel-booking.com/api',
+  production: false,
+  apiUrl: 'http://localhost:3000/api',
   apiVersion: 'v1',
-  stripePublishableKey: 'pk_test_51SidXjKSmvdwgtbdKHPDIoQjqNbNTDyLgfnp2zcGOrgxzbX5O8g5PtpsJn3uIQERXZohHKskm1ArDR2UF8wYBaWT00feXgkdwq' // Add your Stripe publishable key
+  stripePublishableKey: 'pk_test_51SidXjKSmvdwgtbdKHPDIoQjqNbNTDyLgfnp2zcGOrgxzbX5O8g5PtpsJn3uIQERXZohHKskm1ArDR2UF8wYBaWT00feXgkdwq'
 };
