@@ -19,7 +19,10 @@
       "Bash(node -e:*)",
       "Bash(cat:*)",
       "Bash(taskkill:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(npx prisma db seed)",
+      "WebSearch"
     ]
   }
 }

@@ -8,14 +8,19 @@ export interface User {
 }
 
 export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin'
+  USER = 'USER',
+  ADMIN = 'ADMIN'
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
 }
 
 export interface AuthResponse {
   user: User;
-  token: string;
-  refreshToken: string;
+  tokens: AuthTokens;
 }
 
 export interface LoginRequest {

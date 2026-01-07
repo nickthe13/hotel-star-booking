@@ -136,7 +136,7 @@ export class AuthService {
             createdAt: new Date(response.user.createdAt)
           };
 
-          this.setAuthData(user, response.token, response.refreshToken);
+          this.setAuthData(user, response.tokens.accessToken, response.tokens.refreshToken);
         }),
         catchError((error: HttpErrorResponse) => {
           this.rateLimiter.recordFailedLogin(sanitizedEmail);
@@ -177,7 +177,7 @@ export class AuthService {
             createdAt: new Date(response.user.createdAt)
           };
 
-          this.setAuthData(user, response.token, response.refreshToken);
+          this.setAuthData(user, response.tokens.accessToken, response.tokens.refreshToken);
         }),
         catchError((error: HttpErrorResponse) => {
           const message = error.error?.message || 'Registration failed. Please try again.';
@@ -218,10 +218,10 @@ export class AuthService {
       }
     }).pipe(
       tap(response => {
-        this.token.set(response.token);
-        this.refreshTokenValue.set(response.refreshToken);
-        this.secureStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
-        this.secureStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
+        this.token.set(response.tokens.accessToken);
+        this.refreshTokenValue.set(response.tokens.refreshToken);
+        this.secureStorage.setItem(STORAGE_KEYS.TOKEN, response.tokens.accessToken);
+        this.secureStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.tokens.refreshToken);
       }),
       catchError(error => {
         this.logout();
