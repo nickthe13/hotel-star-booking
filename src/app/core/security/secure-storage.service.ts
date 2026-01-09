@@ -25,21 +25,32 @@ export class SecureStorageService {
 
   /**
    * Initializes encryption key from secure source
-   * In production, this should be derived from user authentication
+   * Uses localStorage to persist the key across browser sessions
    */
   private initializeEncryptionKey(): void {
     // Generate or retrieve encryption key
-    // SECURITY NOTE: In production, derive this from user's authentication token
-    // or generate once and store securely (e.g., in memory only during session)
-    const storedKey = sessionStorage.getItem('_ek');
+    // Key is stored in localStorage to persist across browser sessions
+    const storedKey = localStorage.getItem('_ek');
 
     if (storedKey) {
-      this.encryptionKey = decodeBase64(storedKey);
+      try {
+        this.encryptionKey = decodeBase64(storedKey);
+      } catch {
+        // If key is corrupted, generate a new one
+        this.generateNewKey();
+      }
     } else {
-      // Generate a new key (32 bytes for secretbox)
-      this.encryptionKey = nacl.randomBytes(nacl.secretbox.keyLength);
-      sessionStorage.setItem('_ek', encodeBase64(this.encryptionKey));
+      this.generateNewKey();
     }
+  }
+
+  /**
+   * Generates a new encryption key
+   */
+  private generateNewKey(): void {
+    // Generate a new key (32 bytes for secretbox)
+    this.encryptionKey = nacl.randomBytes(nacl.secretbox.keyLength);
+    localStorage.setItem('_ek', encodeBase64(this.encryptionKey));
   }
 
   /**

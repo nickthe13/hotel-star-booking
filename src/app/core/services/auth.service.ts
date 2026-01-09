@@ -112,10 +112,10 @@ export class AuthService {
         return throwError(() => new Error(rateLimitCheck.message || SecurityMessages.accountLocked));
       }
 
-      // Validate password format
-      if (!credentials.password || credentials.password.length < SecurityConfig.auth.password.minLength) {
+      // Basic password validation - don't be too strict on login (backend validates)
+      if (!credentials.password || credentials.password.length < 1) {
         this.rateLimiter.recordFailedLogin(sanitizedEmail);
-        return throwError(() => new Error('Invalid credentials'));
+        return throwError(() => new Error('Password is required'));
       }
 
       // Make API call to backend
