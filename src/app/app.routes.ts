@@ -66,6 +66,11 @@ export const routes: Routes = [
       import('./features/admin/admin.component').then((m) => m.AdminComponent)
   },
   {
+    path: 'contact',
+    loadComponent: () =>
+      import('./features/contact/contact.component').then((m) => m.ContactComponent)
+  },
+  {
     path: '**',
     redirectTo: 'home'
   }
