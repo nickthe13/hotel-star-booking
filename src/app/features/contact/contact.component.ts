@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS } from '../../core/constants/api-endpoints';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-contact',
@@ -34,7 +34,7 @@ export class ContactComponent {
       this.error.set('');
       this.success.set(false);
 
-      this.http.post(`${API_ENDPOINTS.BASE_URL}/contact`, this.contactForm.value).subscribe({
+      this.http.post(`${environment.apiUrl}/${environment.apiVersion}/contact`, this.contactForm.value).subscribe({
         next: () => {
           this.loading.set(false);
           this.success.set(true);
