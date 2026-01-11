@@ -34,7 +34,7 @@ export class ContactComponent {
       this.error.set('');
       this.success.set(false);
 
-      this.http.post(`${environment.apiUrl}/${environment.apiVersion}/contact`, this.contactForm.value).subscribe({
+      this.http.post(`${environment.apiUrl}/contact`, this.contactForm.value).subscribe({
         next: () => {
           this.loading.set(false);
           this.success.set(true);

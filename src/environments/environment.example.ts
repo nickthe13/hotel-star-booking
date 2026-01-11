@@ -15,7 +15,6 @@
 
 export const environment = {
   production: false, // Set to true for production
-  apiUrl: 'http://localhost:3000/api', // Change to your production API URL
-  apiVersion: 'v1',
+  apiUrl: 'http://localhost:3000/api/v1', // Change to your production API URL (include /api/v1)
   stripePublishableKey: 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY_HERE' // Replace with your actual Stripe key
 };

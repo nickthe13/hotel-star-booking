@@ -22,7 +22,8 @@
       "Bash(ls:*)",
       "Bash(find:*)",
       "Bash(npx prisma db seed)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run start:dev:*)"
     ]
   }
 }

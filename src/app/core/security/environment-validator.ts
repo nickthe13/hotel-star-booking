@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 export class EnvironmentValidator {
   private static readonly REQUIRED_KEYS = [
     'apiUrl',
-    'apiVersion',
     'stripePublishableKey'
   ];
 
@@ -106,7 +105,6 @@ export class EnvironmentValidator {
     return {
       production: String(environment.production),
       apiUrl: environment.apiUrl,
-      apiVersion: environment.apiVersion,
       stripeKeyType: environment.stripePublishableKey.startsWith('pk_test_')
         ? 'test'
         : 'live',

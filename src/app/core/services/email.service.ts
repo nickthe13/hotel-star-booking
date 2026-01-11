@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class EmailService {
-  private readonly API_URL = `${environment.apiUrl}/${environment.apiVersion}`;
+  private readonly API_URL = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
