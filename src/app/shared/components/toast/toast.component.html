@@ -1,0 +1,19 @@
+<div class="toast-container">
+  @for (notification of notifications(); track trackById($index, notification)) {
+    <div
+      class="toast toast--{{ notification.type }}"
+      role="alert"
+      aria-live="polite"
+    >
+      <span class="toast__icon">{{ getIcon(notification.type) }}</span>
+      <span class="toast__message">{{ notification.message }}</span>
+      <button
+        class="toast__close"
+        (click)="close(notification.id)"
+        aria-label="Close notification"
+      >
+        ✕
+      </button>
+    </div>
+  }
+</div>

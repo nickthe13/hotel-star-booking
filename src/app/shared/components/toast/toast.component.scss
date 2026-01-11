@@ -1,0 +1,135 @@
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 400px;
+  width: calc(100% - 2rem);
+
+  @media (max-width: 480px) {
+    top: auto;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+  background: white;
+  border-left: 4px solid;
+
+  &--success {
+    border-left-color: #10b981;
+    background: linear-gradient(to right, #ecfdf5, white);
+
+    .toast__icon {
+      color: #10b981;
+      background: #d1fae5;
+    }
+  }
+
+  &--error {
+    border-left-color: #ef4444;
+    background: linear-gradient(to right, #fef2f2, white);
+
+    .toast__icon {
+      color: #ef4444;
+      background: #fee2e2;
+    }
+  }
+
+  &--warning {
+    border-left-color: #f59e0b;
+    background: linear-gradient(to right, #fffbeb, white);
+
+    .toast__icon {
+      color: #f59e0b;
+      background: #fef3c7;
+    }
+  }
+
+  &--info {
+    border-left-color: #3b82f6;
+    background: linear-gradient(to right, #eff6ff, white);
+
+    .toast__icon {
+      color: #3b82f6;
+      background: #dbeafe;
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.875rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  &__message {
+    flex: 1;
+    font-size: 0.9375rem;
+    color: #1e293b;
+    line-height: 1.4;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.875rem;
+    cursor: pointer;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  @keyframes slideIn {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
