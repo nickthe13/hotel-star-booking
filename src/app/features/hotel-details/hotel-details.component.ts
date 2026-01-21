@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, Input, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HotelService } from '../../core/services/hotel.service';
@@ -23,6 +23,7 @@ export class HotelDetailsComponent implements OnInit {
   @Input() id!: string;
 
   @ViewChild(ReviewFormComponent) reviewFormComponent?: ReviewFormComponent;
+  @ViewChild('bookingCard') bookingCardRef?: ElementRef;
 
   hotel = signal<Hotel | undefined>(undefined);
   loading = signal<boolean>(true);
@@ -195,6 +196,42 @@ export class HotelDetailsComponent implements OnInit {
 
   isRoomSelected(room: Room): boolean {
     return this.selectedRoom()?.id === room.id;
+  }
+
+  onBookNowClick(): void {
+    if (!this.selectedRoom()) {
+      // Scroll to rooms section so user can select a room
+      const roomsSection = document.querySelector('.rooms-list');
+      if (roomsSection) {
+        roomsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+
+    // Room and dates are selected - proceed to payment
+    const room = this.selectedRoom()!;
+    const checkIn = this.selectedCheckIn()!;
+    const checkOut = this.selectedCheckOut()!;
+
+    // Calculate nights and total
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+    const totalPrice = room.pricePerNight * nights;
+
+    // Open payment modal directly
+    const bookingDetails: BookingDetails = {
+      hotel: this.hotel()!,
+      room: room,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      guests: 2, // Default guests
+      specialRequests: '',
+      nights: nights,
+      totalPrice: totalPrice
+    };
+
+    this.onConfirmBooking(bookingDetails);
   }
 
   onConfirmBooking(bookingDetails: BookingDetails): void {

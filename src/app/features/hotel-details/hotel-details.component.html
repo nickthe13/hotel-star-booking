@@ -154,6 +154,7 @@
                         </div>
                       }
 
+
                     </div>
                   </div>
                 }
@@ -214,7 +215,7 @@
         </main>
 
         <!-- Booking Card -->
-        <aside class="booking-card">
+        <aside class="booking-card" #bookingCard>
           <div class="booking-card__content">
             <div class="booking-card__price">
               <span class="price-label">From</span>
@@ -257,6 +258,26 @@
                 <span class="feature__text">Instant confirmation</span>
               </div>
             </div>
+
+            <!-- Book Now Button - appears after dates are selected -->
+            @if (selectedCheckIn() && selectedCheckOut()) {
+              <div class="booking-card__action">
+                <button
+                  class="btn btn--primary btn--large btn--full"
+                  (click)="onBookNowClick()"
+                  type="button"
+                >
+                  @if (selectedRoom()) {
+                    Book Now
+                  } @else {
+                    Select a Room to Continue
+                  }
+                </button>
+                @if (!selectedRoom()) {
+                  <p class="booking-card__hint">Please select a room from the list above</p>
+                }
+              </div>
+            }
           </div>
         </aside>
       </div>
