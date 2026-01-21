@@ -51,6 +51,9 @@ export class PaymentModalComponent {
   confirmationNumber = signal<string>('');
   bookingId = signal<string>('');
 
+  // Pending booking (created before payment)
+  pendingBookingId = signal<string>('');
+
   constructor(
     private bookingService: BookingService,
     private paymentService: PaymentService,
@@ -95,7 +98,12 @@ export class PaymentModalComponent {
   }
 
   proceedToPayment(): void {
+    console.log('proceedToPayment called');
+    console.log('isAuthenticated:', this.authService.isAuthenticated());
+    console.log('bookingData:', this.bookingData);
+
     if (!this.authService.isAuthenticated()) {
+      console.log('User not authenticated, redirecting to login');
       // Save current state and redirect to login
       this.router.navigate(['/auth/login'], {
         queryParams: { returnUrl: this.router.url }
@@ -103,36 +111,79 @@ export class PaymentModalComponent {
       return;
     }
 
-    this.createPaymentIntent();
+    // First create the booking, then create payment intent
+    this.createBookingAndPaymentIntent();
   }
 
-  createPaymentIntent(): void {
-    if (!this.bookingData) return;
+  createBookingAndPaymentIntent(): void {
+    console.log('createBookingAndPaymentIntent called');
+
+    if (!this.bookingData) {
+      console.log('No bookingData, returning');
+      return;
+    }
 
     this.loading.set(true);
     this.error.set('');
 
+    const user = this.authService.user();
+    console.log('User:', user);
+
+    // Step 1: Create booking with PENDING_PAYMENT status
+    const bookingRequest = {
+      hotelId: this.bookingData.hotel.id,
+      roomId: this.bookingData.room.id,
+      checkIn: this.bookingData.checkIn,
+      checkOut: this.bookingData.checkOut,
+      guests: this.bookingData.guests,
+      specialRequests: this.bookingData.specialRequests,
+      guestName: user?.name || 'Guest',
+      guestEmail: user?.email || ''
+    };
+
+    console.log('Creating booking with:', bookingRequest);
+
+    this.bookingService.createBooking(bookingRequest).subscribe({
+      next: (confirmation) => {
+        console.log('Booking created:', confirmation);
+        // Save booking ID for payment
+        this.pendingBookingId.set(confirmation.booking.id);
+
+        // Step 2: Create payment intent with booking ID
+        this.createPaymentIntent(confirmation.booking.id);
+      },
+      error: (err) => {
+        console.error('Booking creation error:', err);
+        this.loading.set(false);
+        this.error.set(err.message || 'Failed to create booking. Please try again.');
+      }
+    });
+  }
+
+  createPaymentIntent(bookingId: string): void {
+    console.log('createPaymentIntent called with bookingId:', bookingId);
+
+    if (!this.bookingData) return;
+
     const paymentRequest: CreatePaymentIntentRequest = {
+      bookingId: bookingId,
       amount: this.finalPrice() * 100, // Convert to cents
       currency: 'usd',
-      savePaymentMethod: false,
-      metadata: {
-        hotelId: this.bookingData.hotel.id,
-        hotelName: this.bookingData.hotel.name,
-        roomType: this.bookingData.room.roomType,
-        checkIn: this.bookingData.checkIn,
-        checkOut: this.bookingData.checkOut
-      }
+      savePaymentMethod: false
     };
+
+    console.log('Creating payment intent with:', paymentRequest);
 
     this.paymentService.createPaymentIntent(paymentRequest).subscribe({
       next: (response) => {
+        console.log('Payment intent created:', response);
         this.paymentIntent.set(response);
         this.paymentStep.set('payment');
         this.loading.set(false);
         this.loadSavedPaymentMethods();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Payment intent error:', err);
         this.loading.set(false);
         this.error.set('Failed to initialize payment. Please try again.');
       }
@@ -147,45 +198,25 @@ export class PaymentModalComponent {
   }
 
   onPaymentSuccess(paymentIntentId: string): void {
-    if (!this.bookingData) return;
+    if (!this.bookingData || !this.pendingBookingId()) return;
 
     this.processingPayment.set(true);
+    const bookingId = this.pendingBookingId();
 
-    const bookingRequest = {
-      hotelId: this.bookingData.hotel.id,
-      roomId: this.bookingData.room.id,
-      checkIn: this.bookingData.checkIn,
-      checkOut: this.bookingData.checkOut,
-      guests: this.bookingData.guests,
-      specialRequests: this.bookingData.specialRequests,
-      paymentIntentId: paymentIntentId
-    };
+    // Booking was already created - just need to confirm payment was successful
+    // The backend webhook should handle updating the booking status
+    this.processingPayment.set(false);
+    this.confirmationNumber.set(`CONF-${bookingId}`);
+    this.bookingId.set(bookingId);
+    this.paymentStep.set('confirmation');
 
-    this.bookingService.createBookingWithPayment(bookingRequest).subscribe({
-      next: (response) => {
-        this.processingPayment.set(false);
-        this.confirmationNumber.set(response.confirmationNumber);
-        this.bookingId.set(response.booking.id);
-        this.paymentStep.set('confirmation');
+    // Send receipt email
+    this.emailService.sendPaymentReceipt(bookingId, paymentIntentId).subscribe();
 
-        // Send receipt email
-        if (response.paymentTransaction) {
-          this.emailService.sendPaymentReceipt(
-            response.booking.id,
-            response.paymentTransaction.id
-          ).subscribe();
-        }
-
-        // Emit completion event
-        this.bookingComplete.emit({
-          confirmationNumber: response.confirmationNumber,
-          bookingId: response.booking.id
-        });
-      },
-      error: () => {
-        this.processingPayment.set(false);
-        this.error.set('Booking creation failed. Payment was successful - please contact support.');
-      }
+    // Emit completion event
+    this.bookingComplete.emit({
+      confirmationNumber: `CONF-${bookingId}`,
+      bookingId: bookingId
     });
   }
 
@@ -212,6 +243,7 @@ export class PaymentModalComponent {
     this.error.set('');
     this.pointsToRedeem.set(0);
     this.pointsDiscount.set(0);
+    this.pendingBookingId.set('');
 
     this.closeModal.emit();
   }
