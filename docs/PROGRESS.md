@@ -107,11 +107,7 @@ This document tracks what has been implemented in the Hotel Star Booking project
 
 ## Known Issues (See ARCHITECTURE_AUDIT.md)
 
-1. Angular package version mismatch (service-worker v21 vs core v20)
-2. Saved payment method CRUD endpoints missing in backend
-3. Payment flow ownership unclear (client vs webhook)
-4. Encoding artifacts in email templates
-5. Plan documentation out of sync with actual stack
+**All 6 issues have been resolved!** See ARCHITECTURE_AUDIT.md for details.
 
 ---
 
@@ -148,6 +144,13 @@ This document tracks what has been implemented in the Hotel Star Booking project
   4. Removed mock payment method code from frontend (decided not to implement saved methods CRUD)
   5. Documented payment flow ownership in STRIPE_AND_EMAIL_SETUP.md
   6. Added banner to hotel-booking-plan.md noting it's the original planning doc
+- Additional improvements committed:
+  - Simplified booking DTO to match backend API
+  - Added error handling and retry functionality to hotels list
+  - Added "Book Now" button to hotel details booking card
+  - Added hideFooter option to modal component
+  - Refactored payment flow to create booking before payment intent
+  - Fixed mobile filters panel - added close button and overlay for responsive design
 
 ---
 
