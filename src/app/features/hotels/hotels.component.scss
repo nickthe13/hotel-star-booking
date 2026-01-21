@@ -84,6 +84,21 @@
   }
 }
 
+.filters-overlay {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: $z-index-modal - 1;
+
+  @include respond-to('lg') {
+    display: none;
+  }
+}
+
 .filters {
   background: $white;
   border-radius: $radius-lg;
@@ -112,6 +127,12 @@
 
     @include respond-to('lg') {
       position: sticky;
+      top: 80px;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      border-radius: $radius-lg;
+      overflow-y: visible;
     }
   }
 
@@ -125,6 +146,12 @@
     font-weight: $font-weight-semibold;
   }
 
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
   .btn-clear {
     background: none;
     border: none;
@@ -135,6 +162,30 @@
 
     &:hover {
       text-decoration: underline;
+    }
+  }
+
+  .btn-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: $neutral-100;
+    border: none;
+    border-radius: $radius-full;
+    cursor: pointer;
+    font-size: $font-size-lg;
+    color: $text-secondary;
+    transition: all $transition-base;
+
+    &:hover {
+      background: $neutral-200;
+      color: $text-primary;
+    }
+
+    @include respond-to('lg') {
+      display: none;
     }
   }
 }

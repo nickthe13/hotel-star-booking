@@ -25,11 +25,19 @@
   <div class="hotels-page__content">
     <div class="container">
       <div class="hotels-layout">
+        <!-- Filters Overlay (mobile) -->
+        @if (showFilters()) {
+          <div class="filters-overlay" (click)="toggleFilters()"></div>
+        }
+
         <!-- Filters Sidebar -->
         <aside class="filters" [class.filters--visible]="showFilters()">
           <div class="filters__header">
             <h2 class="filters__title">Filters</h2>
-            <button class="btn-clear" (click)="clearFilters()">Clear All</button>
+            <div class="filters__actions">
+              <button class="btn-clear" (click)="clearFilters()">Clear All</button>
+              <button class="btn-close" (click)="toggleFilters()" aria-label="Close filters">✕</button>
+            </div>
           </div>
 
           <!-- City Filter -->
