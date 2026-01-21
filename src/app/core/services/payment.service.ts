@@ -1,11 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { loadStripe, Stripe, StripeError } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
 import {
   PaymentTransaction,
-  PaymentStatus,
   SavedPaymentMethod,
   CreatePaymentIntentRequest,
   CreatePaymentIntentResponse,
@@ -20,10 +19,6 @@ import {
 export class PaymentService {
   private stripe: Stripe | null = null;
   private stripeLoaded = signal<boolean>(false);
-
-  // Mock storage for development
-  private mockPaymentMethods: SavedPaymentMethod[] = [];
-  private mockTransactions: PaymentTransaction[] = [];
 
   private readonly API_URL = environment.apiUrl;
 
@@ -146,65 +141,29 @@ export class PaymentService {
 
   /**
    * Save payment method
+   * Note: Backend endpoint not yet implemented
    */
-  savePaymentMethod(paymentMethodId: string, setAsDefault: boolean = false): Observable<SavedPaymentMethod> {
-    // In production:
-    // return this.http.post<SavedPaymentMethod>(`${this.API_URL}/payment/methods`, {
-    //   paymentMethodId,
-    //   setAsDefault
-    // });
-
-    // Mock implementation
-    const newMethod: SavedPaymentMethod = {
-      id: `pm_${Date.now()}`,
-      userId: '1',
-      stripePaymentMethodId: paymentMethodId,
-      type: 'card',
-      card: {
-        brand: 'visa',
-        last4: '4242',
-        expMonth: 12,
-        expYear: 2025
-      },
-      isDefault: setAsDefault || this.mockPaymentMethods.length === 0,
-      createdAt: new Date()
-    };
-
-    // If setting as default, unset other defaults
-    if (setAsDefault) {
-      this.mockPaymentMethods.forEach(method => {
-        method.isDefault = false;
-      });
-    }
-
-    this.mockPaymentMethods.push(newMethod);
-    return of(newMethod);
+  savePaymentMethod(_paymentMethodId: string, _setAsDefault: boolean = false): Observable<SavedPaymentMethod> {
+    console.warn('savePaymentMethod: Backend endpoint not implemented');
+    return throwError(() => new Error('Saving payment methods is not yet supported'));
   }
 
   /**
    * Delete payment method
+   * Note: Backend endpoint not yet implemented
    */
-  deletePaymentMethod(id: string): Observable<void> {
-    // In production:
-    // return this.http.delete<void>(`${this.API_URL}/payment/methods/${id}`);
-
-    // Mock implementation
-    this.mockPaymentMethods = this.mockPaymentMethods.filter(method => method.id !== id);
-    return of(void 0);
+  deletePaymentMethod(_id: string): Observable<void> {
+    console.warn('deletePaymentMethod: Backend endpoint not implemented');
+    return throwError(() => new Error('Deleting payment methods is not yet supported'));
   }
 
   /**
    * Set default payment method
+   * Note: Backend endpoint not yet implemented
    */
-  setDefaultPaymentMethod(id: string): Observable<void> {
-    // In production:
-    // return this.http.patch<void>(`${this.API_URL}/payment/methods/${id}/default`, {});
-
-    // Mock implementation
-    this.mockPaymentMethods.forEach(method => {
-      method.isDefault = method.id === id;
-    });
-    return of(void 0);
+  setDefaultPaymentMethod(_id: string): Observable<void> {
+    console.warn('setDefaultPaymentMethod: Backend endpoint not implemented');
+    return throwError(() => new Error('Setting default payment method is not yet supported'));
   }
 
   /**
@@ -216,17 +175,11 @@ export class PaymentService {
 
   /**
    * Get payment transaction by ID
+   * Note: Backend endpoint not yet implemented
    */
-  getPaymentTransaction(id: string): Observable<PaymentTransaction> {
-    // In production:
-    // return this.http.get<PaymentTransaction>(`${this.API_URL}/payment/transaction/${id}`);
-
-    // Mock implementation
-    const transaction = this.mockTransactions.find(tx => tx.id === id);
-    if (!transaction) {
-      return throwError(() => new Error('Transaction not found'));
-    }
-    return of(transaction);
+  getPaymentTransaction(_id: string): Observable<PaymentTransaction> {
+    console.warn('getPaymentTransaction: Backend endpoint not implemented');
+    return throwError(() => new Error('Getting individual transaction is not yet supported'));
   }
 
   /**
@@ -240,31 +193,4 @@ export class PaymentService {
     });
   }
 
-  /**
-   * Create mock transaction (for testing)
-   */
-  createMockTransaction(transaction: Partial<PaymentTransaction>): PaymentTransaction {
-    const newTransaction: PaymentTransaction = {
-      id: transaction.id || `txn_${Date.now()}`,
-      bookingId: transaction.bookingId || '',
-      userId: transaction.userId || '1',
-      amount: transaction.amount || 0,
-      currency: transaction.currency || 'usd',
-      status: transaction.status || PaymentStatus.SUCCEEDED,
-      stripePaymentIntentId: transaction.stripePaymentIntentId || `pi_${Date.now()}`,
-      createdAt: transaction.createdAt || new Date(),
-      updatedAt: transaction.updatedAt || new Date(),
-      metadata: transaction.metadata
-    };
-
-    this.mockTransactions.push(newTransaction);
-    return newTransaction;
-  }
-
-  /**
-   * Get mock transactions (for development)
-   */
-  getMockTransactions(): PaymentTransaction[] {
-    return this.mockTransactions;
-  }
 }
