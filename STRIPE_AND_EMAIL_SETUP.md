@@ -35,6 +35,73 @@ This guide explains how to set up and test the Stripe payment integration and em
 
 ---
 
+## Payment Flow Architecture
+
+### Flow Overview
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│   Client    │      │   Backend   │      │   Stripe    │
+└──────┬──────┘      └──────┬──────┘      └──────┬──────┘
+       │                    │                    │
+       │ 1. Create Intent   │                    │
+       │───────────────────>│                    │
+       │                    │ 2. Create PI       │
+       │                    │───────────────────>│
+       │                    │<───────────────────│
+       │ 3. clientSecret    │                    │
+       │<───────────────────│                    │
+       │                    │                    │
+       │ 4. confirmCardPayment (Stripe.js)       │
+       │────────────────────────────────────────>│
+       │<────────────────────────────────────────│
+       │                    │                    │
+       │ 5. Confirm Payment │                    │
+       │───────────────────>│                    │
+       │                    │                    │
+       │                    │ 6. Webhook Event   │
+       │                    │<───────────────────│
+       │                    │                    │
+```
+
+### Source of Truth
+
+**Current Design:** The system uses a **dual-confirmation** model where both client confirmation and webhooks can update payment status.
+
+| Action | Client Confirm (Step 5) | Webhook (Step 6) |
+|--------|------------------------|------------------|
+| Update payment status | ✅ | ✅ |
+| Update booking to CONFIRMED | ✅ | ✅ |
+| Send confirmation emails | ❌ | ✅ |
+
+### Why Both Paths Update Status
+
+1. **Client Confirm Path**: Provides immediate feedback to the user. Updates status synchronously so the user sees "Payment Successful" right away.
+
+2. **Webhook Path**: Provides reliable delivery guarantee from Stripe. Handles edge cases where the client connection drops after payment succeeds but before confirmation.
+
+### Idempotency
+
+Both paths update to the same status (`SUCCEEDED`, `CONFIRMED`), so the operations are idempotent. Running both doesn't cause incorrect state - it just results in a redundant database update.
+
+### Email Sending
+
+Emails are **only sent via the webhook path** to avoid duplicates. The webhook handler in `handlePaymentSucceeded()` sends:
+- Booking confirmation email
+- Payment receipt email
+
+If webhooks are delayed, users won't receive immediate email confirmation but will still see the booking confirmed in the UI.
+
+### Recommended Improvements (Future)
+
+1. **Single source of truth**: Remove status updates from `confirmPayment()` and rely solely on webhooks for status changes.
+
+2. **Add idempotency keys**: Track processed webhook events to prevent duplicate processing.
+
+3. **Immediate feedback with pending state**: Client confirm could show "Processing..." while webhook is the authoritative source.
+
+---
+
 ## Backend Setup
 
 ### 1. Environment Configuration
