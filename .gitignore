@@ -54,3 +54,7 @@ backend/.env.*.local
 src/environments/environment.ts
 src/environments/environment.*.ts
 !src/environments/environment.example.ts
+
+# Local settings
+.claude/settings.local.json
+nul
