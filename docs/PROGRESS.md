@@ -107,7 +107,13 @@ This document tracks what has been implemented in the Hotel Star Booking project
 
 ## Known Issues (See ARCHITECTURE_AUDIT.md)
 
-**All 6 issues have been resolved!** See ARCHITECTURE_AUDIT.md for details.
+**All 6 architecture audit issues have been resolved!** See ARCHITECTURE_AUDIT.md for details.
+
+### Current Issues
+
+1. **Backend database connection** - `backend/.env` has `DATABASE_URL` pointing to `localhost:5432` instead of Supabase. Need to update with Supabase connection string to run the backend.
+
+2. **Sass @import deprecation warnings** - Multiple warnings about Sass @import rules being deprecated (will be removed in Dart Sass 3.0.0). Should migrate to `@use` and `@forward` syntax.
 
 ---
 
