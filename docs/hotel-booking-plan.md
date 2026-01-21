@@ -1,5 +1,23 @@
 # Hotel Booking Web App — Full Professional Plan
 
+> **Note: This is the ORIGINAL PLANNING DOCUMENT**
+>
+> This document was created during the initial planning phase. The actual implementation differs in several key areas:
+>
+> | Planned | Actual |
+> |---------|--------|
+> | json-server / Express + MongoDB | NestJS + Prisma + PostgreSQL (Supabase) |
+> | Angular Material UI | Custom SCSS components (no Material) |
+> | Mock payment UI | Real Stripe integration |
+> | Basic email mockup | Nodemailer with HTML templates |
+>
+> **For current project status, see:**
+> - `docs/PROGRESS.md` - What has been implemented
+> - `docs/ARCHITECTURE_AUDIT.md` - Known issues and fixes
+> - `backend/IMPLEMENTATION_STATUS.md` - Backend API documentation
+
+---
+
 *A modern, production-style Angular 20.x project created to demonstrate strong frontend engineering skills.*
 
 ## 🎯 Project Goal
