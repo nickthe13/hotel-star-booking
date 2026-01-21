@@ -142,15 +142,29 @@
           <!-- Results -->
           @if (loading()) {
             <app-loader />
+          } @else if (error()) {
+            <div class="no-results">
+              <p class="no-results__title">Unable to load hotels</p>
+              <p class="no-results__text">{{ error() }}</p>
+              <button class="btn btn--primary" (click)="retry()">
+                Try Again
+              </button>
+            </div>
           } @else if (hotels().length === 0) {
             <div class="no-results">
               <p class="no-results__title">No hotels found</p>
               <p class="no-results__text">
-                Try adjusting your filters to see more results
+                @if (activeFiltersCount() > 0) {
+                  Try adjusting your filters to see more results
+                } @else {
+                  No hotels are available at the moment
+                }
               </p>
-              <button class="btn btn--primary" (click)="clearFilters()">
-                Clear Filters
-              </button>
+              @if (activeFiltersCount() > 0) {
+                <button class="btn btn--primary" (click)="clearFilters()">
+                  Clear Filters
+                </button>
+              }
             </div>
           } @else {
             <div class="hotels-grid">

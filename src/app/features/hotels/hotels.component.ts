@@ -16,8 +16,9 @@ import { AMENITIES, STAR_RATINGS } from '../../core/constants/app.constants';
 })
 export class HotelsComponent implements OnInit {
   hotels = signal<Hotel[]>([]);
-  loading = signal<boolean>(false);
+  loading = signal<boolean>(true); // Start with loading true
   showFilters = signal<boolean>(false);
+  error = signal<string>('');
 
   // Filter signals
   searchQuery = signal<string>('');
@@ -90,13 +91,16 @@ export class HotelsComponent implements OnInit {
 
   private fetchHotels(params: HotelSearchParams): void {
     this.loading.set(true);
+    this.error.set('');
     this.hotelService.getHotels(params).subscribe({
       next: (hotels) => {
         this.hotels.set(hotels);
         this.loading.set(false);
         this.updateQueryParams();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading hotels:', err);
+        this.error.set('Failed to load hotels. Please check your connection and try again.');
         this.loading.set(false);
       }
     });
@@ -130,6 +134,10 @@ export class HotelsComponent implements OnInit {
     this.maxPrice.set(1000);
     this.selectedStarRating.set(null);
     this.selectedAmenities.set([]);
+  }
+
+  retry(): void {
+    this.fetchHotels(this.searchParams());
   }
 
   private updateQueryParams(): void {
