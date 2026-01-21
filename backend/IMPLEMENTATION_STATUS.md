@@ -204,138 +204,187 @@ DELETE /api/v1/bookings/:id          - Delete booking (admin)
 
 ---
 
-## 📋 Pending Tasks
+### 6. Payments Module (`src/payments/`)
+**Status**: ✅ Complete
 
-### 1. Database Connection ⚠️
-**Status**: Created troubleshooting guide
+**Files Created**:
+- `dto/` - CreatePaymentIntentDto, ConfirmPaymentDto, RefundPaymentDto
+- `payments.service.ts` - Stripe integration
+- `payments.controller.ts` - Payment endpoints
+- `payments.module.ts` - Module configuration
+
+**Features**:
+- ✅ Create payment intent for bookings
+- ✅ Confirm payment after Stripe processing
+- ✅ Process refunds
+- ✅ Get payment history
+- ✅ Get saved payment methods
+- ✅ Stripe webhook handling
+
+**Endpoints**:
+```
+POST   /api/v1/payments/create-intent   - Create payment intent
+POST   /api/v1/payments/confirm         - Confirm payment
+POST   /api/v1/payments/refund          - Refund payment
+GET    /api/v1/payments/history         - Get payment history
+GET    /api/v1/payments/saved-methods   - Get saved payment methods
+POST   /api/v1/payments/webhook         - Stripe webhook (public)
+```
+
+---
+
+### 7. Email Module (`src/email/`)
+**Status**: ✅ Complete
+
+**Files Created**:
+- `email.service.ts` - Nodemailer integration with HTML templates
+- `email.module.ts` - Module configuration
+
+**Features**:
+- ✅ Welcome email on registration
+- ✅ Booking confirmation email
+- ✅ Payment receipt email
+- ✅ Cancellation confirmation email
+- ✅ HTML email templates with styling
+
+---
+
+### 8. Reviews Module (`src/reviews/`)
+**Status**: ✅ Complete
+
+**Files Created**:
+- `dto/create-review.dto.ts` - Create review DTO
+- `dto/update-review.dto.ts` - Update review DTO
+- `reviews.service.ts` - Review business logic
+- `reviews.controller.ts` - Review endpoints
+- `reviews.module.ts` - Module configuration
+
+**Features**:
+- ✅ Create review (one per user per hotel)
+- ✅ Get all reviews with hotel filter
+- ✅ Get reviews for specific hotel
+- ✅ Get user's review for a hotel
+- ✅ Update own review
+- ✅ Delete own review (or admin can delete any)
+
+**Endpoints**:
+```
+POST   /api/v1/reviews                 - Create review
+GET    /api/v1/reviews                 - Get all reviews (public)
+GET    /api/v1/reviews/hotel/:hotelId  - Get hotel reviews (public)
+GET    /api/v1/reviews/user/:hotelId   - Get user's review for hotel
+GET    /api/v1/reviews/:id             - Get review by ID (public)
+PATCH  /api/v1/reviews/:id             - Update review
+DELETE /api/v1/reviews/:id             - Delete review
+```
+
+---
+
+### 9. Loyalty Module (`src/loyalty/`)
+**Status**: ✅ Complete
+
+**Files Created**:
+- `dto/` - RedeemPointsDto, CalculateRedemptionDto, AdjustPointsDto
+- `constants/tier-config.ts` - Tier configuration
+- `loyalty.service.ts` - Loyalty business logic
+- `loyalty.controller.ts` - Loyalty endpoints
+- `loyalty.module.ts` - Module configuration
+
+**Features**:
+- ✅ Get/create loyalty account
+- ✅ Get detailed account with tier progress
+- ✅ Get tier progress and next tier requirements
+- ✅ Get transaction history with pagination
+- ✅ Calculate maximum redeemable points
+- ✅ Redeem points for bookings
+- ✅ Get all tier information
+- ✅ Admin: Manually adjust user points
+
+**Endpoints**:
+```
+GET    /api/v1/loyalty/account              - Get loyalty account
+GET    /api/v1/loyalty/account/details      - Get detailed account
+GET    /api/v1/loyalty/tier-progress        - Get tier progress
+GET    /api/v1/loyalty/transactions         - Get transaction history
+POST   /api/v1/loyalty/calculate-redemption - Calculate max redemption
+POST   /api/v1/loyalty/redeem               - Redeem points
+GET    /api/v1/loyalty/tiers                - Get tier info
+POST   /api/v1/loyalty/admin/adjust         - Adjust points (admin)
+```
+
+---
+
+### 10. Contact Module (`src/contact/`)
+**Status**: ✅ Complete
+
+**Files Created**:
+- `contact.service.ts` - Contact form handling
+- `contact.controller.ts` - Contact endpoints
+- `contact.module.ts` - Module configuration
+
+---
+
+## 📋 Remaining Tasks
+
+### 1. Database Connection
+**Status**: ⚠️ Verify connection
 
 **Action Required**:
-1. Verify Supabase project is fully initialized in dashboard
-2. Check project status at https://supabase.com/dashboard
-3. Follow steps in `DATABASE_TROUBLESHOOTING.md`
-4. Once connected, run:
-   ```bash
-   cd backend
-   npm run prisma:migrate    # Create all tables
-   npm run prisma:studio     # View database (optional)
-   ```
+1. Verify Supabase project is active in dashboard
+2. Follow steps in `DATABASE_TROUBLESHOOTING.md` if needed
+3. Run migrations: `npm run prisma:migrate`
 
 ---
 
-### 2. Payments Module (Stripe)
-**Status**: ⏳ Not started
+### 2. Missing Backend Endpoints
+**Status**: ⏳ To be decided
 
-**Files to Create**:
-- `src/payments/dto/` - Payment DTOs
-- `src/payments/payments.service.ts` - Stripe integration
-- `src/payments/payments.controller.ts` - Payment endpoints
-- `src/payments/payments.module.ts`
-
-**Required Environment Variables**:
-```env
-STRIPE_SECRET_KEY=sk_test_your_key_here
-STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
-STRIPE_WEBHOOK_SECRET=whsec_your_secret_here
-```
-
-**Features Needed**:
-- Create payment intent
-- Confirm payment
-- Save payment methods
-- Process refunds (admin)
-- Stripe webhooks for payment confirmation
-- Link payments to bookings
+The following frontend features have no backend support:
+- Saved payment methods CRUD (POST/DELETE/PATCH) - frontend has UI but backend only has GET
+- Either implement these endpoints or disable the frontend UI
 
 ---
 
-### 3. Email Module
-**Status**: ⏳ Not started
+### 3. Payment Flow Clarification
+**Status**: ⏳ Documentation needed
 
-**Files to Create**:
-- `src/email/dto/` - Email DTOs
-- `src/email/email.service.ts` - Nodemailer integration
-- `src/email/templates/` - Email templates
-- `src/email/email.module.ts`
-
-**Required Environment Variables**:
-Already in `.env`:
-```env
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASSWORD=your-app-specific-password
-EMAIL_FROM="Hotel Booking <noreply@hotelbooking.com>"
-```
-
-**Features Needed**:
-- Booking confirmation email
-- Payment receipt email
-- Cancellation confirmation email
-- Check-in reminder email
-- Password reset email
+Need to clarify and document:
+- Single source of truth for payment confirmation (client confirm vs webhook)
+- Idempotency handling to prevent double-processing
+- Email sending triggers (avoid duplicate emails)
 
 ---
 
 ## 🚀 Next Steps
 
-### Immediate (Database Connection)
-1. Open Supabase dashboard: https://supabase.com/dashboard
-2. Select project: `hotel-star-booking-db`
-3. Verify status is **Active** (green)
-4. If still initializing, wait 2-3 minutes
-5. Once active, test connection:
-   ```bash
-   cd backend
-   npx prisma db pull
-   ```
-6. If successful, run migrations:
-   ```bash
-   npm run prisma:migrate
-   ```
+### Short-term
+1. Run `npm run start:dev` to test all endpoints
+2. Verify Stripe webhook configuration
+3. Decide on saved payment methods scope
 
-### Short-term (Testing)
-1. Install dependencies:
-   ```bash
-   cd backend
-   npm install
-   ```
-2. Start development server:
-   ```bash
-   npm run start:dev
-   ```
-3. Test health endpoint:
-   ```bash
-   curl http://localhost:3000/api/v1/health
-   ```
-4. Test API endpoints with Postman or similar
+### Medium-term
+1. Create database seed script for sample data
+2. Write unit tests for services
+3. Document payment flow ownership
 
-### Medium-term (Payment & Email)
-1. Implement Payments module with Stripe
-2. Implement Email module with Nodemailer
-3. Create database seed script for sample data
-4. Add comprehensive error handling
-5. Write unit tests for services
-6. Add API documentation (Swagger UI)
-
-### Long-term (Production)
+### Long-term
 1. Set up CI/CD pipeline
-2. Configure logging and monitoring
-3. Deploy to production (Railway, Render, or Docker)
-4. Set up database backups
-5. Configure SSL certificates
-6. Performance optimization
+2. Deploy to production
+3. Configure logging and monitoring
 
 ---
 
 ## 📊 Statistics
 
-- **Total Modules**: 5 core modules + 3 supporting modules
-- **Total Endpoints**: 40+ REST API endpoints
-- **Database Models**: 8 models with relationships
+- **Total Modules**: 10 core modules (Auth, Users, Hotels, Rooms, Bookings, Payments, Email, Reviews, Loyalty, Contact)
+- **Total Endpoints**: 50+ REST API endpoints
+- **Database Models**: 10+ models with relationships
 - **Authentication**: JWT with refresh tokens
 - **Authorization**: Role-based (USER, ADMIN)
 - **Security**: Rate limiting, input validation, CORS, Helmet
 - **Documentation**: Swagger/OpenAPI annotations
+- **Payment**: Stripe integration with webhooks
+- **Loyalty**: Points system with tier progression
 
 ---
 
