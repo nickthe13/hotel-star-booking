@@ -10,17 +10,19 @@
       <div class="modal-body">
         <ng-content></ng-content>
       </div>
-      <div class="modal-footer">
-        <ng-content select="[footer]"></ng-content>
-        @if (!hasFooterContent) {
-          <button class="btn btn--secondary" (click)="close()" type="button">
-            Cancel
-          </button>
-          <button class="btn btn--primary" (click)="confirm()" type="button">
-            {{ confirmText }}
-          </button>
-        }
-      </div>
+      @if (!hideFooter) {
+        <div class="modal-footer">
+          <ng-content select="[footer]"></ng-content>
+          @if (!hasFooterContent) {
+            <button class="btn btn--secondary" (click)="close()" type="button">
+              Cancel
+            </button>
+            <button class="btn btn--primary" (click)="confirm()" type="button">
+              {{ confirmText }}
+            </button>
+          }
+        </div>
+      }
     </div>
   </div>
 }

@@ -13,6 +13,7 @@ export class ModalComponent implements AfterContentInit {
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() confirmText: string = 'Confirm';
   @Input() cancelText: string = 'Cancel';
+  @Input() hideFooter: boolean = false;
 
   @Output() onClose = new EventEmitter<void>();
   @Output() onConfirm = new EventEmitter<void>();
