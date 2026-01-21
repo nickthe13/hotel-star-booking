@@ -49,16 +49,17 @@ export class BookingService {
   createBooking(bookingData: BookingRequest): Observable<BookingConfirmation> {
     this.loading.set(true);
 
-    const createDto = {
+    const createDto: any = {
       roomId: bookingData.roomId,
       checkIn: new Date(bookingData.checkIn).toISOString(),
       checkOut: new Date(bookingData.checkOut).toISOString(),
-      guestName: bookingData.guestName || 'Guest',
-      guestEmail: bookingData.guestEmail || '',
-      guestPhone: bookingData.guestPhone,
-      numberOfGuests: bookingData.guests,
-      specialRequests: bookingData.specialRequests
+      guests: bookingData.guests
     };
+
+    // Only add specialRequests if provided
+    if (bookingData.specialRequests) {
+      createDto.specialRequests = bookingData.specialRequests;
+    }
 
     return this.http.post<any>(`${this.API_URL}/bookings`, createDto).pipe(
       map(response => {
@@ -84,17 +85,16 @@ export class BookingService {
   createBookingWithPayment(bookingData: BookingRequest & { paymentIntentId: string }): Observable<BookingConfirmation> {
     this.loading.set(true);
 
-    const createDto = {
+    const createDto: any = {
       roomId: bookingData.roomId,
       checkIn: new Date(bookingData.checkIn).toISOString(),
       checkOut: new Date(bookingData.checkOut).toISOString(),
-      guestName: bookingData.guestName || 'Guest',
-      guestEmail: bookingData.guestEmail || '',
-      guestPhone: bookingData.guestPhone,
-      numberOfGuests: bookingData.guests,
-      specialRequests: bookingData.specialRequests,
-      paymentIntentId: bookingData.paymentIntentId
+      guests: bookingData.guests
     };
+
+    if (bookingData.specialRequests) {
+      createDto.specialRequests = bookingData.specialRequests;
+    }
 
     return this.http.post<any>(`${this.API_URL}/bookings`, createDto).pipe(
       map(response => {
