@@ -1,5 +1,4 @@
-@import '../../../assets/styles/variables';
-@import '../../../assets/styles/mixins';
+@use '../../../assets/styles' as *;
 
 .header {
   background: $white;

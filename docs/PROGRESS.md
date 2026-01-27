@@ -1,6 +1,6 @@
 # Development Progress
 
-**Last Updated:** 2026-01-21
+**Last Updated:** 2026-01-26
 
 This document tracks what has been implemented in the Hotel Star Booking project.
 
@@ -113,7 +113,7 @@ This document tracks what has been implemented in the Hotel Star Booking project
 
 1. **Backend database connection** - `backend/.env` has `DATABASE_URL` pointing to `localhost:5432` instead of Supabase. Need to update with Supabase connection string to run the backend.
 
-2. **Sass @import deprecation warnings** - Multiple warnings about Sass @import rules being deprecated (will be removed in Dart Sass 3.0.0). Should migrate to `@use` and `@forward` syntax.
+2. ~~**Sass @import deprecation warnings**~~ - **RESOLVED** (2026-01-26) - Migrated all SCSS files to use `@use` and `@forward` syntax.
 
 ---
 
@@ -139,6 +139,15 @@ This document tracks what has been implemented in the Hotel Star Booking project
 ---
 
 ## Session Log
+
+### 2026-01-26
+- Fixed all Sass deprecation warnings by migrating from `@import` to `@use`/`@forward`:
+  - Created `_index.scss` as the main entry point that forwards variables and mixins
+  - Updated `_mixins.scss` to use `@use 'variables' as *`
+  - Updated all 30+ component SCSS files to use `@use '../assets/styles' as *`
+  - Moved inline styles from `loader.component.ts` to a separate SCSS file
+  - Added custom `darken()` and `lighten()` functions using modern `sass:color` module
+  - Fixed `percentage()` division using `sass:math` module
 
 ### 2026-01-21
 - Analyzed project structure and architecture

@@ -1,5 +1,4 @@
-@import '../../../assets/styles/variables';
-@import '../../../assets/styles/mixins';
+@use '../../../assets/styles' as *;
 
 .profile {
   max-width: 1000px;

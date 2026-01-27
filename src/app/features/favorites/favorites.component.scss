@@ -1,5 +1,4 @@
-@import '../../../assets/styles/variables';
-@import '../../../assets/styles/mixins';
+@use '../../../assets/styles' as *;
 
 .favorites-page {
   min-height: calc(100vh - 200px);

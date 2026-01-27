@@ -1,6 +1,5 @@
 /* Global styles */
-@import 'assets/styles/variables';
-@import 'assets/styles/mixins';
+@use 'assets/styles' as *;
 
 /* CSS Reset & Base Styles */
 *,

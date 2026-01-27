@@ -9,39 +9,6 @@ import { Component } from '@angular/core';
       <p class="loader__text">Loading...</p>
     </div>
   `,
-  styles: [
-    `
-      @import '../../../../assets/styles/variables';
-
-      .loader {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 48px;
-        gap: 16px;
-
-        &__spinner {
-          width: 48px;
-          height: 48px;
-          border: 4px solid $neutral-200;
-          border-top-color: $primary-500;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        &__text {
-          color: $text-secondary;
-          font-size: 14px;
-        }
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-    `
-  ]
+  styleUrl: './loader.component.scss'
 })
 export class LoaderComponent {}

@@ -1,5 +1,4 @@
-@import '../../../assets/styles/variables';
-@import '../../../assets/styles/mixins';
+@use '../../../assets/styles' as *;
 
 .dashboard-page {
   min-height: calc(100vh - 64px - 300px);

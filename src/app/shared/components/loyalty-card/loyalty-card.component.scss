@@ -1,4 +1,4 @@
-@import '../../../../assets/styles/variables';
+@use '../../../../assets/styles' as *;
 
 .loyalty-card {
   background: linear-gradient(135deg, $white 0%, $primary-50 100%);

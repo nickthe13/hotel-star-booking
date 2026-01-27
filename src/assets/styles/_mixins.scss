@@ -1,4 +1,15 @@
-@import 'variables';
+@use 'sass:color';
+@use 'sass:math';
+@use 'variables' as *;
+
+// Color utility functions (replacing deprecated global functions)
+@function darken($color, $amount) {
+  @return color.adjust($color, $lightness: -$amount);
+}
+
+@function lighten($color, $amount) {
+  @return color.adjust($color, $lightness: $amount);
+}
 
 // Responsive breakpoints
 @mixin respond-to($breakpoint) {
@@ -160,7 +171,7 @@
   &::before {
     content: '';
     display: block;
-    padding-bottom: percentage($height / $width);
+    padding-bottom: math.percentage(math.div($height, $width));
   }
 }
 
