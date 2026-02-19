@@ -28,7 +28,7 @@
     <div class="profile__header-info">
       <h1 class="profile__name">{{ user()?.name }}</h1>
       <p class="profile__email">{{ user()?.email }}</p>
-      <p class="profile__joined">Member since {{ formatDate(user()?.createdAt!) }}</p>
+      <p class="profile__joined">Member since {{ user()?.createdAt! | formatDate:'long' }}</p>
     </div>
   </div>
 

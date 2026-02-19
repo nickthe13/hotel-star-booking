@@ -7,11 +7,11 @@ import {
   LoyaltyTier,
   TIER_INFO,
 } from '../../../core/models/loyalty.model';
+import { FormatCurrencyPipe } from '../../pipes/format-currency.pipe';
 
 @Component({
   selector: 'app-loyalty-card',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormatCurrencyPipe],
   templateUrl: './loyalty-card.component.html',
   styleUrl: './loyalty-card.component.scss',
 })
@@ -54,12 +54,4 @@ export class LoyaltyCardComponent implements OnInit {
     return points.toLocaleString();
   }
 
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  }
 }

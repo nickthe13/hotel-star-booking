@@ -26,12 +26,6 @@ export const routes: Routes = [
       )
   },
   {
-    path: 'booking/:hotelId',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/booking/booking.component').then((m) => m.BookingComponent)
-  },
-  {
     path: 'auth/login',
     loadComponent: () =>
       import('./features/auth/login/login.component').then((m) => m.LoginComponent)

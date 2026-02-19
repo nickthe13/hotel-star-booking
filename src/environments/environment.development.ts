@@ -1,5 +1,4 @@
-// SECURITY: Do not commit this file with real API keys!
-// Copy from environment.example.ts and add your actual keys
+// Development environment configuration (used with ng serve)
 
 export const environment = {
   production: false,

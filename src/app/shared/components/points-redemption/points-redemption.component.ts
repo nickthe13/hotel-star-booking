@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoyaltyService } from '../../../core/services/loyalty.service';
+import { FormatCurrencyPipe } from '../../pipes/format-currency.pipe';
 import {
   LoyaltyAccount,
   RedemptionCalculation,
@@ -21,8 +22,7 @@ import {
 
 @Component({
   selector: 'app-points-redemption',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FormatCurrencyPipe],
   templateUrl: './points-redemption.component.html',
   styleUrl: './points-redemption.component.scss',
 })
@@ -139,11 +139,4 @@ export class PointsRedemptionComponent implements OnInit, OnChanges {
     return points.toLocaleString();
   }
 
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  }
 }

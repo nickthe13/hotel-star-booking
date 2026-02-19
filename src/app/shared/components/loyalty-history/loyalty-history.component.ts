@@ -6,11 +6,11 @@ import {
   LoyaltyTransactionType,
   PaginatedTransactions,
 } from '../../../core/models/loyalty.model';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 @Component({
   selector: 'app-loyalty-history',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormatDatePipe],
   templateUrl: './loyalty-history.component.html',
   styleUrl: './loyalty-history.component.scss',
 })
@@ -106,15 +106,6 @@ export class LoyaltyHistoryComponent implements OnInit {
   formatPoints(points: number): string {
     const prefix = points > 0 ? '+' : '';
     return `${prefix}${points.toLocaleString()}`;
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
   }
 
   formatTime(dateString: string): string {

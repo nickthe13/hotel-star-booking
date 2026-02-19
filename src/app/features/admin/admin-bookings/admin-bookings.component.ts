@@ -9,6 +9,9 @@ import { TableComponent } from '../../../shared/components/table/table.component
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { TableColumn, TableAction } from '../../../core/models/admin.model';
+import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
+import { FormatCurrencyPipe } from '../../../shared/pipes/format-currency.pipe';
+import { getBookingStatusClass } from '../../../shared/utils/status-helpers';
 
 @Component({
   selector: 'app-admin-bookings',
@@ -17,7 +20,9 @@ import { TableColumn, TableAction } from '../../../core/models/admin.model';
     ReactiveFormsModule,
     TableComponent,
     ModalComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    FormatDatePipe,
+    FormatCurrencyPipe
   ],
   templateUrl: './admin-bookings.component.html',
   styleUrl: './admin-bookings.component.scss'
@@ -180,7 +185,7 @@ export class AdminBookingsComponent implements OnInit {
 
   loadBookings(): void {
     this.loading.set(true);
-    this.bookingService.getAllBookings().subscribe({
+    this.bookingService.getUserBookings().subscribe({
       next: (bookings) => {
         this.allBookings.set(bookings);
         this.loading.set(false);
@@ -346,41 +351,18 @@ export class AdminBookingsComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: BookingStatus): string {
-    switch (status) {
-      case BookingStatus.PENDING_PAYMENT:
-        return 'badge--warning';
-      case BookingStatus.CONFIRMED:
-        return 'badge--success';
-      case BookingStatus.PENDING:
-        return 'badge--warning';
-      case BookingStatus.CHECKED_IN:
-        return 'badge--primary';
-      case BookingStatus.CHECKED_OUT:
-        return 'badge--info';
-      case BookingStatus.CANCELLED:
-        return 'badge--danger';
-      case BookingStatus.COMPLETED:
-        return 'badge--info';
-      case BookingStatus.NO_SHOW:
-        return 'badge--danger';
-      default:
-        return '';
-    }
+    return getBookingStatusClass(status);
   }
 
+  private datePipe = new FormatDatePipe();
+  private currencyPipe = new FormatCurrencyPipe();
+
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return this.currencyPipe.transform(amount);
   }
 
   formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return this.datePipe.transform(date, 'short');
   }
 
   getStatusLabel(status: BookingStatus): string {

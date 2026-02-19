@@ -102,7 +102,7 @@
           <h4 class="booking-info__title">Booking #{{ booking.id }}</h4>
           <p class="booking-info__hotel">{{ booking.hotel?.name || 'N/A' }}</p>
           <p class="booking-info__dates">
-            {{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}
+            {{ booking.checkIn | formatDate:'short' }} - {{ booking.checkOut | formatDate:'short' }}
           </p>
         </div>
 
@@ -157,10 +157,10 @@
           <h4 class="booking-info__title">Booking #{{ booking.id }}</h4>
           <p class="booking-info__hotel">{{ booking.hotel?.name || 'N/A' }}</p>
           <p class="booking-info__dates">
-            {{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}
+            {{ booking.checkIn | formatDate:'short' }} - {{ booking.checkOut | formatDate:'short' }}
           </p>
           <p class="booking-info__payment">
-            <strong>Payment Amount:</strong> {{ formatCurrency(booking.totalPrice) }}
+            <strong>Payment Amount:</strong> {{ booking.totalPrice | formatCurrency }}
           </p>
         </div>
 

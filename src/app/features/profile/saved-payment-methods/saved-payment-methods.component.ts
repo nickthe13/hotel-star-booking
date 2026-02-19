@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentService } from '../../../core/services/payment.service';
 import { SavedPaymentMethod } from '../../../core/models/payment.model';
+import { getCardBrandIcon as sharedGetCardBrandIcon } from '../../../shared/utils/card-brand';
 
 @Component({
   selector: 'app-saved-payment-methods',
@@ -46,16 +47,7 @@ export class SavedPaymentMethodsComponent implements OnInit {
   }
 
   getCardBrandIcon(brand: string): string {
-    const icons: { [key: string]: string } = {
-      'visa': '💳',
-      'mastercard': '💳',
-      'amex': '💳',
-      'discover': '💳',
-      'diners': '💳',
-      'jcb': '💳',
-      'unionpay': '💳'
-    };
-    return icons[brand.toLowerCase()] || '💳';
+    return sharedGetCardBrandIcon(brand);
   }
 
   getCardBrandName(brand: string): string {

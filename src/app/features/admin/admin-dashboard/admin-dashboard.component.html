@@ -39,7 +39,7 @@
       <div class="stat-card stat-card--success">
         <div class="stat-card__icon">💰</div>
         <div class="stat-card__content">
-          <div class="stat-card__value">{{ formatCurrency(statistics().totalRevenue) }}</div>
+          <div class="stat-card__value">{{ statistics().totalRevenue | formatCurrency }}</div>
           <div class="stat-card__label">Total Revenue</div>
         </div>
       </div>
@@ -63,7 +63,7 @@
       <div class="stat-card stat-card--accent">
         <div class="stat-card__icon">💵</div>
         <div class="stat-card__content">
-          <div class="stat-card__value">{{ formatCurrency(statistics().averageBookingValue) }}</div>
+          <div class="stat-card__value">{{ statistics().averageBookingValue | formatCurrency }}</div>
           <div class="stat-card__label">Average Booking Value</div>
         </div>
       </div>
@@ -166,9 +166,9 @@
                   <p class="booking-card__location">{{ booking.hotel.location }}</p>
                   <div class="booking-card__details">
                     <span class="booking-card__dates">
-                      {{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}
+                      {{ booking.checkIn | formatDate:'short' }} - {{ booking.checkOut | formatDate:'short' }}
                     </span>
-                    <span class="booking-card__price">{{ formatCurrency(booking.totalPrice) }}</span>
+                    <span class="booking-card__price">{{ booking.totalPrice | formatCurrency }}</span>
                   </div>
                 </div>
                 <span class="badge" [class]="getStatusBadgeClass(booking.status)">
@@ -198,7 +198,7 @@
                       📅 {{ hotel.bookingCount }} {{ hotel.bookingCount === 1 ? 'booking' : 'bookings' }}
                     </span>
                     <span class="hotel-card__revenue">
-                      💰 {{ formatCurrency(hotel.revenue) }} revenue
+                      💰 {{ hotel.revenue | formatCurrency }} revenue
                     </span>
                   </div>
                 </div>

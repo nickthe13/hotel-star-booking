@@ -159,19 +159,6 @@ export class HotelDetailsComponent implements OnInit {
     this.selectedImageIndex.set(index);
   }
 
-  bookNow(): void {
-    if (this.hotel()) {
-      const queryParams: any = {};
-      if (this.selectedCheckIn()) {
-        queryParams.checkIn = this.selectedCheckIn();
-      }
-      if (this.selectedCheckOut()) {
-        queryParams.checkOut = this.selectedCheckOut();
-      }
-      this.router.navigate(['/booking', this.hotel()!.id], { queryParams });
-    }
-  }
-
   onDateRangeSelected(dateRange: DateRange): void {
     this.selectedCheckIn.set(dateRange.checkIn);
     this.selectedCheckOut.set(dateRange.checkOut);

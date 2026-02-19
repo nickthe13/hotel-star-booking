@@ -56,7 +56,7 @@
         </div>
         <div class="discount-display">
           <span class="discount-label">Discount:</span>
-          <span class="discount-value">-{{ formatCurrency(getDiscountAmount()) }}</span>
+          <span class="discount-value">-{{ getDiscountAmount() | formatCurrency }}</span>
         </div>
       </div>
     </div>
@@ -64,7 +64,7 @@
     <div class="redemption-info">
       <div class="info-item">
         <span class="info-label">Max redeemable</span>
-        <span class="info-value">{{ formatPoints(info.maxPoints) }} points ({{ formatCurrency(info.maxDiscount) }})</span>
+        <span class="info-value">{{ formatPoints(info.maxPoints) }} points ({{ info.maxDiscount | formatCurrency }})</span>
       </div>
       <div class="info-item">
         <span class="info-label">Points remaining after</span>

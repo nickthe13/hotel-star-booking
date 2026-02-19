@@ -10,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ModalComponent } from '../modal/modal.component';
 import { StripePaymentComponent } from '../stripe-payment/stripe-payment.component';
 import { PointsRedemptionComponent } from '../points-redemption/points-redemption.component';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 export interface PaymentModalData {
   hotel: Hotel;
@@ -24,7 +25,7 @@ export interface PaymentModalData {
 
 @Component({
   selector: 'app-payment-modal',
-  imports: [CommonModule, ModalComponent, StripePaymentComponent, PointsRedemptionComponent],
+  imports: [CommonModule, ModalComponent, StripePaymentComponent, PointsRedemptionComponent, FormatDatePipe],
   templateUrl: './payment-modal.component.html',
   styleUrl: './payment-modal.component.scss'
 })
@@ -79,17 +80,6 @@ export class PaymentModalComponent {
       default:
         return 'Payment';
     }
-  }
-
-  formatDate(dateStr: string | undefined): string {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
   }
 
   onPointsRedemptionChange(data: { points: number; discount: number }): void {

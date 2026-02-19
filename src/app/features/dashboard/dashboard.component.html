@@ -83,11 +83,11 @@
                   }
                   <div class="detail-item">
                     <span class="detail-item__label">Check-in</span>
-                    <span class="detail-item__value">{{ formatDate(booking.checkIn) }}</span>
+                    <span class="detail-item__value">{{ booking.checkIn | formatDate:'short' }}</span>
                   </div>
                   <div class="detail-item">
                     <span class="detail-item__label">Check-out</span>
-                    <span class="detail-item__value">{{ formatDate(booking.checkOut) }}</span>
+                    <span class="detail-item__value">{{ booking.checkOut | formatDate:'short' }}</span>
                   </div>
                   <div class="detail-item">
                     <span class="detail-item__label">Nights</span>
@@ -119,7 +119,7 @@
 
                 <div class="booking-card__footer">
                   <span class="booking-card__date">
-                    Booked on {{ formatDate(booking.createdAt) }}
+                    Booked on {{ booking.createdAt | formatDate:'short' }}
                   </span>
                   <div class="booking-card__actions">
                     @if (booking.isPaid && booking.paymentTransactionId) {
@@ -172,8 +172,8 @@
                 <img [src]="booking.hotel.image" [alt]="booking.hotel.name" class="cancel-booking-summary__image" />
                 <div class="cancel-booking-summary__info">
                   <h4>{{ booking.hotel.name }}</h4>
-                  <p>{{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}</p>
-                  <p class="cancel-booking-summary__price">{{ formatCurrency(booking.totalPrice) }}</p>
+                  <p>{{ booking.checkIn | formatDate:'short' }} - {{ booking.checkOut | formatDate:'short' }}</p>
+                  <p class="cancel-booking-summary__price">{{ booking.totalPrice | formatCurrency }}</p>
                 </div>
               }
             </div>
@@ -205,17 +205,17 @@
               <div class="refund-breakdown">
                 <div class="refund-breakdown__row">
                   <span>Original Payment</span>
-                  <span>{{ formatCurrency(booking.totalPrice) }}</span>
+                  <span>{{ booking.totalPrice | formatCurrency }}</span>
                 </div>
                 @if (isWithin24Hours()) {
                   <div class="refund-breakdown__row refund-breakdown__row--fee">
                     <span>Late Cancellation Fee (50%)</span>
-                    <span>-{{ formatCurrency(booking.totalPrice * 0.5) }}</span>
+                    <span>-{{ booking.totalPrice * 0.5 | formatCurrency }}</span>
                   </div>
                 }
                 <div class="refund-breakdown__row refund-breakdown__row--total">
                   <span>Refund Amount</span>
-                  <span class="refund-amount">{{ formatCurrency(refundAmount()) }}</span>
+                  <span class="refund-amount">{{ refundAmount() | formatCurrency }}</span>
                 </div>
               </div>
 
@@ -252,7 +252,7 @@
           } @else if (cancellingBookingId()) {
             Cancelling...
           } @else if (bookingToCancelDetails()?.isPaid) {
-            Cancel & Refund {{ formatCurrency(refundAmount()) }}
+            Cancel & Refund {{ refundAmount() | formatCurrency }}
           } @else {
             Yes, Cancel Booking
           }

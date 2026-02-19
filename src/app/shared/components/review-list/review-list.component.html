@@ -17,7 +17,7 @@
             </div>
             <div class="user-info">
               <h4 class="user-name">{{ review.userName || 'Anonymous' }}</h4>
-              <p class="review-date">{{ formatDate(review.createdAt) }}</p>
+              <p class="review-date">{{ review.createdAt | formatDate:'short' }}</p>
             </div>
           </div>
           <div class="review-card__rating">

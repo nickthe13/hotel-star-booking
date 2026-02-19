@@ -92,12 +92,12 @@
         <div class="date-summary">
           <div class="date-item">
             <span class="date-label">Check-in</span>
-            <span class="date-value">{{ formatDate(checkIn) }}</span>
+            <span class="date-value">{{ checkIn | formatDate:'short' }}</span>
           </div>
           <span class="date-arrow">&#8594;</span>
           <div class="date-item">
             <span class="date-label">Check-out</span>
-            <span class="date-value">{{ formatDate(checkOut) }}</span>
+            <span class="date-value">{{ checkOut | formatDate:'short' }}</span>
           </div>
         </div>
 
@@ -167,11 +167,11 @@
           <!-- Dates -->
           <div class="summary-row">
             <span class="summary-label">Check-in</span>
-            <span class="summary-value">{{ formatDate(checkIn) }}</span>
+            <span class="summary-value">{{ checkIn | formatDate:'short' }}</span>
           </div>
           <div class="summary-row">
             <span class="summary-label">Check-out</span>
-            <span class="summary-value">{{ formatDate(checkOut) }}</span>
+            <span class="summary-value">{{ checkOut | formatDate:'short' }}</span>
           </div>
           <div class="summary-row">
             <span class="summary-label">Duration</span>

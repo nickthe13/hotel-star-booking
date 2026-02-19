@@ -38,11 +38,11 @@
             <div class="summary-rows">
               <div class="summary-row">
                 <span class="label">Check-in</span>
-                <span class="value">{{ formatDate(bookingData.checkIn) }}</span>
+                <span class="value">{{ bookingData.checkIn | formatDate }}</span>
               </div>
               <div class="summary-row">
                 <span class="label">Check-out</span>
-                <span class="value">{{ formatDate(bookingData.checkOut) }}</span>
+                <span class="value">{{ bookingData.checkOut | formatDate }}</span>
               </div>
               <div class="summary-row">
                 <span class="label">Duration</span>
@@ -164,11 +164,11 @@
             </div>
             <div class="detail-row">
               <span class="label">Check-in</span>
-              <span class="value">{{ formatDate(bookingData.checkIn) }}</span>
+              <span class="value">{{ bookingData.checkIn | formatDate }}</span>
             </div>
             <div class="detail-row">
               <span class="label">Check-out</span>
-              <span class="value">{{ formatDate(bookingData.checkOut) }}</span>
+              <span class="value">{{ bookingData.checkOut | formatDate }}</span>
             </div>
             <div class="detail-row total">
               <span class="label">Total Paid</span>

@@ -93,7 +93,7 @@
         <tbody>
           @for (transaction of filteredTransactions(); track transaction.id) {
             <tr>
-              <td>{{ formatDate(transaction.createdAt) }}</td>
+              <td>{{ transaction.createdAt | formatDate:'short' }}</td>
               <td>
                 <span class="transaction-id">{{ transaction.id }}</span>
               </td>
@@ -106,14 +106,14 @@
                   <span class="room-type">{{ transaction.metadata?.roomType }}</span>
                 }
               </td>
-              <td class="amount">{{ formatCurrency(transaction.amount) }}</td>
+              <td class="amount">{{ transaction.amount | formatCurrency }}</td>
               <td>
                 <span class="badge" [ngClass]="getStatusBadgeClass(transaction.status)">
                   {{ getStatusLabel(transaction.status) }}
                 </span>
                 @if (transaction.refundAmount) {
                   <div class="refund-info">
-                    Refunded: {{ formatCurrency(transaction.refundAmount) }}
+                    Refunded: {{ transaction.refundAmount | formatCurrency }}
                   </div>
                 }
               </td>

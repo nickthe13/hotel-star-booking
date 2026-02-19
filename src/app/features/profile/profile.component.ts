@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { BookingService } from '../../core/services/booking.service';
-import { HotelService } from '../../core/services/hotel.service';
-import { User } from '../../core/models/user.model';
+import { FavoritesService } from '../../core/services/favorites.service';
 import { Hotel } from '../../core/models';
 import { PaymentHistoryComponent } from './payment-history/payment-history.component';
 import { SavedPaymentMethodsComponent } from './saved-payment-methods/saved-payment-methods.component';
 import { LoyaltyCardComponent } from '../../shared/components/loyalty-card/loyalty-card.component';
 import { LoyaltyHistoryComponent } from '../../shared/components/loyalty-history/loyalty-history.component';
+import { FormatDatePipe } from '../../shared/pipes/format-date.pipe';
+import { passwordMatchValidator } from '../../shared/utils/form-validators';
 
 type ProfileTab = 'profile' | 'payment-methods' | 'payment-history' | 'loyalty';
 
@@ -23,6 +23,7 @@ type ProfileTab = 'profile' | 'payment-methods' | 'payment-history' | 'loyalty';
     SavedPaymentMethodsComponent,
     LoyaltyCardComponent,
     LoyaltyHistoryComponent,
+    FormatDatePipe,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
@@ -51,8 +52,7 @@ export class ProfileComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     public authService: AuthService,
-    private bookingService: BookingService,
-    private hotelService: HotelService
+    private favoritesService: FavoritesService
   ) {
     this.user = authService.user;
     this.initForms();
@@ -88,19 +88,7 @@ export class ProfileComponent implements OnInit {
       currentPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required]
-    }, { validators: this.passwordMatchValidator });
-  }
-
-  passwordMatchValidator(form: FormGroup) {
-    const newPassword = form.get('newPassword');
-    const confirmPassword = form.get('confirmPassword');
-
-    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    }
-
-    return null;
+    }, { validators: passwordMatchValidator });
   }
 
   populateProfileForm(): void {
@@ -201,50 +189,26 @@ export class ProfileComponent implements OnInit {
 
   loadFavorites(): void {
     this.loadingFavorites.set(true);
-
-    // Load favorite hotel IDs from localStorage
-    const favoritesKey = 'user_favorites';
-    const storedFavorites = localStorage.getItem(favoritesKey);
-
-    if (storedFavorites) {
-      try {
-        const favoriteIds: string[] = JSON.parse(storedFavorites);
-
-        // Load hotel details for each favorite
-        this.hotelService.getHotels().subscribe({
-          next: (hotels) => {
-            const favorites = hotels.filter(hotel => favoriteIds.includes(hotel.id));
-            this.favoriteHotels.set(favorites);
-            this.loadingFavorites.set(false);
-          },
-          error: () => {
-            this.loadingFavorites.set(false);
-          }
-        });
-      } catch (error) {
+    this.favoritesService.loadFavorites().subscribe({
+      next: (hotels) => {
+        this.favoriteHotels.set(hotels);
+        this.loadingFavorites.set(false);
+      },
+      error: () => {
         this.loadingFavorites.set(false);
       }
-    } else {
-      this.loadingFavorites.set(false);
-    }
+    });
   }
 
   removeFavorite(hotelId: string): void {
-    const favoritesKey = 'user_favorites';
-    const storedFavorites = localStorage.getItem(favoritesKey);
-
-    if (storedFavorites) {
-      try {
-        let favoriteIds: string[] = JSON.parse(storedFavorites);
-        favoriteIds = favoriteIds.filter(id => id !== hotelId);
-        localStorage.setItem(favoritesKey, JSON.stringify(favoriteIds));
-
-        // Update the displayed favorites
+    this.favoritesService.removeFromFavorites(hotelId).subscribe({
+      next: () => {
         this.favoriteHotels.set(this.favoriteHotels().filter(hotel => hotel.id !== hotelId));
-      } catch (error) {
-        console.error('Error removing favorite:', error);
+      },
+      error: (err) => {
+        console.error('Error removing favorite:', err);
       }
-    }
+    });
   }
 
   getFieldError(form: FormGroup, fieldName: string): string {
@@ -270,14 +234,6 @@ export class ProfileComponent implements OnInit {
     }
 
     return '';
-  }
-
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
 
   setActiveTab(tab: ProfileTab): void {

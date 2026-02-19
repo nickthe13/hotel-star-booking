@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Booking } from '../../../core/models/booking.model';
 import { CalendarDay, DateRange } from '../../../core/models/availability.model';
 import { AvailabilityService } from '../../../core/services/availability.service';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 @Component({
   selector: 'app-availability-calendar',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormatDatePipe],
   templateUrl: './availability-calendar.component.html',
   styleUrl: './availability-calendar.component.scss'
 })
@@ -160,11 +160,6 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
       checkIn: this.checkIn(),
       checkOut: this.checkOut()
     });
-  }
-
-  formatDate(dateStr: string | null): string {
-    if (!dateStr) return '';
-    return this.availabilityService.formatDateForDisplay(dateStr);
   }
 
   getDayClasses(day: CalendarDay): string {

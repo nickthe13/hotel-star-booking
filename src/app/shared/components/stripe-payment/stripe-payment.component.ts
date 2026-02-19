@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js';
 import { PaymentService } from '../../../core/services/payment.service';
 import { SavedPaymentMethod } from '../../../core/models/payment.model';
+import { getCardBrandIcon as sharedGetCardBrandIcon } from '../../utils/card-brand';
 
 @Component({
   selector: 'app-stripe-payment',
@@ -257,16 +258,7 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getCardBrandIcon(brand: string): string {
-    const icons: { [key: string]: string } = {
-      'visa': '💳',
-      'mastercard': '💳',
-      'amex': '💳',
-      'discover': '💳',
-      'diners': '💳',
-      'jcb': '💳',
-      'unionpay': '💳'
-    };
-    return icons[brand.toLowerCase()] || '💳';
+    return sharedGetCardBrandIcon(brand);
   }
 
   formatCardNumber(last4: string): string {

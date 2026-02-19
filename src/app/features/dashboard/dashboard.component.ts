@@ -7,10 +7,13 @@ import { PaymentService } from '../../core/services/payment.service';
 import { Booking, BookingStatus } from '../../core/models/booking.model';
 import { PaymentStatus, RefundResponse } from '../../core/models/payment.model';
 import { LoyaltyCardComponent } from '../../shared/components/loyalty-card/loyalty-card.component';
+import { FormatDatePipe } from '../../shared/pipes/format-date.pipe';
+import { FormatCurrencyPipe } from '../../shared/pipes/format-currency.pipe';
+import { getBookingStatusClass, getPaymentStatusClass, getPaymentStatusLabel } from '../../shared/utils/status-helpers';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink, LoyaltyCardComponent],
+  imports: [CommonModule, RouterLink, LoyaltyCardComponent, FormatDatePipe, FormatCurrencyPipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -50,6 +53,8 @@ export class DashboardComponent implements OnInit {
     if (!booking || !booking.isPaid) return 0;
     return this.isWithin24Hours() ? booking.totalPrice * 0.5 : booking.totalPrice;
   });
+
+  private currencyPipe = new FormatCurrencyPipe();
 
   constructor(
     private bookingService: BookingService,
@@ -108,15 +113,15 @@ export class DashboardComponent implements OnInit {
           this.processingRefund.set(false);
           this.refundResult.set(result.refund || null);
 
+          const formatted = this.currencyPipe.transform(refundAmount);
           const refundMessage = this.isWithin24Hours()
-            ? `Booking cancelled. 50% refund of ${this.formatCurrency(refundAmount)} processed (late cancellation fee applied).`
-            : `Booking cancelled. Full refund of ${this.formatCurrency(refundAmount)} processed.`;
+            ? `Booking cancelled. 50% refund of ${formatted} processed (late cancellation fee applied).`
+            : `Booking cancelled. Full refund of ${formatted} processed.`;
 
           this.successMessage.set(refundMessage);
           this.loadBookings();
           this.closeCancelModal();
 
-          // Clear success message after 8 seconds (longer to read refund details)
           setTimeout(() => {
             this.successMessage.set('');
           }, 8000);
@@ -128,7 +133,6 @@ export class DashboardComponent implements OnInit {
         }
       });
     } else {
-      // No payment to refund, just cancel
       this.bookingService.cancelBooking(bookingId).subscribe({
         next: () => {
           this.cancellingBookingId.set(null);
@@ -136,7 +140,6 @@ export class DashboardComponent implements OnInit {
           this.successMessage.set('Booking cancelled successfully!');
           this.loadBookings();
 
-          // Clear success message after 5 seconds
           setTimeout(() => {
             this.successMessage.set('');
           }, 5000);
@@ -153,34 +156,12 @@ export class DashboardComponent implements OnInit {
     return this.isWithin24Hours() ? 50 : 100;
   }
 
-  getStatusClass(status: BookingStatus): string {
-    switch (status) {
-      case BookingStatus.CONFIRMED:
-        return 'status--confirmed';
-      case BookingStatus.PENDING:
-        return 'status--pending';
-      case BookingStatus.CANCELLED:
-        return 'status--cancelled';
-      case BookingStatus.COMPLETED:
-        return 'status--completed';
-      default:
-        return '';
-    }
-  }
-
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-
   calculateNights(checkIn: Date, checkOut: Date): number {
-    const nights = Math.ceil(
-      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return nights;
+    return this.bookingService.calculateNights(new Date(checkIn), new Date(checkOut));
+  }
+
+  getStatusClass(status: BookingStatus): string {
+    return getBookingStatusClass(status);
   }
 
   canCancelBooking(booking: Booking): boolean {
@@ -188,38 +169,11 @@ export class DashboardComponent implements OnInit {
   }
 
   getPaymentStatusClass(status?: PaymentStatus): string {
-    if (!status) return 'payment-status--unknown';
-
-    switch (status) {
-      case PaymentStatus.SUCCEEDED:
-        return 'payment-status--success';
-      case PaymentStatus.PENDING:
-      case PaymentStatus.PROCESSING:
-        return 'payment-status--warning';
-      case PaymentStatus.FAILED:
-      case PaymentStatus.CANCELLED:
-        return 'payment-status--danger';
-      case PaymentStatus.REFUNDED:
-      case PaymentStatus.PARTIALLY_REFUNDED:
-        return 'payment-status--info';
-      default:
-        return 'payment-status--unknown';
-    }
+    return getPaymentStatusClass(status);
   }
 
   getPaymentStatusLabel(status?: PaymentStatus): string {
-    if (!status) return 'Not Paid';
-
-    return status.split('_').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
-  }
-
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return getPaymentStatusLabel(status);
   }
 
   viewPaymentReceipt(booking: Booking): void {
@@ -228,8 +182,8 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    // In production, this would download or open a receipt PDF
+    const datePipe = new FormatDatePipe();
     console.log('Viewing receipt for transaction:', booking.paymentTransactionId);
-    alert(`Payment Receipt\n\nBooking ID: ${booking.id}\nTransaction ID: ${booking.paymentTransactionId}\nAmount: ${this.formatCurrency(booking.totalPrice)}\nStatus: ${this.getPaymentStatusLabel(booking.paymentStatus)}\nDate: ${this.formatDate(booking.createdAt)}`);
+    alert(`Payment Receipt\n\nBooking ID: ${booking.id}\nTransaction ID: ${booking.paymentTransactionId}\nAmount: ${this.currencyPipe.transform(booking.totalPrice)}\nStatus: ${this.getPaymentStatusLabel(booking.paymentStatus)}\nDate: ${datePipe.transform(booking.createdAt, 'short')}`);
   }
 }

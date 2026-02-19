@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Hotel, Room, DateRange } from '../../../core/models';
 import { AvailabilityCalendarComponent } from '../availability-calendar/availability-calendar.component';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 export interface BookingDetails {
   hotel: Hotel;
@@ -17,7 +18,7 @@ export interface BookingDetails {
 
 @Component({
   selector: 'app-booking-stepper',
-  imports: [CommonModule, FormsModule, AvailabilityCalendarComponent],
+  imports: [CommonModule, FormsModule, AvailabilityCalendarComponent, FormatDatePipe],
   templateUrl: './booking-stepper.component.html',
   styleUrl: './booking-stepper.component.scss'
 })
@@ -124,16 +125,6 @@ export class BookingStepperComponent {
     };
 
     this.confirmBooking.emit(bookingDetails);
-  }
-
-  formatDate(dateStr: string | null): string {
-    if (!dateStr) return 'Select date';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
   }
 
   canConfirm(): boolean {

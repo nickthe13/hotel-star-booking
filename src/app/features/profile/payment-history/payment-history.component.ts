@@ -2,10 +2,13 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentService } from '../../../core/services/payment.service';
 import { PaymentTransaction, PaymentStatus } from '../../../core/models/payment.model';
+import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
+import { FormatCurrencyPipe } from '../../../shared/pipes/format-currency.pipe';
+import { getPaymentStatusClass, getPaymentStatusLabel } from '../../../shared/utils/status-helpers';
 
 @Component({
   selector: 'app-payment-history',
-  imports: [CommonModule],
+  imports: [CommonModule, FormatDatePipe, FormatCurrencyPipe],
   templateUrl: './payment-history.component.html',
   styleUrl: './payment-history.component.scss'
 })
@@ -86,49 +89,18 @@ export class PaymentHistoryComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: PaymentStatus): string {
-    switch (status) {
-      case PaymentStatus.SUCCEEDED:
-        return 'badge--success';
-      case PaymentStatus.PENDING:
-      case PaymentStatus.PROCESSING:
-        return 'badge--warning';
-      case PaymentStatus.FAILED:
-      case PaymentStatus.CANCELLED:
-        return 'badge--danger';
-      case PaymentStatus.REFUNDED:
-      case PaymentStatus.PARTIALLY_REFUNDED:
-        return 'badge--info';
-      default:
-        return '';
-    }
+    return getPaymentStatusClass(status);
   }
 
   getStatusLabel(status: PaymentStatus): string {
-    return status.split('_').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  }
-
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  }
-
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return getPaymentStatusLabel(status);
   }
 
   viewReceipt(transaction: PaymentTransaction): void {
     // In production, this would download or open a receipt PDF
+    const currencyPipe = new FormatCurrencyPipe();
+    const datePipe = new FormatDatePipe();
     console.log('Viewing receipt for transaction:', transaction.id);
-    alert(`Receipt for Transaction ${transaction.id}\n\nAmount: ${this.formatCurrency(transaction.amount)}\nStatus: ${this.getStatusLabel(transaction.status)}\nDate: ${this.formatDate(transaction.createdAt)}\n\nBooking ID: ${transaction.bookingId}`);
+    alert(`Receipt for Transaction ${transaction.id}\n\nAmount: ${currencyPipe.transform(transaction.amount)}\nStatus: ${this.getStatusLabel(transaction.status)}\nDate: ${datePipe.transform(transaction.createdAt, 'short')}\n\nBooking ID: ${transaction.bookingId}`);
   }
 }

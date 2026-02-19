@@ -82,41 +82,6 @@ export class BookingService {
     );
   }
 
-  createBookingWithPayment(bookingData: BookingRequest & { paymentIntentId: string }): Observable<BookingConfirmation> {
-    this.loading.set(true);
-
-    const createDto: any = {
-      roomId: bookingData.roomId,
-      checkIn: new Date(bookingData.checkIn).toISOString(),
-      checkOut: new Date(bookingData.checkOut).toISOString(),
-      guests: bookingData.guests
-    };
-
-    if (bookingData.specialRequests) {
-      createDto.specialRequests = bookingData.specialRequests;
-    }
-
-    return this.http.post<any>(`${this.API_URL}/bookings`, createDto).pipe(
-      map(response => {
-        this.loading.set(false);
-        const booking = this.mapBookingFromApi(response);
-
-        return {
-          booking,
-          confirmationNumber: `CONF-${booking.id}`,
-          estimatedCheckInTime: '3:00 PM',
-          message: 'Your booking has been confirmed and payment processed!',
-          requiresPayment: false
-        };
-      }),
-      catchError((error: HttpErrorResponse) => {
-        this.loading.set(false);
-        const message = error.error?.message || 'Failed to create booking';
-        return throwError(() => new Error(message));
-      })
-    );
-  }
-
   getUserBookings(): Observable<Booking[]> {
     this.loading.set(true);
 
@@ -128,22 +93,6 @@ export class BookingService {
       catchError((error: HttpErrorResponse) => {
         this.loading.set(false);
         console.error('Error fetching bookings:', error);
-        return of([]);
-      })
-    );
-  }
-
-  getAllBookings(): Observable<Booking[]> {
-    this.loading.set(true);
-
-    return this.http.get<any[]>(`${this.API_URL}/bookings`).pipe(
-      map(response => {
-        this.loading.set(false);
-        return response.map(b => this.mapBookingFromApi(b));
-      }),
-      catchError((error: HttpErrorResponse) => {
-        this.loading.set(false);
-        console.error('Error fetching all bookings:', error);
         return of([]);
       })
     );

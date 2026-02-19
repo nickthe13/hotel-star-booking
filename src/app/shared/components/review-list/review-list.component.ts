@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Review } from '../../../core/models/hotel.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 @Component({
   selector: 'app-review-list',
-  imports: [CommonModule, ConfirmationDialogComponent],
+  imports: [CommonModule, ConfirmationDialogComponent, FormatDatePipe],
   templateUrl: './review-list.component.html',
   styleUrl: './review-list.component.scss'
 })
@@ -49,15 +50,6 @@ export class ReviewListComponent {
       this.onDelete.emit(reviewId);
       this.closeDeleteDialog();
     }
-  }
-
-  formatDate(date: Date | string): string {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
 
   getStarArray(rating: number): number[] {

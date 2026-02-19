@@ -52,12 +52,12 @@
       <div class="date-display">
         <div class="date-item">
           <span class="date-label">Check-in</span>
-          <span class="date-value">{{ formatDate(checkIn()) || 'Select date' }}</span>
+          <span class="date-value">{{ (checkIn() | formatDate:'short') || 'Select date' }}</span>
         </div>
         <div class="date-separator">→</div>
         <div class="date-item">
           <span class="date-label">Check-out</span>
-          <span class="date-value">{{ formatDate(checkOut()) || 'Select date' }}</span>
+          <span class="date-value">{{ (checkOut() | formatDate:'short') || 'Select date' }}</span>
         </div>
       </div>
 

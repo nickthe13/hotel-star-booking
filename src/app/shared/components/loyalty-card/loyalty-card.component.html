@@ -16,7 +16,7 @@
         <span class="points-label">Available Points</span>
       </div>
       <div class="points-worth" *ngIf="!compact">
-        <span class="worth-value">{{ formatCurrency(account.currentPoints / 100) }}</span>
+        <span class="worth-value">{{ account.currentPoints / 100 | formatCurrency }}</span>
         <span class="worth-label">Reward Value</span>
       </div>
     </div>
@@ -24,7 +24,7 @@
     <div class="tier-progress" *ngIf="tierProgress() as progress">
       <div class="progress-header" *ngIf="!compact">
         <span class="multiplier">{{ progress.tierMultiplier }}x Points</span>
-        <span class="lifetime">{{ formatCurrency(progress.currentSpending) }} lifetime</span>
+        <span class="lifetime">{{ progress.currentSpending | formatCurrency }} lifetime</span>
       </div>
 
       <div class="progress-bar-container" *ngIf="progress.nextTier">
@@ -42,7 +42,7 @@
       </div>
 
       <div class="next-tier-info" *ngIf="progress.nextTier && progress.amountToNextTier && !compact">
-        <span>Spend {{ formatCurrency(progress.amountToNextTier) }} more to reach {{ getTierName(progress.nextTier) }}</span>
+        <span>Spend {{ progress.amountToNextTier | formatCurrency }} more to reach {{ getTierName(progress.nextTier) }}</span>
       </div>
 
       <div class="max-tier-info" *ngIf="!progress.nextTier && !compact">

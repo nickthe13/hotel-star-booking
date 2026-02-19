@@ -29,12 +29,12 @@
         <div class="transaction-booking" *ngIf="txn.booking">
           <span class="booking-hotel">{{ txn.booking.room?.hotel?.name }}</span>
           <span class="booking-dates">
-            {{ formatDate(txn.booking.checkIn) }} - {{ formatDate(txn.booking.checkOut) }}
+            {{ txn.booking.checkIn | formatDate:'short' }} - {{ txn.booking.checkOut | formatDate:'short' }}
           </span>
         </div>
 
         <div class="transaction-meta">
-          <span class="transaction-date">{{ formatDate(txn.createdAt) }}</span>
+          <span class="transaction-date">{{ txn.createdAt | formatDate:'short' }}</span>
           <span class="transaction-time">{{ formatTime(txn.createdAt) }}</span>
           <span class="transaction-balance">Balance: {{ txn.balanceAfter.toLocaleString() }}</span>
         </div>

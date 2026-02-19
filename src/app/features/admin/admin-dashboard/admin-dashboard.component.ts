@@ -6,10 +6,13 @@ import { HotelService } from '../../../core/services/hotel.service';
 import { Booking, BookingStatus } from '../../../core/models/booking.model';
 import { Hotel } from '../../../core/models';
 import { DashboardStatistics, PopularHotel } from '../../../core/models/admin.model';
+import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
+import { FormatCurrencyPipe } from '../../../shared/pipes/format-currency.pipe';
+import { getBookingStatusClass } from '../../../shared/utils/status-helpers';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormatDatePipe, FormatCurrencyPipe],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
@@ -90,7 +93,7 @@ export class AdminDashboardComponent implements OnInit {
   loadData(): void {
     this.loading.set(true);
 
-    this.bookingService.getAllBookings().subscribe({
+    this.bookingService.getUserBookings().subscribe({
       next: (bookings) => {
         this.allBookings.set(bookings);
       },
@@ -112,32 +115,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: BookingStatus): string {
-    switch (status) {
-      case BookingStatus.CONFIRMED:
-        return 'badge--success';
-      case BookingStatus.PENDING:
-        return 'badge--warning';
-      case BookingStatus.CANCELLED:
-        return 'badge--danger';
-      case BookingStatus.COMPLETED:
-        return 'badge--info';
-      default:
-        return '';
-    }
-  }
-
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  }
-
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return getBookingStatusClass(status);
   }
 }
