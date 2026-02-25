@@ -21,12 +21,27 @@ import {
 })
 export class LoyaltyService {
   private readonly API_URL = environment.apiUrl;
+  private readonly CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+  private lastFetchTime: number | null = null;
+  private cachedAccountWithDetails = signal<LoyaltyAccountWithDetails | null>(null);
 
   loyaltyAccount = signal<LoyaltyAccount | null>(null);
   tierProgress = signal<TierProgress | null>(null);
   loading = signal<boolean>(false);
 
   constructor(private http: HttpClient) {}
+
+  private isCacheValid(): boolean {
+    return (
+      this.lastFetchTime !== null &&
+      this.cachedAccountWithDetails() !== null &&
+      Date.now() - this.lastFetchTime < this.CACHE_DURATION_MS
+    );
+  }
+
+  invalidateCache(): void {
+    this.lastFetchTime = null;
+  }
 
   private mapAccountFromApi(apiAccount: any): LoyaltyAccount {
     return {
@@ -67,18 +82,22 @@ export class LoyaltyService {
     };
   }
 
-  getAccount(): Observable<LoyaltyAccount> {
+  getAccount(forceRefresh = false): Observable<LoyaltyAccount> {
+    if (!forceRefresh && this.loyaltyAccount() !== null && this.isCacheValid()) {
+      return of(this.loyaltyAccount()!);
+    }
+
     this.loading.set(true);
 
     return this.http.get<any>(`${this.API_URL}/loyalty/account`).pipe(
       map(response => this.mapAccountFromApi(response)),
       tap(account => {
         this.loyaltyAccount.set(account);
+        this.lastFetchTime = Date.now();
         this.loading.set(false);
       }),
       catchError((error: HttpErrorResponse) => {
         this.loading.set(false);
-        // Return a default account for new users
         const defaultAccount: LoyaltyAccount = {
           id: '',
           userId: '',
@@ -95,7 +114,11 @@ export class LoyaltyService {
     );
   }
 
-  getAccountWithDetails(): Observable<LoyaltyAccountWithDetails> {
+  getAccountWithDetails(forceRefresh = false): Observable<LoyaltyAccountWithDetails> {
+    if (!forceRefresh && this.isCacheValid()) {
+      return of(this.cachedAccountWithDetails()!);
+    }
+
     this.loading.set(true);
 
     return this.http.get<any>(`${this.API_URL}/loyalty/account`).pipe(
@@ -112,10 +135,15 @@ export class LoyaltyService {
           recentTransactions,
         };
       }),
-      tap(() => this.loading.set(false)),
+      tap(details => {
+        this.loyaltyAccount.set(details);
+        this.tierProgress.set(details.tierProgress);
+        this.cachedAccountWithDetails.set(details);
+        this.lastFetchTime = Date.now();
+        this.loading.set(false);
+      }),
       catchError((error: HttpErrorResponse) => {
         this.loading.set(false);
-        // Return default for new users
         const defaultAccount: LoyaltyAccountWithDetails = {
           id: '',
           userId: '',
@@ -217,6 +245,7 @@ export class LoyaltyService {
             currentPoints: account.currentPoints - points,
           });
         }
+        this.invalidateCache();
       }),
       map(response => ({
         pointsRedeemed: response.pointsRedeemed || points,
@@ -245,6 +274,7 @@ export class LoyaltyService {
             currentPoints: account.currentPoints - points,
           });
         }
+        this.invalidateCache();
       }),
       map(response => ({
         discountAmount: response.discountAmount || (points / POINTS_CONFIG.POINTS_TO_DOLLAR_RATIO),
@@ -326,7 +356,7 @@ export class LoyaltyService {
   }
 
   refreshAccount(): void {
-    this.getAccount().subscribe();
-    this.getTierProgress().subscribe();
+    this.invalidateCache();
+    this.getAccountWithDetails(true).subscribe();
   }
 }
