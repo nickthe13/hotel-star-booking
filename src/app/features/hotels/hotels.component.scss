@@ -294,12 +294,20 @@
 }
 
 .toolbar {
-  @include flex-between;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-sm;
   margin-bottom: $spacing-lg;
   padding: $spacing-md;
   background: $white;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
+
+  @include respond-to('md') {
+    @include flex-between;
+    flex-wrap: nowrap;
+  }
 
   .btn-filters {
     @include button-base;
@@ -332,17 +340,28 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
+    flex: 1;
+    justify-content: flex-end;
+
+    @include respond-to('md') {
+      flex: initial;
+    }
 
     label {
       font-size: $font-size-sm;
       font-weight: $font-weight-medium;
       color: $text-secondary;
+      white-space: nowrap;
     }
 
     .sort-select {
       @include input-field;
       width: auto;
-      min-width: 150px;
+      min-width: 120px;
+
+      @include respond-to('md') {
+        min-width: 150px;
+      }
     }
   }
 }
