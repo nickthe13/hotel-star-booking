@@ -66,6 +66,20 @@
       </ul>
     </nav>
 
+    <button
+      class="header__menu-toggle"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-controls="mobile-menu"
+      aria-label="Toggle navigation menu"
+    >
+      <span class="header__menu-icon" [class.header__menu-icon--open]="mobileMenuOpen()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+
     <div class="header__actions">
       @if (authService.isAuthenticated()) {
         <span class="welcome-message">Hi, {{ authService.user()?.name }}!</span>
@@ -73,6 +87,49 @@
       } @else {
         <a routerLink="/auth/login" class="btn btn--secondary">Sign In</a>
         <a routerLink="/auth/register" class="btn btn--primary">Sign Up</a>
+      }
+    </div>
+  </div>
+
+  @if (mobileMenuOpen()) {
+    <div class="mobile-menu__backdrop" (click)="closeMobileMenu()"></div>
+  }
+
+  <div
+    id="mobile-menu"
+    class="mobile-menu"
+    [class.mobile-menu--open]="mobileMenuOpen()"
+  >
+    <nav class="mobile-menu__nav">
+      <ul class="mobile-menu__list">
+        <li><a routerLink="/home" routerLinkActive="mobile-menu__link--active" class="mobile-menu__link" (click)="closeMobileMenu()">Home</a></li>
+        <li><a routerLink="/hotels" routerLinkActive="mobile-menu__link--active" class="mobile-menu__link" (click)="closeMobileMenu()">Hotels</a></li>
+        <li><a routerLink="/contact" routerLinkActive="mobile-menu__link--active" class="mobile-menu__link" (click)="closeMobileMenu()">Contact</a></li>
+        @if (authService.isAuthenticated()) {
+          <li><a routerLink="/dashboard" routerLinkActive="mobile-menu__link--active" class="mobile-menu__link" (click)="closeMobileMenu()">My Bookings</a></li>
+          <li>
+            <a routerLink="/favorites" routerLinkActive="mobile-menu__link--active" class="mobile-menu__link mobile-menu__link--favorites" (click)="closeMobileMenu()">
+              <svg viewBox="0 0 24 24" width="16" height="16" class="mobile-menu__icon">
+                <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              Favorites
+            </a>
+          </li>
+          <li><a routerLink="/profile" routerLinkActive="mobile-menu__link--active" class="mobile-menu__link" (click)="closeMobileMenu()">Profile</a></li>
+          @if (authService.isAdmin()) {
+            <li><a routerLink="/admin" routerLinkActive="mobile-menu__link--active" class="mobile-menu__link mobile-menu__link--admin" (click)="closeMobileMenu()">Admin</a></li>
+          }
+        }
+      </ul>
+    </nav>
+
+    <div class="mobile-menu__actions">
+      @if (authService.isAuthenticated()) {
+        <span class="mobile-menu__welcome">Hi, {{ authService.user()?.name }}!</span>
+        <button (click)="logout()" class="btn btn--secondary mobile-menu__btn">Logout</button>
+      } @else {
+        <a routerLink="/auth/login" class="btn btn--secondary mobile-menu__btn" (click)="closeMobileMenu()">Sign In</a>
+        <a routerLink="/auth/register" class="btn btn--primary mobile-menu__btn" (click)="closeMobileMenu()">Sign Up</a>
       }
     </div>
   </div>
