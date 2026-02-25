@@ -4,6 +4,10 @@
   min-height: calc(100vh - 64px - 300px);
   padding: $spacing-3xl 0;
   background: $neutral-50;
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg 0;
+  }
 }
 
 .dashboard-header {
@@ -18,6 +22,8 @@
     flex-direction: column;
     gap: $spacing-lg;
     align-items: flex-start;
+    margin-bottom: $spacing-xl;
+    padding-bottom: $spacing-md;
   }
 
   &__content {
@@ -28,6 +34,10 @@
     font-size: $font-size-3xl;
     color: $text-primary;
     margin-bottom: $spacing-xs;
+
+    @include respond-to('mobile') {
+      font-size: $font-size-2xl;
+    }
   }
 
   &__subtitle {
@@ -42,6 +52,7 @@
 
   @include respond-to('mobile') {
     max-width: 100%;
+    margin-bottom: $spacing-xl;
   }
 }
 
@@ -50,6 +61,10 @@
   flex-direction: column;
   padding: $spacing-3xl;
   gap: $spacing-lg;
+
+  @include respond-to('mobile') {
+    padding: $spacing-xl;
+  }
 
   .spinner {
     width: 48px;
@@ -111,6 +126,10 @@
   box-shadow: $shadow-sm;
   text-align: center;
 
+  @include respond-to('mobile') {
+    padding: $spacing-xl;
+  }
+
   &__icon {
     font-size: 64px;
     margin-bottom: $spacing-lg;
@@ -137,6 +156,7 @@
 
   @include respond-to('mobile') {
     grid-template-columns: 1fr;
+    gap: $spacing-md;
   }
 }
 
@@ -146,6 +166,10 @@
   box-shadow: $shadow-md;
   padding: $spacing-xl;
   transition: $transition-base, opacity 0.5s ease-out;
+
+  @include respond-to('mobile') {
+    padding: $spacing-md;
+  }
 
   &:hover {
     box-shadow: $shadow-lg;
@@ -164,6 +188,11 @@
     margin-bottom: $spacing-lg;
     padding-bottom: $spacing-lg;
     border-bottom: 1px solid $border-color-light;
+
+    @include respond-to('mobile') {
+      flex-direction: column;
+      gap: $spacing-sm;
+    }
   }
 
   &__info {
@@ -187,6 +216,11 @@
     grid-template-columns: repeat(2, 1fr);
     gap: $spacing-md;
     margin-bottom: $spacing-lg;
+
+    @include respond-to('mobile') {
+      grid-template-columns: 1fr;
+      gap: $spacing-sm;
+    }
   }
 
   &__hotel {
@@ -326,6 +360,11 @@
     height: 80px;
     object-fit: cover;
     border-radius: $radius-md;
+
+    @include respond-to('mobile') {
+      width: 60px;
+      height: 60px;
+    }
   }
 
   &__content {
@@ -399,6 +438,10 @@
   justify-content: center;
   z-index: $z-index-modal;
   padding: $spacing-lg;
+
+  @include respond-to('mobile') {
+    padding: $spacing-sm;
+  }
 }
 
 .modal {
@@ -415,6 +458,10 @@
     align-items: center;
     padding: $spacing-lg;
     border-bottom: 1px solid $border-color;
+
+    @include respond-to('mobile') {
+      padding: $spacing-md;
+    }
   }
 
   &__title {
@@ -448,6 +495,10 @@
   &__body {
     padding: $spacing-xl;
 
+    @include respond-to('mobile') {
+      padding: $spacing-md;
+    }
+
     p {
       margin: 0 0 $spacing-md 0;
       color: $text-primary;
@@ -468,6 +519,15 @@
     gap: $spacing-md;
     padding: $spacing-lg;
     border-top: 1px solid $border-color;
+
+    @include respond-to('mobile') {
+      padding: $spacing-md;
+      flex-direction: column-reverse;
+
+      .btn {
+        width: 100%;
+      }
+    }
   }
 }
 
@@ -514,6 +574,11 @@
     height: 72px;
     object-fit: cover;
     border-radius: $radius-md;
+
+    @include respond-to('mobile') {
+      width: 56px;
+      height: 56px;
+    }
   }
 
   &__info {

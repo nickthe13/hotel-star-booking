@@ -10,6 +10,10 @@
   position: relative;
   overflow: hidden;
 
+  @include respond-to('mobile') {
+    padding: 16px;
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -87,6 +91,12 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 24px;
+
+  @include respond-to('mobile') {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
 }
 
 .points-display {
@@ -101,6 +111,10 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+
+    @include respond-to('mobile') {
+      font-size: 32px;
+    }
   }
 
   .points-label {
@@ -112,6 +126,10 @@
 
 .points-worth {
   text-align: right;
+
+  @include respond-to('mobile') {
+    text-align: left;
+  }
 
   .worth-value {
     display: block;
@@ -243,22 +261,3 @@
   }
 }
 
-@media (max-width: 480px) {
-  .loyalty-card {
-    padding: 16px;
-  }
-
-  .points-display .points-value {
-    font-size: 32px;
-  }
-
-  .points-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .points-worth {
-    text-align: left;
-  }
-}
