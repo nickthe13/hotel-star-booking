@@ -1,6 +1,5 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { HotelService } from '../../../core/services/hotel.service';
 import { Booking, BookingStatus } from '../../../core/models/booking.model';
@@ -12,11 +11,12 @@ import { getBookingStatusClass } from '../../../shared/utils/status-helpers';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, RouterLink, FormatDatePipe, FormatCurrencyPipe],
+  imports: [CommonModule, FormatDatePipe, FormatCurrencyPipe],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent implements OnInit {
+  navigateToTab = output<'dashboard' | 'hotels' | 'rooms' | 'bookings' | 'reviews'>();
   allBookings = signal<Booking[]>([]);
   allHotels = signal<Hotel[]>([]);
   loading = signal<boolean>(true);

@@ -12,18 +12,18 @@
 
     <!-- Quick Actions -->
     <div class="quick-actions">
-      <a routerLink="/admin/hotels" class="quick-action-btn">
+      <button type="button" class="quick-action-btn" (click)="navigateToTab.emit('hotels')">
         <span class="quick-action-btn__icon">🏨</span>
         <span class="quick-action-btn__text">Manage Hotels</span>
-      </a>
-      <a routerLink="/admin/rooms" class="quick-action-btn">
+      </button>
+      <button type="button" class="quick-action-btn" (click)="navigateToTab.emit('rooms')">
         <span class="quick-action-btn__icon">🚪</span>
         <span class="quick-action-btn__text">Manage Rooms</span>
-      </a>
-      <a routerLink="/admin/bookings" class="quick-action-btn">
+      </button>
+      <button type="button" class="quick-action-btn" (click)="navigateToTab.emit('bookings')">
         <span class="quick-action-btn__icon">📅</span>
         <span class="quick-action-btn__text">Manage Bookings</span>
-      </a>
+      </button>
     </div>
 
     <!-- Statistics Cards -->

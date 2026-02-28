@@ -113,7 +113,9 @@
 }
 
 .btn__icon {
-  font-size: $font-size-base;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  line-height: 1;
 }
 
 .btn__label {

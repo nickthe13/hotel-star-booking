@@ -67,7 +67,8 @@
   border: 2px solid $primary-500;
   border-radius: $radius-lg;
   color: $primary-500;
-  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
   font-weight: $font-weight-semibold;
   transition: all 0.3s ease;
   flex: 1;
@@ -187,7 +188,8 @@
   gap: $spacing-lg;
 
   @include respond-to('mobile') {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-md;
   }
 }
 
@@ -198,12 +200,22 @@
   background: $neutral-50;
   border-radius: $radius-md;
   gap: $spacing-md;
+
+  @include respond-to('mobile') {
+    padding: $spacing-md;
+  }
 }
 
 .status-item__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @include respond-to('mobile') {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-xs;
+  }
 }
 
 .status-item__label {

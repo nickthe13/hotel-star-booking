@@ -62,7 +62,7 @@
   <!-- Tab Content -->
   <div class="admin-panel__content">
     @if (isActiveTab('dashboard')) {
-      <app-admin-dashboard></app-admin-dashboard>
+      <app-admin-dashboard (navigateToTab)="selectTab($event)"></app-admin-dashboard>
     }
 
     @if (isActiveTab('hotels')) {
