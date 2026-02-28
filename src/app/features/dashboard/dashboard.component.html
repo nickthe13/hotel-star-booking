@@ -59,7 +59,7 @@
               <div class="booking-card" [class.booking-card--cancelled]="booking.status === BookingStatus.CANCELLED">
                 <div class="booking-card__header">
                   <div class="booking-card__info">
-                    <h3 class="booking-card__title">Booking #{{ booking.id }}</h3>
+                    <h3 class="booking-card__title">{{ booking.hotel?.name || 'Hotel Booking' }}</h3>
                     <div class="badge-group">
                       <span class="status-badge" [ngClass]="getStatusClass(booking.status)">
                         {{ booking.status }}

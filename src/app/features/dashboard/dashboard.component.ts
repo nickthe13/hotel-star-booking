@@ -184,6 +184,6 @@ export class DashboardComponent implements OnInit {
 
     const datePipe = new FormatDatePipe();
     console.log('Viewing receipt for transaction:', booking.paymentTransactionId);
-    alert(`Payment Receipt\n\nBooking ID: ${booking.id}\nTransaction ID: ${booking.paymentTransactionId}\nAmount: ${this.currencyPipe.transform(booking.totalPrice)}\nStatus: ${this.getPaymentStatusLabel(booking.paymentStatus)}\nDate: ${datePipe.transform(booking.createdAt, 'short')}`);
+    alert(`Payment Receipt\n\nHotel: ${booking.hotel?.name || 'N/A'}\nTransaction: ${booking.paymentTransactionId}\nAmount: ${this.currencyPipe.transform(booking.totalPrice)}\nStatus: ${this.getPaymentStatusLabel(booking.paymentStatus)}\nDate: ${datePipe.transform(booking.createdAt, 'short')}`);
   }
 }
