@@ -58,3 +58,10 @@ src/environments/environment.*.ts
 # Local settings
 .claude/settings.local.json
 nul
+
+# Build archives
+*.tar.gz
+
+# Claude worktrees
+.claude/worktrees/
+.claude/launch.json
