@@ -34,7 +34,10 @@ export class BookingsService {
       throw new BadRequestException('Check-out date must be after check-in date');
     }
 
-    if (checkInDate < new Date()) {
+    // Compare dates only (ignore time) so booking for today is allowed
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (checkInDate < today) {
       throw new BadRequestException('Check-in date cannot be in the past');
     }
 

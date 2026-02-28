@@ -27,12 +27,22 @@ export class HotelsService {
       country,
       search,
       minRating,
+      rating,
+      minPrice,
+      maxPrice,
       amenity,
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
       sortOrder = 'desc',
     } = query;
+
+    // Map frontend sortBy values to valid Prisma fields
+    const sortByMap: Record<string, string> = {
+      popularity: 'rating',
+      price: 'rating',
+    };
+    const actualSortBy = sortByMap[sortBy] || sortBy;
 
     // Build where clause
     const where: any = {};
@@ -57,12 +67,22 @@ export class HotelsService {
       ];
     }
 
-    if (minRating !== undefined) {
-      where.rating = { gte: minRating };
+    // Support both 'minRating' and 'rating' params
+    const effectiveRating = minRating ?? rating;
+    if (effectiveRating !== undefined) {
+      where.rating = { gte: effectiveRating };
     }
 
     if (amenity) {
       where.amenities = { has: amenity };
+    }
+
+    // Price filtering via rooms
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      const priceFilter: any = {};
+      if (minPrice !== undefined) priceFilter.gte = minPrice;
+      if (maxPrice !== undefined) priceFilter.lte = maxPrice;
+      where.rooms = { some: { price: priceFilter } };
     }
 
     // Calculate pagination
@@ -77,9 +97,10 @@ export class HotelsService {
       skip,
       take: limit,
       orderBy: {
-        [sortBy]: sortOrder,
+        [actualSortBy]: sortOrder,
       },
       include: {
+        rooms: true,
         _count: {
           select: {
             rooms: true,

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, Input, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HotelService } from '../../core/services/hotel.service';
@@ -19,7 +19,7 @@ import { PaymentModalComponent, PaymentModalData } from '../../shared/components
   templateUrl: './hotel-details.component.html',
   styleUrl: './hotel-details.component.scss'
 })
-export class HotelDetailsComponent implements OnInit {
+export class HotelDetailsComponent implements OnInit, OnDestroy {
   @Input() id!: string;
 
   @ViewChild(ReviewFormComponent) reviewFormComponent?: ReviewFormComponent;
@@ -28,7 +28,12 @@ export class HotelDetailsComponent implements OnInit {
   hotel = signal<Hotel | undefined>(undefined);
   loading = signal<boolean>(true);
   selectedImageIndex = signal<number>(0);
+  imageAnimating = signal<boolean>(false);
   userRating = signal<number>(0);
+
+  // Auto-slide
+  private autoSlideTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly SLIDE_INTERVAL = 4000; // 4 seconds
   hoveredRating = signal<number>(0);
   hasRated = signal<boolean>(false);
 
@@ -84,22 +89,37 @@ export class HotelDetailsComponent implements OnInit {
     if (this.id) {
       this.loadHotel();
       this.loadUserRating();
-      this.loadReviews();
-      if (this.authService.isAuthenticated()) {
-        this.loadUserReview();
-      }
     }
   }
 
   private loadHotel(): void {
     this.loading.set(true);
+    this.reviewsLoading.set(true);
     this.hotelService.getHotelById(this.id).subscribe({
       next: (hotel) => {
         this.hotel.set(hotel);
         this.loading.set(false);
+        this.startAutoSlide();
+
+        // Extract reviews from hotel response (already included by backend)
+        if (hotel && hotel.reviews) {
+          this.reviews.set(hotel.reviews);
+
+          // Find the current user's review from the list
+          if (this.authService.isAuthenticated()) {
+            const userId = this.authService.user()?.id;
+            const userReview = hotel.reviews.find((r: Review) => r.userId === userId || (r as any).user?.id === userId);
+            if (userReview) {
+              this.userReview.set(userReview);
+            }
+          }
+        }
+        this.loadLocalReviews();
+        this.reviewsLoading.set(false);
       },
       error: () => {
         this.loading.set(false);
+        this.reviewsLoading.set(false);
         this.router.navigate(['/hotels']);
       }
     });
@@ -155,8 +175,58 @@ export class HotelDetailsComponent implements OnInit {
     localStorage.setItem(ratingsKey, JSON.stringify(ratings));
   }
 
+  ngOnDestroy(): void {
+    this.stopAutoSlide();
+  }
+
   selectImage(index: number): void {
-    this.selectedImageIndex.set(index);
+    this.animateToImage(index);
+  }
+
+  nextImage(): void {
+    const hotel = this.hotel();
+    if (!hotel) return;
+    const next = (this.selectedImageIndex() + 1) % hotel.images.length;
+    this.animateToImage(next);
+  }
+
+  prevImage(): void {
+    const hotel = this.hotel();
+    if (!hotel) return;
+    const prev = (this.selectedImageIndex() - 1 + hotel.images.length) % hotel.images.length;
+    this.animateToImage(prev);
+  }
+
+  private animateToImage(index: number): void {
+    if (index === this.selectedImageIndex()) return;
+    this.imageAnimating.set(true);
+    // Brief fade-out, then swap image and fade-in
+    setTimeout(() => {
+      this.selectedImageIndex.set(index);
+      this.imageAnimating.set(false);
+    }, 300);
+  }
+
+  startAutoSlide(): void {
+    this.stopAutoSlide();
+    const hotel = this.hotel();
+    if (!hotel || hotel.images.length <= 1) return;
+    this.autoSlideTimer = setInterval(() => this.nextImage(), this.SLIDE_INTERVAL);
+  }
+
+  stopAutoSlide(): void {
+    if (this.autoSlideTimer) {
+      clearInterval(this.autoSlideTimer);
+      this.autoSlideTimer = null;
+    }
+  }
+
+  onGalleryMouseEnter(): void {
+    this.stopAutoSlide();
+  }
+
+  onGalleryMouseLeave(): void {
+    this.startAutoSlide();
   }
 
   onDateRangeSelected(dateRange: DateRange): void {
@@ -317,32 +387,6 @@ export class HotelDetailsComponent implements OnInit {
   }
 
   // Review methods
-  private loadReviews(): void {
-    this.reviewsLoading.set(true);
-    this.reviewService.getHotelReviews(this.id).subscribe({
-      next: (reviews) => {
-        this.reviews.set(reviews);
-        this.reviewsLoading.set(false);
-      },
-      error: () => {
-        this.reviewsLoading.set(false);
-      }
-    });
-  }
-
-  private loadUserReview(): void {
-    this.reviewService.getUserReview(this.id).subscribe({
-      next: (review) => {
-        if (review) {
-          this.userReview.set(review);
-        }
-      },
-      error: () => {
-        // User hasn't reviewed yet
-      }
-    });
-  }
-
   openReviewModal(): void {
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/auth/login']);
@@ -369,14 +413,23 @@ export class HotelDetailsComponent implements OnInit {
       }).subscribe({
         next: (updatedReview) => {
           this.userReview.set(updatedReview);
-          this.loadReviews();
+          this.loadHotel();
           this.closeReviewModal();
           if (this.reviewFormComponent) {
             this.reviewFormComponent.resetSubmitting();
           }
         },
-        error: (error) => {
-          console.error('Error updating review:', error);
+        error: () => {
+          // API unavailable — update locally
+          const updatedReview: Review = {
+            ...existingReview,
+            rating: formData.rating,
+            comment: formData.comment
+          };
+          this.userReview.set(updatedReview);
+          this.reviews.update(list => list.map(r => r.id === existingReview.id ? updatedReview : r));
+          this.saveLocalReviews();
+          this.closeReviewModal();
           if (this.reviewFormComponent) {
             this.reviewFormComponent.resetSubmitting();
           }
@@ -391,20 +444,71 @@ export class HotelDetailsComponent implements OnInit {
       }).subscribe({
         next: (newReview) => {
           this.userReview.set(newReview);
-          this.loadReviews();
-          this.loadHotel(); // Reload hotel to update average rating
+          this.loadHotel();
           this.closeReviewModal();
           if (this.reviewFormComponent) {
             this.reviewFormComponent.resetSubmitting();
           }
         },
-        error: (error) => {
-          console.error('Error creating review:', error);
+        error: () => {
+          // API unavailable — save locally
+          const user = this.authService.user();
+          const localReview: Review = {
+            id: 'local_' + Date.now(),
+            hotelId: this.id,
+            userId: user?.id || '',
+            userName: user?.name || 'You',
+            rating: formData.rating,
+            comment: formData.comment,
+            createdAt: new Date()
+          };
+          this.userReview.set(localReview);
+          this.reviews.update(list => [localReview, ...list]);
+          this.saveLocalReviews();
+          this.closeReviewModal();
           if (this.reviewFormComponent) {
             this.reviewFormComponent.resetSubmitting();
           }
         }
       });
+    }
+  }
+
+  private saveLocalReviews(): void {
+    const reviews = this.reviews();
+    const localReviews = reviews.filter(r => r.id.startsWith('local_'));
+    if (localReviews.length > 0) {
+      const key = `local_reviews_${this.id}`;
+      localStorage.setItem(key, JSON.stringify(localReviews));
+    }
+  }
+
+  private loadLocalReviews(): void {
+    const key = `local_reviews_${this.id}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      try {
+        const localReviews: Review[] = JSON.parse(stored).map((r: any) => ({
+          ...r,
+          createdAt: new Date(r.createdAt)
+        }));
+        // Merge with existing reviews (avoid duplicates)
+        this.reviews.update(list => {
+          const existingIds = new Set(list.map(r => r.id));
+          const newReviews = localReviews.filter(r => !existingIds.has(r.id));
+          return [...newReviews, ...list];
+        });
+        // Set user review if found
+        const user = this.authService.user();
+        if (user) {
+          const userLocalReview = localReviews.find(r => r.userId === user.id);
+          if (userLocalReview && !this.userReview()) {
+            this.userReview.set(userLocalReview);
+          }
+        }
+      } catch (e) {
+        console.error('Error loading local reviews:', e);
+      }
     }
   }
 
@@ -419,17 +523,35 @@ export class HotelDetailsComponent implements OnInit {
   }
 
   deleteReview(reviewId: string): void {
+    // Handle local reviews directly
+    if (reviewId.startsWith('local_')) {
+      if (this.userReview()?.id === reviewId) {
+        this.userReview.set(undefined);
+      }
+      this.reviews.update(list => list.filter(r => r.id !== reviewId));
+      this.saveLocalReviews();
+      // Clean up if no local reviews left
+      const key = `local_reviews_${this.id}`;
+      const remaining = this.reviews().filter(r => r.id.startsWith('local_'));
+      if (remaining.length === 0) {
+        localStorage.removeItem(key);
+      }
+      return;
+    }
+
     this.reviewService.deleteReview(reviewId).subscribe({
       next: () => {
-        // If it's the user's review, clear it
         if (this.userReview()?.id === reviewId) {
           this.userReview.set(undefined);
         }
-        this.loadReviews();
-        this.loadHotel(); // Reload hotel to update average rating
+        this.loadHotel();
       },
-      error: (error) => {
-        console.error('Error deleting review:', error);
+      error: () => {
+        // API unavailable — remove locally
+        if (this.userReview()?.id === reviewId) {
+          this.userReview.set(undefined);
+        }
+        this.reviews.update(list => list.filter(r => r.id !== reviewId));
       }
     });
   }

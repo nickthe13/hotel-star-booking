@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, map, of, catchError, tap } from 'rxjs';
+import { Observable, map, of, catchError, tap, shareReplay } from 'rxjs';
 import { Hotel, HotelSearchParams, Room } from '../models';
 import { environment } from '../../../environments/environment';
 
@@ -19,8 +19,39 @@ export class HotelService {
   private hotels = signal<Hotel[]>([]);
   private loading = signal<boolean>(false);
   private hotelsLoaded = false;
+  private preloadRequest$: Observable<Hotel[]> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    // Preload hotels immediately when the service is created (app startup)
+    this.preload();
+  }
+
+  /**
+   * Preload all hotels in the background on app startup.
+   * By the time the user clicks "Hotels", data is already cached.
+   */
+  preload(): void {
+    if (this.hotelsLoaded || this.preloadRequest$) return;
+
+    this.preloadRequest$ = this.http.get<any>(`${this.API_URL}/hotels`).pipe(
+      map(response => {
+        const hotelsData = Array.isArray(response) ? response : response.data || response;
+        const hotels = hotelsData.map((h: any) => this.mapHotelFromApi(h));
+        this.hotels.set(hotels);
+        this.hotelsLoaded = true;
+        return hotels;
+      }),
+      shareReplay(1),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error preloading hotels:', error);
+        this.preloadRequest$ = null;
+        return of([]);
+      })
+    );
+
+    // Fire the request (subscribe to trigger it)
+    this.preloadRequest$.subscribe();
+  }
 
   private mapHotelFromApi(apiHotel: any): Hotel {
     return {
@@ -61,49 +92,30 @@ export class HotelService {
   }
 
   getHotels(params?: HotelSearchParams): Observable<Hotel[]> {
-    this.loading.set(true);
-
-    let httpParams = new HttpParams();
-
-    if (params) {
-      if (params.query) httpParams = httpParams.set('search', params.query);
-      if (params.city) httpParams = httpParams.set('city', params.city);
-      if (params.minPrice !== undefined) httpParams = httpParams.set('minPrice', params.minPrice.toString());
-      if (params.maxPrice !== undefined) httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
-      if (params.starRating) httpParams = httpParams.set('rating', params.starRating.toString());
-      if (params.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
-      if (params.sortOrder) httpParams = httpParams.set('sortOrder', params.sortOrder);
+    // If already cached, return instantly (no HTTP call)
+    if (this.hotelsLoaded) {
+      return of(this.hotels());
     }
 
-    return this.http.get<any>(`${this.API_URL}/hotels`, { params: httpParams }).pipe(
+    // If preload is in-flight, wait for it instead of making a duplicate request
+    if (this.preloadRequest$) {
+      return this.preloadRequest$;
+    }
+
+    // Fallback: fetch fresh (shouldn't normally happen)
+    this.loading.set(true);
+    return this.http.get<any>(`${this.API_URL}/hotels`).pipe(
       map(response => {
-        // Handle both paginated and array responses
         const hotelsData = Array.isArray(response) ? response : response.data || response;
         const hotels = hotelsData.map((h: any) => this.mapHotelFromApi(h));
-
-        // Apply client-side filtering for amenities (if backend doesn't support it)
-        let filteredHotels = hotels;
-        if (params?.amenities && params.amenities.length > 0) {
-          filteredHotels = hotels.filter((hotel: Hotel) =>
-            params.amenities!.every(amenity => hotel.amenities.includes(amenity))
-          );
-        }
-
-        if (params?.guestRating) {
-          filteredHotels = filteredHotels.filter(
-            (hotel: Hotel) => hotel.averageRating && hotel.averageRating >= params.guestRating!
-          );
-        }
-
-        this.hotels.set(filteredHotels);
+        this.hotels.set(hotels);
         this.hotelsLoaded = true;
         this.loading.set(false);
-        return filteredHotels;
+        return hotels;
       }),
       catchError((error: HttpErrorResponse) => {
         console.error('Error fetching hotels:', error);
         this.loading.set(false);
-        // Return cached hotels if available
         return of(this.hotels());
       })
     );
@@ -128,19 +140,21 @@ export class HotelService {
   }
 
   getFeaturedHotels(limit: number = 6): Observable<Hotel[]> {
-    return this.http.get<any>(`${this.API_URL}/hotels/featured`, {
-      params: new HttpParams().set('limit', limit.toString())
-    }).pipe(
-      map(response => {
-        const hotelsData = Array.isArray(response) ? response : response.data || response;
-        return hotelsData.map((h: any) => this.mapHotelFromApi(h));
-      }),
-      catchError((error: HttpErrorResponse) => {
-        console.error('Error fetching featured hotels:', error);
-        // Fallback to getting hotels and filtering featured ones
-        return this.getHotels().pipe(
-          map(hotels => hotels.filter(h => h.featured).slice(0, limit))
-        );
+    // Use cached data if available — no extra API call
+    return this.getHotels().pipe(
+      map(hotels => {
+        const featured = hotels
+          .filter(h => h.featured)
+          .slice(0, limit);
+        // If not enough featured, fill with highest rated
+        if (featured.length < limit) {
+          const remaining = hotels
+            .filter(h => !h.featured)
+            .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+            .slice(0, limit - featured.length);
+          return [...featured, ...remaining];
+        }
+        return featured;
       })
     );
   }

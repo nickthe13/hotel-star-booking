@@ -23,7 +23,13 @@
       "Bash(find:*)",
       "Bash(npx prisma db seed)",
       "WebSearch",
-      "Bash(npm run start:dev:*)"
+      "Bash(npm run start:dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(curl:*)",
+      "Bash(npx ng build:*)",
+      "Bash(xxd:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

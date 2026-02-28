@@ -1,9 +1,9 @@
-import { Component, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HotelService } from '../../core/services/hotel.service';
-import { Hotel, HotelSearchParams } from '../../core/models';
+import { Hotel } from '../../core/models';
 import { HotelCardComponent } from '../../shared/components/hotel-card/hotel-card.component';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { AMENITIES, STAR_RATINGS } from '../../core/constants/app.constants';
@@ -15,8 +15,10 @@ import { AMENITIES, STAR_RATINGS } from '../../core/constants/app.constants';
   styleUrl: './hotels.component.scss'
 })
 export class HotelsComponent implements OnInit {
-  hotels = signal<Hotel[]>([]);
-  loading = signal<boolean>(true); // Start with loading true
+  // All hotels from a single API call (never changes until page reload)
+  private allHotels = signal<Hotel[]>([]);
+
+  loading = signal<boolean>(true);
   showFilters = signal<boolean>(false);
   error = signal<string>('');
 
@@ -35,17 +37,67 @@ export class HotelsComponent implements OnInit {
   amenities = AMENITIES;
   starRatings = STAR_RATINGS;
 
-  // Computed search params
-  searchParams = computed<HotelSearchParams>(() => ({
-    query: this.searchQuery() || undefined,
-    city: this.selectedCity() || undefined,
-    minPrice: this.minPrice(),
-    maxPrice: this.maxPrice(),
-    starRating: this.selectedStarRating() || undefined,
-    amenities: this.selectedAmenities().length > 0 ? this.selectedAmenities() : undefined,
-    sortBy: this.sortBy(),
-    sortOrder: this.sortOrder()
-  }));
+  // Computed: filter + sort happens instantly in memory (no API call)
+  hotels = computed(() => {
+    let result = [...this.allHotels()];
+
+    // Search filter
+    const query = this.searchQuery().toLowerCase();
+    if (query) {
+      result = result.filter(h =>
+        h.name.toLowerCase().includes(query) ||
+        h.city.toLowerCase().includes(query) ||
+        h.country.toLowerCase().includes(query) ||
+        h.description.toLowerCase().includes(query)
+      );
+    }
+
+    // City filter
+    const city = this.selectedCity();
+    if (city) {
+      result = result.filter(h => h.city === city);
+    }
+
+    // Price filter
+    const min = this.minPrice();
+    const max = this.maxPrice();
+    if (min > 0 || max < 1000) {
+      result = result.filter(h => h.pricePerNight >= min && h.pricePerNight <= max);
+    }
+
+    // Star rating filter
+    const star = this.selectedStarRating();
+    if (star) {
+      result = result.filter(h => h.starRating >= star);
+    }
+
+    // Amenities filter
+    const amenities = this.selectedAmenities();
+    if (amenities.length > 0) {
+      result = result.filter(h =>
+        amenities.every(a => h.amenities.includes(a))
+      );
+    }
+
+    // Sort
+    const sortBy = this.sortBy();
+    const sortOrder = this.sortOrder();
+    const multiplier = sortOrder === 'asc' ? 1 : -1;
+
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'price':
+          return (a.pricePerNight - b.pricePerNight) * multiplier;
+        case 'rating':
+          return ((a.averageRating || 0) - (b.averageRating || 0)) * multiplier;
+        case 'popularity':
+        default:
+          return ((a.totalReviews || 0) - (b.totalReviews || 0)) * multiplier;
+      }
+    });
+
+    return result;
+  });
 
   resultsCount = computed(() => this.hotels().length);
 
@@ -65,21 +117,10 @@ export class HotelsComponent implements OnInit {
     private hotelService: HotelService,
     private route: ActivatedRoute,
     private router: Router
-  ) {
-    // Effect to fetch hotels when search params change
-    effect(() => {
-      const params = this.searchParams();
-      this.fetchHotels(params);
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
-    // Load cities from API
-    this.hotelService.getCities().subscribe(cities => {
-      this.cities.set(cities);
-    });
-
-    // Load initial filters from query params
+    // Load initial filters from URL query params
     this.route.queryParams.subscribe(params => {
       if (params['city']) this.selectedCity.set(params['city']);
       if (params['minPrice']) this.minPrice.set(+params['minPrice']);
@@ -87,16 +128,23 @@ export class HotelsComponent implements OnInit {
       if (params['starRating']) this.selectedStarRating.set(+params['starRating']);
       if (params['sortBy']) this.sortBy.set(params['sortBy']);
     });
+
+    // Single API call — fetch ALL hotels once
+    this.loadHotels();
   }
 
-  private fetchHotels(params: HotelSearchParams): void {
+  private loadHotels(): void {
     this.loading.set(true);
     this.error.set('');
-    this.hotelService.getHotels(params).subscribe({
+
+    this.hotelService.getHotels({}).subscribe({
       next: (hotels) => {
-        this.hotels.set(hotels);
+        this.allHotels.set(hotels);
         this.loading.set(false);
-        this.updateQueryParams();
+
+        // Extract cities from loaded data
+        const uniqueCities = [...new Set(hotels.map(h => h.city))].sort();
+        this.cities.set(uniqueCities);
       },
       error: (err) => {
         console.error('Error loading hotels:', err);
@@ -137,22 +185,6 @@ export class HotelsComponent implements OnInit {
   }
 
   retry(): void {
-    this.fetchHotels(this.searchParams());
-  }
-
-  private updateQueryParams(): void {
-    const queryParams: any = {};
-
-    if (this.selectedCity()) queryParams.city = this.selectedCity();
-    if (this.minPrice() > 0) queryParams.minPrice = this.minPrice();
-    if (this.maxPrice() < 1000) queryParams.maxPrice = this.maxPrice();
-    if (this.selectedStarRating()) queryParams.starRating = this.selectedStarRating();
-    if (this.sortBy() !== 'popularity') queryParams.sortBy = this.sortBy();
-
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams,
-      queryParamsHandling: 'merge'
-    });
+    this.loadHotels();
   }
 }

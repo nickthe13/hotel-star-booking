@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsNumber, Min, Max, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -52,6 +52,40 @@ export class QueryHotelDto {
   minRating?: number;
 
   @ApiProperty({
+    example: 4.0,
+    description: 'Minimum rating filter (alias for minRating)',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(5)
+  rating?: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Minimum price filter',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minPrice?: number;
+
+  @ApiProperty({
+    example: 1000,
+    description: 'Maximum price filter',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  maxPrice?: number;
+
+  @ApiProperty({
     example: 'WiFi',
     description: 'Filter by amenity',
     required: false,
@@ -87,11 +121,12 @@ export class QueryHotelDto {
 
   @ApiProperty({
     example: 'rating',
-    description: 'Sort by field (name, rating, createdAt)',
+    description: 'Sort by field (name, rating, createdAt, popularity, price)',
     required: false,
   })
   @IsOptional()
   @IsString()
+  @IsIn(['name', 'rating', 'createdAt', 'popularity', 'price'])
   sortBy?: string = 'createdAt';
 
   @ApiProperty({

@@ -7,6 +7,9 @@ import { json } from 'express';
 import { GlobalExceptionFilter } from './common/filters';
 
 async function bootstrap() {
+  console.log('---------------- DEBUGGING ----------------');
+  console.log('Current DATABASE_URL:', process.env.DATABASE_URL); 
+  console.log('-------------------------------------------');
   const app = await NestFactory.create(AppModule, {
     rawBody: true, // Enable raw body for webhooks
   });
