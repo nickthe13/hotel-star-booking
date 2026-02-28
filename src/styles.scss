@@ -157,15 +157,28 @@ button {
 /* Skip to main content link */
 .skip-link {
   position: absolute;
-  top: -40px;
-  left: 0;
-  background: $primary-500;
-  color: $text-inverse;
-  padding: $spacing-sm $spacing-md;
-  text-decoration: none;
-  z-index: 100;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+  z-index: $z-index-modal;
 
   &:focus {
+    width: auto;
+    height: auto;
+    padding: $spacing-sm $spacing-md;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
     top: 0;
+    left: 0;
+    background: $primary-500;
+    color: $text-inverse;
+    text-decoration: none;
   }
 }
