@@ -14,7 +14,8 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole, PaymentStatus } from '@prisma/client';
+import { PaymentsService } from '../payments/payments.service';
 import {
   ApiTags,
   ApiOperation,
@@ -27,7 +28,10 @@ import {
 @ApiBearerAuth()
 @Controller('bookings')
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
+  constructor(
+    private readonly bookingsService: BookingsService,
+    private readonly paymentsService: PaymentsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new booking' })
@@ -109,7 +113,7 @@ export class BookingsController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Cannot cancel booking (too late or invalid status)',
+    description: 'Cannot cancel booking (invalid status)',
   })
   @ApiResponse({
     status: 404,
@@ -119,8 +123,35 @@ export class BookingsController {
     status: 403,
     description: 'Forbidden - Can only cancel own bookings',
   })
-  cancel(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.bookingsService.cancel(id, user.id, user.role);
+  async cancel(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Body() body?: { refundAmount?: number },
+  ) {
+    const result = await this.bookingsService.cancel(id, user.id, user.role);
+
+    // Process Stripe refund if booking was paid and refundAmount provided
+    let refund = null;
+    const payment = result.paymentTransaction?.status === PaymentStatus.SUCCEEDED
+      ? result.paymentTransaction
+      : null;
+
+    if (body?.refundAmount && body.refundAmount > 0 && payment?.stripePaymentIntentId) {
+      try {
+        const refundResult = await this.paymentsService.refundPayment(user.id, {
+          paymentIntentId: payment.stripePaymentIntentId,
+          amount: body.refundAmount,
+          reason: result.isLateCancellation
+            ? 'Late cancellation - 50% refund'
+            : 'Booking cancelled by customer',
+        }, { skipBookingUpdate: true });
+        refund = refundResult;
+      } catch (error) {
+        console.error('Failed to process refund for cancelled booking:', error);
+      }
+    }
+
+    return { booking: result, refund };
   }
 
   @Post(':id/apply-points')

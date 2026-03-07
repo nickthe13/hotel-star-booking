@@ -140,7 +140,8 @@ export class AuthService {
         }),
         catchError((error: HttpErrorResponse) => {
           this.rateLimiter.recordFailedLogin(sanitizedEmail);
-          const message = error.error?.message || 'Invalid email or password';
+          const raw = error.error?.message;
+          const message = Array.isArray(raw) ? raw.join('. ') : (raw || 'Invalid email or password');
           return throwError(() => new Error(message));
         })
       );
@@ -180,7 +181,8 @@ export class AuthService {
           this.setAuthData(user, response.tokens.accessToken, response.tokens.refreshToken);
         }),
         catchError((error: HttpErrorResponse) => {
-          const message = error.error?.message || 'Registration failed. Please try again.';
+          const raw = error.error?.message;
+          const message = Array.isArray(raw) ? raw.join('. ') : (raw || 'Registration failed. Please try again.');
           return throwError(() => new Error(message));
         })
       );

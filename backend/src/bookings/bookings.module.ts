@@ -3,9 +3,10 @@ import { BookingsService } from './bookings.service';
 import { BookingsController } from './bookings.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
-  imports: [PrismaModule, forwardRef(() => LoyaltyModule)],
+  imports: [PrismaModule, forwardRef(() => LoyaltyModule), PaymentsModule],
   controllers: [BookingsController],
   providers: [BookingsService],
   exports: [BookingsService],

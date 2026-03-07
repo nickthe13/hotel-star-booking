@@ -61,6 +61,7 @@
     @if (currentStep() === 1) {
       <div class="step-panel">
         <h3 class="step-title">Select Your Dates</h3>
+        <p class="step-hint">Tap a date for check-in, then tap another for check-out</p>
         <app-availability-calendar
           [pricePerNight]="pricePerNight()"
           [compact]="true"

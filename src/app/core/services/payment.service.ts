@@ -141,29 +141,26 @@ export class PaymentService {
 
   /**
    * Save payment method
-   * Note: Backend endpoint not yet implemented
    */
-  savePaymentMethod(_paymentMethodId: string, _setAsDefault: boolean = false): Observable<SavedPaymentMethod> {
-    console.warn('savePaymentMethod: Backend endpoint not implemented');
-    return throwError(() => new Error('Saving payment methods is not yet supported'));
+  savePaymentMethod(paymentMethodId: string, setAsDefault: boolean = false): Observable<SavedPaymentMethod> {
+    return this.http.post<SavedPaymentMethod>(`${this.API_URL}/payments/saved-methods`, {
+      paymentMethodId,
+      setAsDefault
+    });
   }
 
   /**
    * Delete payment method
-   * Note: Backend endpoint not yet implemented
    */
-  deletePaymentMethod(_id: string): Observable<void> {
-    console.warn('deletePaymentMethod: Backend endpoint not implemented');
-    return throwError(() => new Error('Deleting payment methods is not yet supported'));
+  deletePaymentMethod(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/payments/saved-methods/${id}`);
   }
 
   /**
    * Set default payment method
-   * Note: Backend endpoint not yet implemented
    */
-  setDefaultPaymentMethod(_id: string): Observable<void> {
-    console.warn('setDefaultPaymentMethod: Backend endpoint not implemented');
-    return throwError(() => new Error('Setting default payment method is not yet supported'));
+  setDefaultPaymentMethod(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/payments/saved-methods/${id}/default`, {});
   }
 
   /**

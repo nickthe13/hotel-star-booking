@@ -260,17 +260,12 @@ export class BookingsService {
       );
     }
 
-    // Check cancellation policy (24 hours before check-in)
+    // Calculate hours until check-in for late cancellation info
     const now = new Date();
     const hoursUntilCheckIn = (booking.checkIn.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const isLateCancellation = hoursUntilCheckIn < 24;
 
-    if (hoursUntilCheckIn < 24 && userRole !== UserRole.ADMIN) {
-      throw new BadRequestException(
-        'Bookings can only be cancelled at least 24 hours before check-in',
-      );
-    }
-
-    return this.prismaService.booking.update({
+    const updatedBooking = await this.prismaService.booking.update({
       where: { id },
       data: {
         status: BookingStatus.CANCELLED,
@@ -281,8 +276,18 @@ export class BookingsService {
             hotel: true,
           },
         },
+        paymentTransaction: true,
       },
     });
+
+    // Reverse loyalty points if any were earned or redeemed
+    try {
+      await this.loyaltyService.reversePointsForBooking(booking.userId, id);
+    } catch (error) {
+      console.error('Failed to reverse loyalty points for cancelled booking:', error);
+    }
+
+    return { ...updatedBooking, isLateCancellation };
   }
 
   /**

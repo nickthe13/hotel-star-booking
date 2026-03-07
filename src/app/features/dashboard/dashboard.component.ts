@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { BookingService } from '../../core/services/booking.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentService } from '../../core/services/payment.service';
+import { LoyaltyService } from '../../core/services/loyalty.service';
 import { Booking, BookingStatus } from '../../core/models/booking.model';
 import { PaymentStatus, RefundResponse } from '../../core/models/payment.model';
 import { LoyaltyCardComponent } from '../../shared/components/loyalty-card/loyalty-card.component';
@@ -59,7 +60,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private bookingService: BookingService,
     public authService: AuthService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private loyaltyService: LoyaltyService
   ) {}
 
   ngOnInit(): void {
@@ -72,7 +74,7 @@ export class DashboardComponent implements OnInit {
 
     this.bookingService.getUserBookings().subscribe({
       next: (bookings) => {
-        this.bookings.set(bookings);
+        this.bookings.set(bookings.filter(b => b.status !== BookingStatus.CANCELLED));
         this.loading.set(false);
       },
       error: (err) => {
@@ -114,11 +116,20 @@ export class DashboardComponent implements OnInit {
           this.refundResult.set(result.refund || null);
 
           const formatted = this.currencyPipe.transform(refundAmount);
-          const refundMessage = this.isWithin24Hours()
+          let refundMessage = this.isWithin24Hours()
             ? `Booking cancelled. 50% refund of ${formatted} processed (late cancellation fee applied).`
             : `Booking cancelled. Full refund of ${formatted} processed.`;
 
+          if (booking.pointsEarned && booking.pointsEarned > 0) {
+            refundMessage += ` ${booking.pointsEarned} earned points reversed.`;
+          }
+          if (booking.pointsRedeemed && booking.pointsRedeemed > 0) {
+            refundMessage += ` ${booking.pointsRedeemed} redeemed points returned.`;
+          }
+
           this.successMessage.set(refundMessage);
+          this.loyaltyService.refreshAccount();
+          this.bookings.set(this.bookings().filter(b => b.id !== bookingId));
           this.loadBookings();
           this.closeCancelModal();
 
@@ -136,8 +147,16 @@ export class DashboardComponent implements OnInit {
       this.bookingService.cancelBooking(bookingId).subscribe({
         next: () => {
           this.cancellingBookingId.set(null);
+
+          let message = 'Booking cancelled successfully!';
+          if (booking.pointsRedeemed && booking.pointsRedeemed > 0) {
+            message += ` ${booking.pointsRedeemed} redeemed points have been returned.`;
+          }
+
+          this.successMessage.set(message);
+          this.loyaltyService.refreshAccount();
+          this.bookings.set(this.bookings().filter(b => b.id !== bookingId));
           this.closeCancelModal();
-          this.successMessage.set('Booking cancelled successfully!');
           this.loadBookings();
 
           setTimeout(() => {
@@ -165,7 +184,8 @@ export class DashboardComponent implements OnInit {
   }
 
   canCancelBooking(booking: Booking): boolean {
-    return booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.PENDING;
+    return booking.status === BookingStatus.CONFIRMED
+      || booking.status === BookingStatus.PENDING_PAYMENT;
   }
 
   getPaymentStatusClass(status?: PaymentStatus): string {

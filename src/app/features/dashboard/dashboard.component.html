@@ -229,6 +229,28 @@
               <p>This booking has not been paid yet. No refund is required.</p>
             </div>
           }
+
+          <!-- Loyalty Points Impact -->
+          @if ((booking.pointsEarned && booking.pointsEarned > 0) ||
+               (booking.pointsRedeemed && booking.pointsRedeemed > 0)) {
+            <div class="loyalty-impact">
+              <h4 class="loyalty-impact__title">Loyalty Points Impact</h4>
+              <div class="loyalty-impact__items">
+                @if (booking.pointsEarned && booking.pointsEarned > 0) {
+                  <div class="loyalty-impact__row loyalty-impact__row--deduct">
+                    <span>Points earned will be reversed</span>
+                    <span>-{{ booking.pointsEarned }} pts</span>
+                  </div>
+                }
+                @if (booking.pointsRedeemed && booking.pointsRedeemed > 0) {
+                  <div class="loyalty-impact__row loyalty-impact__row--return">
+                    <span>Redeemed points will be returned</span>
+                    <span>+{{ booking.pointsRedeemed }} pts</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
         }
 
         <p class="modal__warning">This action cannot be undone.</p>

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, ContentChild, ElementRef, AfterContentInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ContentChild, ElementRef, AfterContentInit, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.scss'
 })
-export class ModalComponent implements AfterContentInit {
+export class ModalComponent implements AfterContentInit, OnChanges, OnDestroy {
   @Input({ required: true }) title!: string;
   @Input() isOpen: boolean = false;
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
@@ -24,6 +24,16 @@ export class ModalComponent implements AfterContentInit {
 
   ngAfterContentInit(): void {
     this.hasFooterContent = !!this.footerContent;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isOpen']) {
+      document.body.style.overflow = this.isOpen ? 'hidden' : '';
+    }
+  }
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
   }
 
   close(): void {

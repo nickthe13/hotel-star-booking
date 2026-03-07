@@ -307,9 +307,17 @@
             <p class="location-text">
               📍 {{ hotel()!.location }}, {{ hotel()!.city }}, {{ hotel()!.country }}
             </p>
-            <div class="map-placeholder">
-              <p>Map view coming soon</p>
-            </div>
+            @if (hotel()!.latitude != null && hotel()!.longitude != null) {
+              <app-hotel-map
+                [latitude]="hotel()!.latitude!"
+                [longitude]="hotel()!.longitude!"
+                [hotelName]="hotel()!.name"
+              ></app-hotel-map>
+            } @else {
+              <div class="map-placeholder">
+                <p>Map not available for this location</p>
+              </div>
+            }
           </section>
         </div>
       </div>

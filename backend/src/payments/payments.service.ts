@@ -69,6 +69,7 @@ export class PaymentsService {
         userId,
         hotelName: booking.room.hotel.name,
         roomType: booking.room.type,
+        savePaymentMethod: dto.savePaymentMethod ? 'true' : 'false',
       },
       automatic_payment_methods: {
         enabled: true,
@@ -253,7 +254,7 @@ export class PaymentsService {
   /**
    * Process a refund
    */
-  async refundPayment(userId: string, dto: RefundPaymentDto) {
+  async refundPayment(userId: string, dto: RefundPaymentDto, options?: { skipBookingUpdate?: boolean }) {
     // Find payment
     const payment = await this.prisma.paymentTransaction.findFirst({
       where: {
@@ -305,13 +306,15 @@ export class PaymentsService {
       },
     });
 
-    // Update booking status
-    await this.prisma.booking.update({
-      where: { id: payment.bookingId },
-      data: {
-        status: 'CANCELLED',
-      },
-    });
+    // Update booking status (skip if already handled by BookingsService.cancel())
+    if (!options?.skipBookingUpdate) {
+      await this.prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: {
+          status: 'CANCELLED',
+        },
+      });
+    }
 
     // Send cancellation email
     this.emailService.sendCancellationConfirmation(payment.booking.user.email, {

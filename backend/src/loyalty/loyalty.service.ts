@@ -334,6 +334,98 @@ export class LoyaltyService {
     return transaction;
   }
 
+  async reversePointsForBooking(
+    userId: string,
+    bookingId: string,
+  ): Promise<{ pointsDeducted: number; pointsReturned: number }> {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      return { pointsDeducted: 0, pointsReturned: 0 };
+    }
+
+    const pointsEarned = booking.pointsEarned || 0;
+    const pointsRedeemed = booking.pointsRedeemed || 0;
+
+    if (pointsEarned === 0 && pointsRedeemed === 0) {
+      return { pointsDeducted: 0, pointsReturned: 0 };
+    }
+
+    const account = await this.getOrCreateAccount(userId);
+
+    // Clamp so currentPoints never goes below 0
+    const netChange = -pointsEarned + pointsRedeemed;
+    const newBalance = Math.max(0, account.currentPoints + netChange);
+    const actualDeducted = Math.min(pointsEarned, account.currentPoints + pointsRedeemed);
+
+    const operations: any[] = [];
+
+    if (pointsEarned > 0) {
+      operations.push(
+        this.prisma.loyaltyTransaction.create({
+          data: {
+            loyaltyAccountId: account.id,
+            bookingId,
+            type: LoyaltyTransactionType.ADJUSTMENT,
+            points: -actualDeducted,
+            description: `Points reversed due to booking cancellation`,
+            balanceAfter: pointsRedeemed > 0
+              ? newBalance - pointsRedeemed
+              : newBalance,
+            metadata: { reason: 'booking_cancellation' },
+          },
+        }),
+      );
+    }
+
+    if (pointsRedeemed > 0) {
+      operations.push(
+        this.prisma.loyaltyTransaction.create({
+          data: {
+            loyaltyAccountId: account.id,
+            bookingId,
+            type: LoyaltyTransactionType.ADJUSTMENT,
+            points: pointsRedeemed,
+            description: `Redeemed points returned due to booking cancellation`,
+            balanceAfter: newBalance,
+            metadata: { reason: 'booking_cancellation' },
+          },
+        }),
+      );
+    }
+
+    // Calculate amount that was paid (used for lifetimeSpending reversal)
+    const amountPaid = booking.totalPrice - (booking.discountFromPoints || 0);
+
+    operations.push(
+      this.prisma.loyaltyAccount.update({
+        where: { id: account.id },
+        data: {
+          currentPoints: newBalance,
+          lifetimePoints: { decrement: actualDeducted },
+          lifetimeSpending: { decrement: amountPaid },
+        },
+      }),
+      this.prisma.booking.update({
+        where: { id: bookingId },
+        data: {
+          pointsEarned: 0,
+          pointsRedeemed: 0,
+          discountFromPoints: 0,
+        },
+      }),
+    );
+
+    await this.prisma.$transaction(operations);
+
+    // Check if tier should change due to reduced spending
+    await this.updateTierIfNeeded(userId);
+
+    return { pointsDeducted: actualDeducted, pointsReturned: pointsRedeemed };
+  }
+
   async getTransactionHistory(
     userId: string,
     page = 1,

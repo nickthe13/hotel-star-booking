@@ -730,6 +730,45 @@
   }
 }
 
+.loyalty-impact {
+  background: rgba(#8b5cf6, 0.05);
+  border: 1px solid rgba(#8b5cf6, 0.2);
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0 0 $spacing-md 0;
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: $font-size-sm;
+    padding: $spacing-xs 0;
+
+    &--deduct span:last-child {
+      color: $error;
+      font-weight: $font-weight-semibold;
+    }
+
+    &--return span:last-child {
+      color: $success;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
 // Button spinner for processing state
 .btn-spinner {
   display: inline-block;

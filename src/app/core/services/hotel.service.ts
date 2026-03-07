@@ -61,6 +61,8 @@ export class HotelService {
       location: apiHotel.address || '',
       city: apiHotel.city,
       country: apiHotel.country,
+      latitude: apiHotel.latitude ?? null,
+      longitude: apiHotel.longitude ?? null,
       starRating: Math.round(apiHotel.rating) || 4,
       images: apiHotel.images || [],
       amenities: apiHotel.amenities || [],
@@ -122,19 +124,28 @@ export class HotelService {
   }
 
   getHotelById(id: string): Observable<Hotel | undefined> {
-    this.loading.set(true);
+    // Check cache first
+    const cachedHotel = this.hotels().find(h => h.id === id);
+    if (cachedHotel) {
+      return of(cachedHotel);
+    }
 
+    // Not in cache — fetch from API
+    this.loading.set(true);
     return this.http.get<any>(`${this.API_URL}/hotels/${id}`).pipe(
       map(apiHotel => {
         this.loading.set(false);
-        return this.mapHotelFromApi(apiHotel);
+        const hotel = this.mapHotelFromApi(apiHotel);
+        // Add to cache
+        if (hotel) {
+          this.hotels.update(hotels => [...hotels, hotel]);
+        }
+        return hotel;
       }),
       catchError((error: HttpErrorResponse) => {
         console.error('Error fetching hotel:', error);
         this.loading.set(false);
-        // Try to find in cached hotels
-        const cachedHotel = this.hotels().find(h => h.id === id);
-        return of(cachedHotel);
+        return of(undefined);
       })
     );
   }

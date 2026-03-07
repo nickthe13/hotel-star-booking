@@ -1,0 +1,17 @@
+@use '../../../../assets/styles' as *;
+
+:host {
+  display: block;
+}
+
+.hotel-map__container {
+  width: 100%;
+  height: 350px;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  z-index: 0;
+
+  @include respond-to('mobile') {
+    height: 250px;
+  }
+}

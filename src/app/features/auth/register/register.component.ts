@@ -24,7 +24,7 @@ export class RegisterComponent {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)]],
       confirmPassword: ['', [Validators.required]]
     }, {
       validators: passwordMatchValidator
@@ -41,7 +41,7 @@ export class RegisterComponent {
       this.authService.register(registerData).subscribe({
         next: () => {
           this.loading.set(false);
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/home']);
         },
         error: (err) => {
           this.loading.set(false);

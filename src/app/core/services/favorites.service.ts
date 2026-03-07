@@ -21,6 +21,10 @@ export class FavoritesService {
   // Loading state
   loading = signal<boolean>(false);
 
+  // Cache management
+  private cacheTimestamp = 0;
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
   // Computed values
   readonly favorites = computed(() => this.favoriteHotels());
   readonly favoritesCount = computed(() => this.favoriteIds().size);
@@ -50,11 +54,31 @@ export class FavoritesService {
   }
 
   /**
+   * Check if the favorites cache is still valid
+   */
+  private isCacheValid(): boolean {
+    return this.favoriteIds().size > 0 &&
+           (Date.now() - this.cacheTimestamp) < this.CACHE_DURATION;
+  }
+
+  /**
+   * Invalidate the favorites cache
+   */
+  invalidateCache(): void {
+    this.cacheTimestamp = 0;
+  }
+
+  /**
    * Load user's favorites from the API
    */
-  loadFavorites(): Observable<Hotel[]> {
+  loadFavorites(forceRefresh = false): Observable<Hotel[]> {
     if (!this.authService.isAuthenticated()) {
       return of([]);
+    }
+
+    // Return cached data if valid
+    if (!forceRefresh && this.isCacheValid()) {
+      return of(this.favoriteHotels());
     }
 
     this.loading.set(true);
@@ -69,6 +93,7 @@ export class FavoritesService {
       tap(hotels => {
         this.favoriteHotels.set(hotels);
         this.favoriteIds.set(new Set(hotels.map(h => h.id)));
+        this.cacheTimestamp = Date.now();
         this.loading.set(false);
       }),
       catchError((error: HttpErrorResponse) => {
@@ -159,13 +184,14 @@ export class FavoritesService {
   clearFavorites(): void {
     this.favoriteIds.set(new Set());
     this.favoriteHotels.set([]);
+    this.cacheTimestamp = 0;
   }
 
   /**
    * Refresh favorites from server
    */
   refreshFavorites(): void {
-    this.loadFavorites().subscribe();
+    this.loadFavorites(true).subscribe();
   }
 
   private mapHotelFromApi(apiHotel: any): Hotel {

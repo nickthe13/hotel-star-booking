@@ -72,6 +72,8 @@ async function main() {
     address: string;
     city: string;
     country: string;
+    latitude: number;
+    longitude: number;
     rating: number;
     images: string[];
     amenities: string[];
@@ -83,6 +85,8 @@ async function main() {
       address: 'Oia Village',
       city: 'Santorini',
       country: 'Greece',
+      latitude: 36.4618,
+      longitude: 25.3753,
       rating: 4.9,
       images: [
         'https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800',
@@ -102,6 +106,8 @@ async function main() {
       address: 'Syntagma Square',
       city: 'Athens',
       country: 'Greece',
+      latitude: 37.9755,
+      longitude: 23.7348,
       rating: 4.7,
       images: [
         'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800',
@@ -121,6 +127,8 @@ async function main() {
       address: 'Paradise Beach',
       city: 'Mykonos',
       country: 'Greece',
+      latitude: 37.4050,
+      longitude: 25.3570,
       rating: 4.8,
       images: [
         'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
@@ -140,6 +148,8 @@ async function main() {
       address: 'Elounda Bay',
       city: 'Crete',
       country: 'Greece',
+      latitude: 35.2580,
+      longitude: 25.7340,
       rating: 4.6,
       images: [
         'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800',
@@ -159,6 +169,8 @@ async function main() {
       address: 'Old Town',
       city: 'Rhodes',
       country: 'Greece',
+      latitude: 36.4441,
+      longitude: 28.2242,
       rating: 4.4,
       images: [
         'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800',
@@ -178,6 +190,8 @@ async function main() {
       address: 'City Center',
       city: 'Thessaloniki',
       country: 'Greece',
+      latitude: 40.6401,
+      longitude: 22.9444,
       rating: 4.5,
       images: [
         'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800',
@@ -197,6 +211,8 @@ async function main() {
       address: 'Paleokastritsa',
       city: 'Corfu',
       country: 'Greece',
+      latitude: 39.6680,
+      longitude: 19.7070,
       rating: 4.7,
       images: [
         'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
@@ -216,6 +232,8 @@ async function main() {
       address: 'Navagio Beach',
       city: 'Zakynthos',
       country: 'Greece',
+      latitude: 37.8591,
+      longitude: 20.6244,
       rating: 4.8,
       images: [
         'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800',
@@ -235,6 +253,8 @@ async function main() {
       address: 'Old Town',
       city: 'Nafplio',
       country: 'Greece',
+      latitude: 37.5673,
+      longitude: 22.8016,
       rating: 4.6,
       images: [
         'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800',
@@ -254,6 +274,8 @@ async function main() {
       address: 'Naoussa',
       city: 'Paros',
       country: 'Greece',
+      latitude: 37.1224,
+      longitude: 25.2368,
       rating: 4.7,
       images: [
         'https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800',
@@ -273,6 +295,8 @@ async function main() {
       address: 'Kalambaka',
       city: 'Meteora',
       country: 'Greece',
+      latitude: 39.7139,
+      longitude: 21.6276,
       rating: 4.5,
       images: [
         'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800',
@@ -292,6 +316,8 @@ async function main() {
       address: 'Delphi',
       city: 'Delphi',
       country: 'Greece',
+      latitude: 38.4824,
+      longitude: 22.5010,
       rating: 4.6,
       images: [
         'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800',

@@ -12,8 +12,19 @@ import { PaymentStatus } from '../models/payment.model';
 export class BookingService {
   private readonly API_URL = environment.apiUrl;
   loading = signal<boolean>(false);
+  private bookingsCache = signal<Booking[]>([]);
+  private cacheTimestamp = 0;
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   constructor(private http: HttpClient) {}
+
+  private isCacheValid(): boolean {
+    return this.bookingsCache().length > 0 && (Date.now() - this.cacheTimestamp) < this.CACHE_DURATION;
+  }
+
+  invalidateCache(): void {
+    this.cacheTimestamp = 0;
+  }
 
   private mapBookingFromApi(apiBooking: any): Booking {
     return {
@@ -62,6 +73,7 @@ export class BookingService {
     }
 
     return this.http.post<any>(`${this.API_URL}/bookings`, createDto).pipe(
+      tap(() => this.invalidateCache()),
       map(response => {
         this.loading.set(false);
         const booking = this.mapBookingFromApi(response);
@@ -82,13 +94,20 @@ export class BookingService {
     );
   }
 
-  getUserBookings(): Observable<Booking[]> {
+  getUserBookings(forceRefresh = false): Observable<Booking[]> {
+    if (!forceRefresh && this.isCacheValid()) {
+      return of(this.bookingsCache());
+    }
+
     this.loading.set(true);
 
     return this.http.get<any[]>(`${this.API_URL}/bookings`).pipe(
       map(response => {
         this.loading.set(false);
-        return response.map(b => this.mapBookingFromApi(b));
+        const bookings = response.map(b => this.mapBookingFromApi(b));
+        this.bookingsCache.set(bookings);
+        this.cacheTimestamp = Date.now();
+        return bookings;
       }),
       catchError((error: HttpErrorResponse) => {
         this.loading.set(false);
@@ -110,6 +129,7 @@ export class BookingService {
 
   cancelBooking(id: string): Observable<void> {
     return this.http.post<any>(`${this.API_URL}/bookings/${id}/cancel`, {}).pipe(
+      tap(() => this.invalidateCache()),
       map(() => undefined),
       catchError((error: HttpErrorResponse) => {
         const message = error.error?.message || 'Failed to cancel booking';
@@ -122,6 +142,7 @@ export class BookingService {
     return this.http.post<any>(`${this.API_URL}/bookings/${id}/cancel`, {
       refundAmount
     }).pipe(
+      tap(() => this.invalidateCache()),
       map(response => {
         const booking = this.mapBookingFromApi(response.booking || response);
 
@@ -151,6 +172,7 @@ export class BookingService {
     if (updates.specialRequests) updateDto.specialRequests = updates.specialRequests;
 
     return this.http.patch<any>(`${this.API_URL}/bookings/${id}`, updateDto).pipe(
+      tap(() => this.invalidateCache()),
       map(response => this.mapBookingFromApi(response)),
       catchError((error: HttpErrorResponse) => {
         const message = error.error?.message || 'Failed to update booking';
@@ -175,6 +197,7 @@ export class BookingService {
         break;
       default:
         return this.http.patch<any>(`${this.API_URL}/bookings/${id}`, { status }).pipe(
+          tap(() => this.invalidateCache()),
           map(() => undefined),
           catchError((error: HttpErrorResponse) => {
             const message = error.error?.message || 'Failed to update booking status';
@@ -184,6 +207,7 @@ export class BookingService {
     }
 
     return this.http.post<any>(endpoint, {}).pipe(
+      tap(() => this.invalidateCache()),
       map(() => undefined),
       catchError((error: HttpErrorResponse) => {
         const message = error.error?.message || 'Failed to update booking status';
@@ -204,6 +228,7 @@ export class BookingService {
 
   removeBooking(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/bookings/${id}`).pipe(
+      tap(() => this.invalidateCache()),
       catchError((error: HttpErrorResponse) => {
         const message = error.error?.message || 'Failed to delete booking';
         return throwError(() => new Error(message));

@@ -12,10 +12,11 @@ import { ReviewFormComponent, ReviewFormData } from '../../shared/components/rev
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { BookingStepperComponent, BookingDetails } from '../../shared/components/booking-stepper/booking-stepper.component';
 import { PaymentModalComponent, PaymentModalData } from '../../shared/components/payment-modal/payment-modal.component';
+import { HotelMapComponent } from '../../shared/components/hotel-map/hotel-map.component';
 
 @Component({
   selector: 'app-hotel-details',
-  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent, BookingStepperComponent, PaymentModalComponent],
+  imports: [CommonModule, RouterLink, LoaderComponent, ReviewListComponent, ReviewFormComponent, ModalComponent, BookingStepperComponent, PaymentModalComponent, HotelMapComponent],
   templateUrl: './hotel-details.component.html',
   styleUrl: './hotel-details.component.scss'
 })
@@ -248,6 +249,10 @@ export class HotelDetailsComponent implements OnInit, OnDestroy {
       this.selectedRoom.set(undefined);
     } else {
       this.selectedRoom.set(room);
+      // Scroll to booking card after brief delay for visual feedback
+      setTimeout(() => {
+        this.bookingCardRef?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
     }
   }
 

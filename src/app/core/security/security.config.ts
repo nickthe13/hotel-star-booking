@@ -26,7 +26,7 @@ export const SecurityConfig = {
       requireUppercase: true,
       requireLowercase: true,
       requireNumbers: true,
-      requireSpecialChars: false
+      requireSpecialChars: true
     }
   },
 

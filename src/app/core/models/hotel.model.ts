@@ -5,6 +5,8 @@ export interface Hotel {
   location: string;
   city: string;
   country: string;
+  latitude?: number | null;
+  longitude?: number | null;
   starRating: number;
   images: string[];
   amenities: string[];

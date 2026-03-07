@@ -43,6 +43,7 @@ export class PaymentModalComponent {
   processingPayment = signal<boolean>(false);
   loading = signal<boolean>(false);
   error = signal<string>('');
+  saveCard = signal<boolean>(false);
 
   // Loyalty
   pointsToRedeem = signal<number>(0);
@@ -159,7 +160,7 @@ export class PaymentModalComponent {
       bookingId: bookingId,
       amount: this.finalPrice() * 100, // Convert to cents
       currency: 'usd',
-      savePaymentMethod: false
+      savePaymentMethod: this.saveCard()
     };
 
     console.log('Creating payment intent with:', paymentRequest);
@@ -210,6 +211,10 @@ export class PaymentModalComponent {
     });
   }
 
+  onSavePaymentMethodChange(save: boolean): void {
+    this.saveCard.set(save);
+  }
+
   onPaymentError(errorMessage: string): void {
     this.error.set(errorMessage);
     this.processingPayment.set(false);
@@ -234,6 +239,7 @@ export class PaymentModalComponent {
     this.pointsToRedeem.set(0);
     this.pointsDiscount.set(0);
     this.pendingBookingId.set('');
+    this.saveCard.set(false);
 
     this.closeModal.emit();
   }
