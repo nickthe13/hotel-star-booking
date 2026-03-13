@@ -5,7 +5,7 @@
       <p class="subtitle">Manage your saved cards for faster checkout</p>
     </div>
     <button (click)="openAddMethodModal()" class="btn btn--primary">
-      <span>➕</span>
+      <span>+</span>
       <span>Add Payment Method</span>
     </button>
   </div>
@@ -160,20 +160,40 @@
       <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Add Payment Method</h3>
-          <button (click)="closeAddMethodModal()" class="modal-close">&times;</button>
+          <button (click)="closeAddMethodModal()" class="modal-close" [disabled]="addingCard()">&times;</button>
         </div>
 
         <div class="modal-body">
-          <p class="info-text">This feature requires Stripe integration to add new payment methods. In a production environment, a Stripe Elements form would appear here.</p>
-          <div class="alert alert--info">
-            <span>ℹ️</span>
-            <span>New payment methods can be added during checkout and saved for future use.</span>
+          <p class="info-text">Enter your card details below to save a new payment method.</p>
+
+          @if (addCardError()) {
+            <div class="alert alert--error" style="margin-bottom: 1rem;">
+              <span>⚠️</span>
+              <span>{{ addCardError() }}</span>
+            </div>
+          }
+
+          <div class="stripe-card-container">
+            <label class="card-label">Card Details</label>
+            <div #addCardElement class="stripe-card-element"></div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button (click)="closeAddMethodModal()" class="btn btn--secondary">
-            Close
+          <button (click)="closeAddMethodModal()" class="btn btn--secondary" [disabled]="addingCard()">
+            Cancel
+          </button>
+          <button
+            (click)="onAddCard()"
+            class="btn btn--primary"
+            [disabled]="addingCard() || !cardComplete()"
+          >
+            @if (addingCard()) {
+              <span class="spinner-sm"></span>
+              <span>Saving...</span>
+            } @else {
+              <span>Save Card</span>
+            }
           </button>
         </div>
       </div>

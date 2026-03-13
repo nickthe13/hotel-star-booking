@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, signal, computed } from '@angul
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Hotel, Room, DateRange } from '../../../core/models';
+import { Booking } from '../../../core/models/booking.model';
 import { AvailabilityCalendarComponent } from '../availability-calendar/availability-calendar.component';
 import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
@@ -25,6 +26,7 @@ export interface BookingDetails {
 export class BookingStepperComponent {
   @Input() hotel!: Hotel;
   @Input() selectedRoom: Room | undefined;
+  @Input() roomBookings: Booking[] = [];
   @Input() checkIn: string | null = null;
   @Input() checkOut: string | null = null;
 

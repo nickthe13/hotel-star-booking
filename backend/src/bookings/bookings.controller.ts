@@ -14,6 +14,7 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { UserRole, PaymentStatus } from '@prisma/client';
 import { PaymentsService } from '../payments/payments.service';
 import {
@@ -59,6 +60,18 @@ export class BookingsController {
   })
   findAll(@CurrentUser() user: any) {
     return this.bookingsService.findAll(user.id, user.role);
+  }
+
+  @Public()
+  @Get('room/:roomId')
+  @ApiOperation({ summary: 'Get active bookings for a room (for availability calendar)' })
+  @ApiParam({ name: 'roomId', description: 'Room ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Room bookings retrieved successfully',
+  })
+  getRoomBookings(@Param('roomId') roomId: string) {
+    return this.bookingsService.getRoomBookings(roomId);
   }
 
   @Get(':id')

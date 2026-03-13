@@ -1,0 +1,84 @@
+@use '../../../assets/styles' as *;
+
+.privacy-page {
+  min-height: calc(100vh - 64px - 300px);
+  padding: $spacing-3xl 0;
+  background: linear-gradient(135deg, $primary-50 0%, $primary-100 100%);
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg $spacing-md;
+  }
+}
+
+.privacy-header {
+  text-align: center;
+  margin-bottom: $spacing-3xl;
+
+  @include respond-to('mobile') {
+    margin-bottom: $spacing-xl;
+  }
+
+  &__title {
+    font-size: $font-size-4xl;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+
+    @include respond-to('mobile') {
+      font-size: $font-size-2xl;
+    }
+  }
+
+  &__date {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+}
+
+.privacy-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: $radius-xl;
+  padding: $spacing-3xl;
+  box-shadow: $shadow-lg;
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg;
+    border-radius: $radius-lg;
+  }
+}
+
+.privacy-section {
+  margin-bottom: $spacing-xl;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+    font-weight: 600;
+
+    @include respond-to('mobile') {
+      font-size: $font-size-lg;
+    }
+  }
+
+  &__text {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    line-height: 1.7;
+  }
+}
+
+.privacy-link {
+  color: $primary-600;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

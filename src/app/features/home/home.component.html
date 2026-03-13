@@ -1,18 +1,50 @@
-<div class="hero">
-  <div class="hero__overlay"></div>
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero">
+  <div class="hero__bg">
+    <div class="hero__orb hero__orb--1"></div>
+    <div class="hero__orb hero__orb--2"></div>
+    <div class="hero__orb hero__orb--3"></div>
+  </div>
+
   <div class="hero__content">
-    <h1 class="hero__title">Find Your Perfect Stay</h1>
+    <span class="hero__badge">Your Next Adventure Awaits</span>
+    <h1 class="hero__title">Find Your<br/><span class="hero__title--accent">Perfect Stay</span></h1>
     <p class="hero__subtitle">
-      Discover and book amazing hotels around the world at the best prices
+      Discover and book amazing hotels around the world.<br/>
+      Best prices. Trusted reviews. Seamless booking.
     </p>
     <div class="hero__cta">
-      <a routerLink="/hotels" class="btn btn--primary btn--large">Browse Hotels</a>
+      <a routerLink="/hotels" class="btn btn--primary btn--large">
+        Explore Hotels
+        <span class="btn__arrow">&rarr;</span>
+      </a>
     </div>
   </div>
-</div>
 
-<!-- Loyalty Rewards Banner -->
-<section class="loyalty-banner">
+  <button class="hero__scroll-indicator" (click)="scrollToContent()" type="button" aria-label="Scroll down">
+    <div class="scroll-mouse">
+      <div class="scroll-mouse__wheel"></div>
+    </div>
+    <span class="scroll-text">Scroll Down</span>
+  </button>
+</section>
+
+<!-- ═══════════════════ STATS ═══════════════════ -->
+<section class="stats" #statsSection>
+  <div class="container">
+    <div class="stats__grid">
+      @for (stat of stats(); track stat.label) {
+        <div class="stat-item" appScrollReveal="fade-up" [revealDelay]="$index * 150">
+          <div class="stat-item__value">{{ formatStatValue(stat) }}</div>
+          <div class="stat-item__label">{{ stat.label }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ LOYALTY BANNER ═══════════════════ -->
+<section class="loyalty-banner" appScrollReveal="fade-up">
   <div class="container">
     <div class="loyalty-banner__content">
       <div class="loyalty-banner__icon">⭐</div>
@@ -38,44 +70,165 @@
   </div>
 </section>
 
+<!-- ═══════════════════ FEATURES ═══════════════════ -->
 <section class="features">
   <div class="container">
-    <h2 class="section-title">Why Choose Us</h2>
+    <h2 class="section-title" appScrollReveal="fade-up">Why Choose Us</h2>
+    <p class="section-subtitle" appScrollReveal="fade-up" [revealDelay]="100">
+      Everything you need for the perfect trip, all in one place
+    </p>
     <div class="features__grid">
-      <div class="feature-card">
-        <div class="feature-card__icon">🏨</div>
+      <div class="feature-card" appScrollReveal="fade-up" [revealDelay]="0">
+        <div class="feature-card__icon-wrap feature-card__icon-wrap--blue">
+          <span>🏨</span>
+        </div>
         <h3 class="feature-card__title">Best Hotels</h3>
         <p class="feature-card__text">
-          Curated selection of top-rated hotels worldwide
+          Curated selection of top-rated hotels worldwide, handpicked for quality and comfort
         </p>
       </div>
-      <div class="feature-card">
-        <div class="feature-card__icon">💰</div>
+      <div class="feature-card" appScrollReveal="fade-up" [revealDelay]="150">
+        <div class="feature-card__icon-wrap feature-card__icon-wrap--green">
+          <span>💰</span>
+        </div>
         <h3 class="feature-card__title">Best Prices</h3>
-        <p class="feature-card__text">Guaranteed lowest prices and exclusive deals</p>
+        <p class="feature-card__text">
+          Guaranteed lowest prices and exclusive deals you won't find anywhere else
+        </p>
       </div>
-      <div class="feature-card">
-        <div class="feature-card__icon">⭐</div>
+      <div class="feature-card" appScrollReveal="fade-up" [revealDelay]="300">
+        <div class="feature-card__icon-wrap feature-card__icon-wrap--amber">
+          <span>⭐</span>
+        </div>
         <h3 class="feature-card__title">Trusted Reviews</h3>
         <p class="feature-card__text">
-          Real reviews from verified guests to help you choose
+          Real reviews from verified guests to help you make the right choice
         </p>
       </div>
-      <div class="feature-card">
-        <div class="feature-card__icon">🔒</div>
+      <div class="feature-card" appScrollReveal="fade-up" [revealDelay]="450">
+        <div class="feature-card__icon-wrap feature-card__icon-wrap--purple">
+          <span>🔒</span>
+        </div>
         <h3 class="feature-card__title">Secure Booking</h3>
-        <p class="feature-card__text">Safe and secure payment processing</p>
+        <p class="feature-card__text">
+          Safe and secure payment processing powered by industry-leading Stripe
+        </p>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ═══════════════════ DESTINATIONS ═══════════════════ -->
+<section class="destinations">
+  <div class="container">
+    <h2 class="section-title" appScrollReveal="fade-up">Popular Destinations</h2>
+    <p class="section-subtitle" appScrollReveal="fade-up" [revealDelay]="100">
+      Explore breathtaking locations loved by travelers worldwide
+    </p>
+    <div class="destinations__grid">
+      <a routerLink="/hotels" class="destination-card" appScrollReveal="fade-up" [revealDelay]="0">
+        <img
+          src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600&h=400&fit=crop"
+          alt="Santorini, Greece"
+          class="destination-card__img"
+          loading="lazy"
+        />
+        <div class="destination-card__overlay">
+          <h3 class="destination-card__name">Santorini</h3>
+          <span class="destination-card__country">Greece</span>
+        </div>
+      </a>
+      <a routerLink="/hotels" class="destination-card" appScrollReveal="fade-up" [revealDelay]="150">
+        <img
+          src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=400&fit=crop"
+          alt="Paris, France"
+          class="destination-card__img"
+          loading="lazy"
+        />
+        <div class="destination-card__overlay">
+          <h3 class="destination-card__name">Paris</h3>
+          <span class="destination-card__country">France</span>
+        </div>
+      </a>
+      <a routerLink="/hotels" class="destination-card" appScrollReveal="fade-up" [revealDelay]="300">
+        <img
+          src="https://images.unsplash.com/photo-1566679056462-2075774c8c07?w=600&h=400&fit=crop"
+          alt="Meteora, Greece"
+          class="destination-card__img"
+          loading="lazy"
+        />
+        <div class="destination-card__overlay">
+          <h3 class="destination-card__name">Meteora</h3>
+          <span class="destination-card__country">Greece</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ TESTIMONIALS ═══════════════════ -->
+<section class="testimonials">
+  <div class="container">
+    <h2 class="section-title" appScrollReveal="fade-up">What Our Guests Say</h2>
+    <p class="section-subtitle" appScrollReveal="fade-up" [revealDelay]="100">
+      Don't just take our word for it
+    </p>
+    <div class="testimonials__grid">
+      <div class="testimonial-card" appScrollReveal="fade-up" [revealDelay]="0">
+        <div class="testimonial-card__stars">★★★★★</div>
+        <p class="testimonial-card__quote">
+          "Absolutely amazing experience! The booking process was seamless and the hotel exceeded all our expectations. Will definitely use again."
+        </p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar">SM</div>
+          <div>
+            <div class="testimonial-card__name">Sarah M.</div>
+            <div class="testimonial-card__trip">Trip to Santorini</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card" appScrollReveal="fade-up" [revealDelay]="150">
+        <div class="testimonial-card__stars">★★★★★</div>
+        <p class="testimonial-card__quote">
+          "Found an incredible deal on a 5-star hotel in Paris. The loyalty points program is a fantastic bonus. Highly recommend!"
+        </p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar">JD</div>
+          <div>
+            <div class="testimonial-card__name">James D.</div>
+            <div class="testimonial-card__trip">Trip to Paris</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card" appScrollReveal="fade-up" [revealDelay]="300">
+        <div class="testimonial-card__stars">★★★★★</div>
+        <p class="testimonial-card__quote">
+          "The best hotel booking platform I've used. Great prices, beautiful properties, and the customer service is top-notch."
+        </p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar">EK</div>
+          <div>
+            <div class="testimonial-card__name">Elena K.</div>
+            <div class="testimonial-card__trip">Trip to Meteora</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CTA ═══════════════════ -->
 <section class="cta-section">
   <div class="container">
-    <h2 class="cta-section__title">Ready to Start Your Journey?</h2>
-    <p class="cta-section__text">
-      Join thousands of happy travelers who found their perfect accommodation
-    </p>
-    <a routerLink="/hotels" class="btn btn--primary btn--large">Explore Hotels Now</a>
+    <div class="cta-section__inner" appScrollReveal="scale-up">
+      <h2 class="cta-section__title">Ready to Start Your Journey?</h2>
+      <p class="cta-section__text">
+        Join thousands of happy travelers who found their perfect accommodation
+      </p>
+      <a routerLink="/hotels" class="btn btn--primary btn--large">
+        Explore Hotels Now
+        <span class="btn__arrow">&rarr;</span>
+      </a>
+    </div>
   </div>
 </section>

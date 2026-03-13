@@ -31,11 +31,14 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
 
   isSelectingCheckOut = signal<boolean>(false);
 
+  // Mirror @Input bookings as a signal so computed() tracks changes
+  private bookingsSignal = signal<Booking[]>([]);
+
   calendarDays = computed(() => {
     return this.availabilityService.generateCalendarMonth(
       this.currentYear(),
       this.currentMonth(),
-      this.bookings,
+      this.bookingsSignal(),
       { checkIn: this.checkIn(), checkOut: this.checkOut() },
       this.pricePerNight
     );
@@ -74,6 +77,9 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['bookings']) {
+      this.bookingsSignal.set(this.bookings);
+    }
     if (changes['initialCheckIn'] && this.initialCheckIn) {
       this.checkIn.set(this.initialCheckIn);
       // Navigate to the month of check-in date
@@ -135,7 +141,7 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
         this.checkOut.set(null);
       } else {
         // Check if there are any booked dates in the range
-        if (this.availabilityService.hasBookedDatesInRange(this.checkIn()!, dateStr, this.bookings)) {
+        if (this.availabilityService.hasBookedDatesInRange(this.checkIn()!, dateStr, this.bookingsSignal())) {
           // Can't select this range, restart
           this.checkIn.set(dateStr);
           this.checkOut.set(null);

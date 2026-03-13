@@ -5,7 +5,9 @@ import { HotelService } from '../../core/services/hotel.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReviewService } from '../../core/services/review.service';
 import { FavoritesService } from '../../core/services/favorites.service';
+import { BookingService } from '../../core/services/booking.service';
 import { Hotel, Review, DateRange, Room } from '../../core/models';
+import { Booking } from '../../core/models/booking.model';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ReviewListComponent } from '../../shared/components/review-list/review-list.component';
 import { ReviewFormComponent, ReviewFormData } from '../../shared/components/review-form/review-form.component';
@@ -51,6 +53,7 @@ export class HotelDetailsComponent implements OnInit, OnDestroy {
 
   // Room Selection
   selectedRoom = signal<Room | undefined>(undefined);
+  roomBookings = signal<Booking[]>([]);
 
   // Payment Modal
   showPaymentModal = signal<boolean>(false);
@@ -61,6 +64,7 @@ export class HotelDetailsComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     private reviewService: ReviewService,
     private favoritesService: FavoritesService,
+    private bookingService: BookingService,
     private router: Router
   ) {}
 
@@ -247,8 +251,14 @@ export class HotelDetailsComponent implements OnInit, OnDestroy {
     // Toggle selection if clicking the same room
     if (this.selectedRoom()?.id === room.id) {
       this.selectedRoom.set(undefined);
+      this.roomBookings.set([]);
     } else {
       this.selectedRoom.set(room);
+      // Fetch bookings for the selected room to show on availability calendar
+      this.bookingService.getRoomBookings(room.id).subscribe({
+        next: (bookings) => this.roomBookings.set(bookings),
+        error: () => this.roomBookings.set([])
+      });
       // Scroll to booking card after brief delay for visual feedback
       setTimeout(() => {
         this.bookingCardRef?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -317,9 +327,15 @@ export class HotelDetailsComponent implements OnInit, OnDestroy {
   }
 
   onBookingComplete(result: { confirmationNumber: string; bookingId: string }): void {
-    // Booking completed successfully - modal will show confirmation
-    // Could add additional logic here like analytics, etc.
     console.log('Booking completed:', result.confirmationNumber);
+    // Refresh room bookings so calendar shows newly booked dates
+    const room = this.selectedRoom();
+    if (room) {
+      this.bookingService.getRoomBookings(room.id).subscribe({
+        next: (bookings) => this.roomBookings.set(bookings),
+        error: () => {}
+      });
+    }
   }
 
   canBookNow(): boolean {

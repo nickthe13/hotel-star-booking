@@ -232,7 +232,11 @@ export class PaymentsService {
       },
     });
 
-    return payments;
+    return payments.map((p) => ({
+      ...p,
+      hotelName: p.booking?.room?.hotel?.name ?? null,
+      roomType: p.booking?.room?.type ?? null,
+    }));
   }
 
   /**
@@ -248,7 +252,24 @@ export class PaymentsService {
       },
     });
 
-    return savedMethods;
+    return savedMethods.map(m => this.formatPaymentMethod(m));
+  }
+
+  private formatPaymentMethod(m: any) {
+    return {
+      id: m.id,
+      userId: m.userId,
+      stripePaymentMethodId: m.stripePaymentMethodId,
+      type: m.type,
+      card: {
+        brand: m.cardBrand || 'unknown',
+        last4: m.cardLast4 || '****',
+        expMonth: m.cardExpMonth || 0,
+        expYear: m.cardExpYear || 0,
+      },
+      isDefault: m.isDefault,
+      createdAt: m.createdAt,
+    };
   }
 
   /**
@@ -422,18 +443,34 @@ export class PaymentsService {
     }
   }
 
-  private async savePaymentMethod(userId: string, paymentMethodId: string) {
+  async savePaymentMethodForUser(userId: string, paymentMethodId: string, setAsDefault: boolean = false) {
+    // Check if already saved
+    const existing = await this.prisma.paymentMethod.findFirst({
+      where: { stripePaymentMethodId: paymentMethodId, userId },
+    });
+
+    if (existing) {
+      return this.formatPaymentMethod(existing);
+    }
+
     // Retrieve payment method details from Stripe
     const paymentMethod = await this.stripe.paymentMethods.retrieve(
       paymentMethodId,
     );
 
     if (!paymentMethod) {
-      return;
+      throw new NotFoundException('Payment method not found in Stripe');
     }
 
-    // Save to database
-    await this.prisma.paymentMethod.create({
+    // If setting as default, unset current default first
+    if (setAsDefault) {
+      await this.prisma.paymentMethod.updateMany({
+        where: { userId, isDefault: true },
+        data: { isDefault: false },
+      });
+    }
+
+    const saved = await this.prisma.paymentMethod.create({
       data: {
         userId,
         stripePaymentMethodId: paymentMethodId,
@@ -442,8 +479,56 @@ export class PaymentsService {
         cardLast4: paymentMethod.card?.last4 || null,
         cardExpMonth: paymentMethod.card?.exp_month || null,
         cardExpYear: paymentMethod.card?.exp_year || null,
-        isDefault: false,
+        isDefault: setAsDefault,
       },
     });
+    return this.formatPaymentMethod(saved);
+  }
+
+  async deleteSavedPaymentMethod(userId: string, id: string) {
+    const method = await this.prisma.paymentMethod.findFirst({
+      where: { id, userId },
+    });
+
+    if (!method) {
+      throw new NotFoundException('Payment method not found');
+    }
+
+    // Detach from Stripe
+    try {
+      await this.stripe.paymentMethods.detach(method.stripePaymentMethodId);
+    } catch (error) {
+      console.error('Failed to detach payment method from Stripe:', error);
+    }
+
+    await this.prisma.paymentMethod.delete({ where: { id } });
+
+    return { message: 'Payment method deleted successfully' };
+  }
+
+  async setDefaultPaymentMethod(userId: string, id: string) {
+    const method = await this.prisma.paymentMethod.findFirst({
+      where: { id, userId },
+    });
+
+    if (!method) {
+      throw new NotFoundException('Payment method not found');
+    }
+
+    // Unset current default
+    await this.prisma.paymentMethod.updateMany({
+      where: { userId, isDefault: true },
+      data: { isDefault: false },
+    });
+
+    // Set new default
+    return this.prisma.paymentMethod.update({
+      where: { id },
+      data: { isDefault: true },
+    });
+  }
+
+  private async savePaymentMethod(userId: string, paymentMethodId: string) {
+    await this.savePaymentMethodForUser(userId, paymentMethodId, false);
   }
 }

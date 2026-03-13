@@ -65,6 +65,16 @@ export const routes: Routes = [
       import('./features/contact/contact.component').then((m) => m.ContactComponent)
   },
   {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./features/privacy-policy/privacy-policy.component').then((m) => m.PrivacyPolicyComponent)
+  },
+  {
+    path: 'help-center',
+    loadComponent: () =>
+      import('./features/help-center/help-center.component').then((m) => m.HelpCenterComponent)
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then((m) => m.NotFoundComponent)

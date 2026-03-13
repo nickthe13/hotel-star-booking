@@ -43,7 +43,6 @@ export class PaymentModalComponent {
   processingPayment = signal<boolean>(false);
   loading = signal<boolean>(false);
   error = signal<string>('');
-  saveCard = signal<boolean>(false);
 
   // Loyalty
   pointsToRedeem = signal<number>(0);
@@ -159,8 +158,7 @@ export class PaymentModalComponent {
     const paymentRequest: CreatePaymentIntentRequest = {
       bookingId: bookingId,
       amount: this.finalPrice() * 100, // Convert to cents
-      currency: 'usd',
-      savePaymentMethod: this.saveCard()
+      currency: 'usd'
     };
 
     console.log('Creating payment intent with:', paymentRequest);
@@ -188,14 +186,24 @@ export class PaymentModalComponent {
     });
   }
 
-  onPaymentSuccess(paymentIntentId: string): void {
+  onPaymentSuccess(data: { paymentIntentId: string; paymentMethodId?: string }): void {
     if (!this.bookingData || !this.pendingBookingId()) return;
 
     this.processingPayment.set(true);
     const bookingId = this.pendingBookingId();
 
-    // Booking was already created - just need to confirm payment was successful
-    // The backend webhook should handle updating the booking status
+    // Confirm payment with backend (updates booking status + saves card if requested)
+    this.paymentService.confirmPaymentWithBackend(data.paymentIntentId, data.paymentMethodId).subscribe({
+      next: () => this.finalizeConfirmation(bookingId, data.paymentIntentId),
+      error: (err) => {
+        console.error('Failed to confirm payment with backend:', err);
+        // Still show confirmation - the webhook will handle it
+        this.finalizeConfirmation(bookingId, data.paymentIntentId);
+      }
+    });
+  }
+
+  private finalizeConfirmation(bookingId: string, paymentIntentId: string): void {
     this.processingPayment.set(false);
     this.confirmationNumber.set(`CONF-${bookingId}`);
     this.bookingId.set(bookingId);
@@ -209,10 +217,6 @@ export class PaymentModalComponent {
       confirmationNumber: `CONF-${bookingId}`,
       bookingId: bookingId
     });
-  }
-
-  onSavePaymentMethodChange(save: boolean): void {
-    this.saveCard.set(save);
   }
 
   onPaymentError(errorMessage: string): void {
@@ -239,7 +243,6 @@ export class PaymentModalComponent {
     this.pointsToRedeem.set(0);
     this.pointsDiscount.set(0);
     this.pendingBookingId.set('');
-    this.saveCard.set(false);
 
     this.closeModal.emit();
   }

@@ -95,25 +95,25 @@
             <tr>
               <td>{{ transaction.createdAt | formatDate:'short' }}</td>
               <td>
-                <span class="transaction-id">{{ transaction.id }}</span>
+                <span class="transaction-id" [title]="transaction.id">{{ transaction.id }}</span>
               </td>
               <td>
-                <span class="booking-id">{{ transaction.bookingId }}</span>
+                <span class="booking-id" [title]="transaction.bookingId">{{ transaction.bookingId }}</span>
               </td>
               <td>
-                <span class="hotel-name">{{ transaction.metadata?.hotelName || 'N/A' }}</span>
-                @if (transaction.metadata?.roomType) {
-                  <span class="room-type">{{ transaction.metadata?.roomType }}</span>
+                <span class="hotel-name">{{ transaction.hotelName || 'N/A' }}</span>
+                @if (transaction.roomType) {
+                  <span class="room-type">{{ transaction.roomType }}</span>
                 }
               </td>
-              <td class="amount">{{ transaction.amount | formatCurrency }}</td>
+              <td class="amount">{{ transaction.amount / 100 | formatCurrency }}</td>
               <td>
                 <span class="badge" [ngClass]="getStatusBadgeClass(transaction.status)">
                   {{ getStatusLabel(transaction.status) }}
                 </span>
                 @if (transaction.refundAmount) {
                   <div class="refund-info">
-                    Refunded: {{ transaction.refundAmount | formatCurrency }}
+                    Refunded: {{ transaction.refundAmount / 100 | formatCurrency }}
                   </div>
                 }
               </td>

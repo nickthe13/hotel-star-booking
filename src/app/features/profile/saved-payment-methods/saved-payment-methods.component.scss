@@ -119,11 +119,11 @@
   }
 
   &--default {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
 
     &:hover {
-      box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
+      box-shadow: 0 8px 24px rgba(118, 75, 162, 0.4);
     }
   }
 }
@@ -383,6 +383,33 @@
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   display: inline-block;
+}
+
+// Stripe Card Element
+.stripe-card-container {
+  margin-bottom: 1rem;
+
+  .card-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+  }
+
+  .stripe-card-element {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    transition: border-color 0.2s ease;
+    min-height: 44px;
+
+    &:focus-within {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+  }
 }
 
 // Responsive

@@ -133,7 +133,7 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    const updates = this.profileForm.value;
+    const updates = { name: this.profileForm.value.name };
 
     this.authService.updateProfile(updates).subscribe({
       next: () => {

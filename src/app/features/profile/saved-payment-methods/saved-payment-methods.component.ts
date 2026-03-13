@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentService } from '../../../core/services/payment.service';
 import { SavedPaymentMethod } from '../../../core/models/payment.model';
 import { getCardBrandIcon as sharedGetCardBrandIcon } from '../../../shared/utils/card-brand';
+import { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js';
 
 @Component({
   selector: 'app-saved-payment-methods',
@@ -10,7 +11,9 @@ import { getCardBrandIcon as sharedGetCardBrandIcon } from '../../../shared/util
   templateUrl: './saved-payment-methods.component.html',
   styleUrl: './saved-payment-methods.component.scss'
 })
-export class SavedPaymentMethodsComponent implements OnInit {
+export class SavedPaymentMethodsComponent implements OnInit, OnDestroy {
+  @ViewChild('addCardElement') addCardElementRef!: ElementRef;
+
   paymentMethods = signal<SavedPaymentMethod[]>([]);
   loading = signal<boolean>(false);
   error = signal<string>('');
@@ -22,11 +25,22 @@ export class SavedPaymentMethodsComponent implements OnInit {
 
   // For adding new method
   showAddMethodModal = signal<boolean>(false);
+  addingCard = signal<boolean>(false);
+  addCardError = signal<string>('');
+  cardComplete = signal<boolean>(false);
+
+  private stripe: Stripe | null = null;
+  private elements: StripeElements | null = null;
+  private cardElement: StripeCardElement | null = null;
 
   constructor(private paymentService: PaymentService) {}
 
   ngOnInit(): void {
     this.loadPaymentMethods();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyCardElement();
   }
 
   loadPaymentMethods(): void {
@@ -158,12 +172,102 @@ export class SavedPaymentMethodsComponent implements OnInit {
     });
   }
 
-  openAddMethodModal(): void {
+  async openAddMethodModal(): Promise<void> {
     this.showAddMethodModal.set(true);
+    this.addCardError.set('');
+    this.cardComplete.set(false);
+
+    // Initialize Stripe and mount card element after DOM renders
+    this.stripe = await this.paymentService.getStripe();
+    setTimeout(() => this.mountAddCardElement(), 100);
   }
 
   closeAddMethodModal(): void {
+    this.destroyCardElement();
     this.showAddMethodModal.set(false);
+    this.addCardError.set('');
+    this.cardComplete.set(false);
+  }
+
+  private mountAddCardElement(): void {
+    if (!this.stripe || !this.addCardElementRef) {
+      return;
+    }
+
+    this.elements = this.stripe.elements();
+    this.cardElement = this.elements.create('card', {
+      style: {
+        base: {
+          color: '#32325d',
+          fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+          fontSmoothing: 'antialiased',
+          fontSize: '16px',
+          '::placeholder': { color: '#aab7c4' }
+        },
+        invalid: {
+          color: '#fa755a',
+          iconColor: '#fa755a'
+        }
+      }
+    });
+    this.cardElement.mount(this.addCardElementRef.nativeElement);
+
+    this.cardElement.on('change', (event) => {
+      this.cardComplete.set(event.complete);
+      if (event.error) {
+        this.addCardError.set(event.error.message);
+      } else {
+        this.addCardError.set('');
+      }
+    });
+  }
+
+  private destroyCardElement(): void {
+    if (this.cardElement) {
+      this.cardElement.destroy();
+      this.cardElement = null;
+    }
+    this.elements = null;
+  }
+
+  async onAddCard(): Promise<void> {
+    if (!this.stripe || !this.cardElement || !this.cardComplete()) {
+      return;
+    }
+
+    this.addingCard.set(true);
+    this.addCardError.set('');
+
+    const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+      type: 'card',
+      card: this.cardElement,
+    });
+
+    if (error) {
+      this.addCardError.set(error.message || 'Failed to add card');
+      this.addingCard.set(false);
+      return;
+    }
+
+    if (!paymentMethod) {
+      this.addCardError.set('Failed to create payment method');
+      this.addingCard.set(false);
+      return;
+    }
+
+    // Save to backend
+    this.paymentService.savePaymentMethod(paymentMethod.id, this.paymentMethods().length === 0).subscribe({
+      next: () => {
+        this.addingCard.set(false);
+        this.loadPaymentMethods();
+        this.closeAddMethodModal();
+      },
+      error: (err) => {
+        this.addCardError.set('Failed to save payment method. Please try again.');
+        this.addingCard.set(false);
+        console.error('Error saving payment method:', err);
+      }
+    });
   }
 
   onMethodAdded(): void {

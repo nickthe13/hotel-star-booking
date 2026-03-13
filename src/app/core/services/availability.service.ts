@@ -78,7 +78,7 @@ export class AvailabilityService {
     const checkOut = selectedRange.checkOut;
 
     const isToday = date.getTime() === today.getTime();
-    const isPast = date < today;
+    const isPast = date <= today;
     const isBooked = this.isDateBooked(date, bookings);
 
     let isSelected = false;

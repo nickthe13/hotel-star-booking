@@ -11,11 +11,11 @@
         <h4>Payment Method</h4>
 
         <div class="payment-options">
-          @for (method of savedPaymentMethods; track method.id) {
+          @for (method of savedPaymentMethods; track method.stripePaymentMethodId) {
             <div
               class="saved-card"
-              [class.saved-card--selected]="paymentForm.value.selectedMethod === method.id"
-              (click)="onUseSavedCard(method.id)"
+              [class.saved-card--selected]="paymentForm.value.selectedMethod === method.stripePaymentMethodId"
+              (click)="onUseSavedCard(method.stripePaymentMethodId)"
             >
               <div class="saved-card__info">
                 <span class="card-icon">{{ getCardBrandIcon(method.card.brand) }}</span>
@@ -27,7 +27,7 @@
               @if (method.isDefault) {
                 <span class="badge badge--primary">Default</span>
               }
-              @if (paymentForm.value.selectedMethod === method.id) {
+              @if (paymentForm.value.selectedMethod === method.stripePaymentMethodId) {
                 <span class="checkmark">✓</span>
               }
             </div>
@@ -53,18 +53,6 @@
         <div class="card-element-container">
           <div #cardElement class="card-element"></div>
         </div>
-
-        @if (allowSavePaymentMethod) {
-          <div class="save-card-checkbox">
-            <label>
-              <input
-                type="checkbox"
-                formControlName="saveCard"
-              />
-              <span>Save card for future bookings</span>
-            </label>
-          </div>
-        }
       </div>
     }
 
@@ -78,7 +66,7 @@
     <button
       type="submit"
       class="btn btn--primary btn--full"
-      [disabled]="processing() || (!useNewCard() && !paymentForm.value.selectedMethod)"
+      [disabled]="processing() || (!useNewCard() && !paymentForm.value.selectedMethod) || (useNewCard() && !cardComplete())"
     >
       @if (processing()) {
         <span class="spinner"></span>

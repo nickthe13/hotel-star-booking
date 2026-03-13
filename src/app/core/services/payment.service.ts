@@ -133,6 +133,16 @@ export class PaymentService {
   }
 
   /**
+   * Confirm payment with backend (updates booking status + saves card if requested)
+   */
+  confirmPaymentWithBackend(paymentIntentId: string, paymentMethodId?: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/payments/confirm`, {
+      paymentIntentId,
+      paymentMethodId: paymentMethodId || ''
+    });
+  }
+
+  /**
    * Get user's saved payment methods
    */
   getUserPaymentMethods(): Observable<SavedPaymentMethod[]> {

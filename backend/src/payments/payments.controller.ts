@@ -2,6 +2,9 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
+  Patch,
+  Param,
   Body,
   Headers,
   RawBodyRequest,
@@ -107,6 +110,48 @@ export class PaymentsController {
   })
   async getSavedPaymentMethods(@CurrentUser() user: any) {
     return this.paymentsService.getSavedPaymentMethods(user.id);
+  }
+
+  @Post('saved-methods')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Save a payment method' })
+  @ApiResponse({ status: 201, description: 'Payment method saved successfully' })
+  async savePaymentMethod(
+    @CurrentUser() user: any,
+    @Body() body: { paymentMethodId: string; setAsDefault?: boolean },
+  ) {
+    return this.paymentsService.savePaymentMethodForUser(
+      user.id,
+      body.paymentMethodId,
+      body.setAsDefault || false,
+    );
+  }
+
+  @Delete('saved-methods/:id')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete a saved payment method' })
+  @ApiResponse({ status: 200, description: 'Payment method deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Payment method not found' })
+  async deleteSavedPaymentMethod(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+  ) {
+    return this.paymentsService.deleteSavedPaymentMethod(user.id, id);
+  }
+
+  @Patch('saved-methods/:id/default')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Set a payment method as default' })
+  @ApiResponse({ status: 200, description: 'Default payment method updated' })
+  @ApiResponse({ status: 404, description: 'Payment method not found' })
+  async setDefaultPaymentMethod(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+  ) {
+    return this.paymentsService.setDefaultPaymentMethod(user.id, id);
   }
 
   @Public()

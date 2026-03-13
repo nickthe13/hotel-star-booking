@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MinLength, MaxLength, Matches } from 'class-validator';
+import { IsString, IsOptional, IsUrl, MinLength, MaxLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
@@ -24,4 +24,14 @@ export class UpdateUserDto {
     message: 'Please provide a valid phone number',
   })
   phone?: string;
+
+  @ApiProperty({
+    example: 'https://example.com/avatar.jpg',
+    description: 'User avatar URL',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl({}, { message: 'Please provide a valid URL for avatar' })
+  avatar?: string;
 }

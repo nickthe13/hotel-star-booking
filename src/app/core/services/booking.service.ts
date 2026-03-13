@@ -236,6 +236,24 @@ export class BookingService {
     );
   }
 
+  getRoomBookings(roomId: string): Observable<Booking[]> {
+    return this.http.get<any[]>(`${this.API_URL}/bookings/room/${roomId}`).pipe(
+      map(response => response.map(b => ({
+        id: b.id,
+        userId: '',
+        hotelId: '',
+        roomId: roomId,
+        checkIn: new Date(b.checkIn),
+        checkOut: new Date(b.checkOut),
+        guests: 0,
+        totalPrice: 0,
+        status: b.status as BookingStatus,
+        createdAt: new Date(),
+      }))),
+      catchError(() => of([]))
+    );
+  }
+
   // Utility methods
   calculateTotalPrice(pricePerNight: number, checkIn: Date, checkOut: Date): number {
     const nights = this.calculateNights(checkIn, checkOut);

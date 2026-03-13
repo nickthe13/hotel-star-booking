@@ -35,7 +35,7 @@ export class PaymentHistoryComponent implements OnInit {
       txns = txns.filter(txn =>
         txn.bookingId.toLowerCase().includes(query) ||
         txn.id.toLowerCase().includes(query) ||
-        txn.metadata?.hotelName?.toLowerCase().includes(query)
+        txn.hotelName?.toLowerCase().includes(query)
       );
     }
 
@@ -89,11 +89,11 @@ export class PaymentHistoryComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: PaymentStatus): string {
-    return getPaymentStatusClass(status);
+    return getPaymentStatusClass(status.toLowerCase() as PaymentStatus);
   }
 
   getStatusLabel(status: PaymentStatus): string {
-    return getPaymentStatusLabel(status);
+    return getPaymentStatusLabel(status.toLowerCase() as PaymentStatus);
   }
 
   viewReceipt(transaction: PaymentTransaction): void {
@@ -101,6 +101,6 @@ export class PaymentHistoryComponent implements OnInit {
     const currencyPipe = new FormatCurrencyPipe();
     const datePipe = new FormatDatePipe();
     console.log('Viewing receipt for transaction:', transaction.id);
-    alert(`Receipt for Transaction ${transaction.id}\n\nAmount: ${currencyPipe.transform(transaction.amount)}\nStatus: ${this.getStatusLabel(transaction.status)}\nDate: ${datePipe.transform(transaction.createdAt, 'short')}\n\nBooking ID: ${transaction.bookingId}`);
+    alert(`Receipt for Transaction ${transaction.id}\n\nAmount: ${currencyPipe.transform(transaction.amount / 100)}\nHotel: ${transaction.hotelName || 'N/A'}\nStatus: ${this.getStatusLabel(transaction.status)}\nDate: ${datePipe.transform(transaction.createdAt, 'short')}\n\nBooking ID: ${transaction.bookingId}`);
   }
 }

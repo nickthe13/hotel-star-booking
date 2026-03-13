@@ -268,6 +268,11 @@ export class AuthService {
   }
 
   updateProfile(updates: Partial<User>): Observable<User> {
+    const userId = this.currentUser()?.id;
+    if (!userId) {
+      return throwError(() => new Error('Not authenticated'));
+    }
+
     // Sanitize inputs
     const sanitizedUpdates = { ...updates };
 
@@ -275,11 +280,10 @@ export class AuthService {
       sanitizedUpdates.name = InputSanitizer.sanitizeString(sanitizedUpdates.name);
     }
 
-    if (sanitizedUpdates.email) {
-      sanitizedUpdates.email = InputSanitizer.sanitizeEmail(sanitizedUpdates.email);
-    }
+    // Remove email from updates — email changes not supported
+    delete sanitizedUpdates.email;
 
-    return this.http.patch<User>(`${this.API_URL}/users/profile`, sanitizedUpdates).pipe(
+    return this.http.patch<User>(`${this.API_URL}/users/${userId}`, sanitizedUpdates).pipe(
       tap(updatedUser => {
         const user: User = {
           ...updatedUser,

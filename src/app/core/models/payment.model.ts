@@ -14,6 +14,8 @@ export interface PaymentTransaction {
   refundAmount?: number;
   refundReason?: string;
   failureReason?: string;
+  hotelName?: string;
+  roomType?: string;
   metadata?: {
     hotelName?: string;
     roomType?: string;

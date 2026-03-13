@@ -1,0 +1,33 @@
+<div class="help-page">
+  <div class="container">
+    <div class="help-header">
+      <h1 class="help-header__title">Help Center</h1>
+      <p class="help-header__subtitle">Find answers to commonly asked questions</p>
+    </div>
+
+    <div class="help-card">
+      <h2 class="faq-title">Frequently Asked Questions</h2>
+
+      <div class="faq-list">
+        @for (faq of faqs; track faq.question; let i = $index) {
+          <div class="faq-item" [class.faq-item--open]="isFaqOpen(i)">
+            <button class="faq-item__question" (click)="toggleFaq(i)" type="button">
+              <span>{{ faq.question }}</span>
+              <span class="faq-item__icon">{{ isFaqOpen(i) ? '−' : '+' }}</span>
+            </button>
+            @if (isFaqOpen(i)) {
+              <div class="faq-item__answer">
+                <p>{{ faq.answer }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="help-contact">
+      <p class="help-contact__text">Still need help? We're here for you.</p>
+      <a routerLink="/contact" class="btn btn--primary">Contact Us</a>
+    </div>
+  </div>
+</div>

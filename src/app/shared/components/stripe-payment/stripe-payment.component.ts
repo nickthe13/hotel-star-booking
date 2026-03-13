@@ -18,11 +18,9 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
   @Input() clientSecret!: string;
   @Input() amount!: number;
   @Input() savedPaymentMethods: SavedPaymentMethod[] = [];
-  @Input() allowSavePaymentMethod: boolean = true;
 
-  @Output() paymentSuccess = new EventEmitter<string>();
+  @Output() paymentSuccess = new EventEmitter<{ paymentIntentId: string; paymentMethodId?: string }>();
   @Output() paymentError = new EventEmitter<string>();
-  @Output() savePaymentMethodChange = new EventEmitter<boolean>();
   @Output() selectedPaymentMethodChange = new EventEmitter<string | null>();
 
   paymentForm: FormGroup;
@@ -40,7 +38,6 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
     private paymentService: PaymentService
   ) {
     this.paymentForm = this.fb.group({
-      saveCard: [false],
       selectedMethod: [null]
     });
   }
@@ -60,11 +57,6 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
         // User wants to use new card, show card element
         this.mountCardElement();
       }
-    });
-
-    // Watch for save card checkbox
-    this.paymentForm.get('saveCard')?.valueChanges.subscribe((value) => {
-      this.savePaymentMethodChange.emit(value);
     });
 
     // If user has saved cards, default to using new card
@@ -197,8 +189,7 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
       // Extract mock payment intent ID from client secret
       const mockPaymentIntentId = this.clientSecret.replace('pi_mock_secret_', 'pi_');
 
-      this.processing.set(false);
-      this.paymentSuccess.emit(mockPaymentIntentId);
+      this.paymentSuccess.emit({ paymentIntentId: mockPaymentIntentId });
       return;
     }
 
@@ -214,8 +205,10 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     if (result.paymentIntent?.status === 'succeeded') {
-      this.processing.set(false);
-      this.paymentSuccess.emit(result.paymentIntent.id);
+      this.paymentSuccess.emit({
+        paymentIntentId: result.paymentIntent.id,
+        paymentMethodId: result.paymentIntent.payment_method as string
+      });
     } else {
       throw new Error('Payment was not successful');
     }
@@ -235,8 +228,7 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
       // Extract mock payment intent ID from client secret
       const mockPaymentIntentId = this.clientSecret.replace('pi_mock_secret_', 'pi_');
 
-      this.processing.set(false);
-      this.paymentSuccess.emit(mockPaymentIntentId);
+      this.paymentSuccess.emit({ paymentIntentId: mockPaymentIntentId, paymentMethodId });
       return;
     }
 
@@ -250,8 +242,10 @@ export class StripePaymentComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     if (result.paymentIntent?.status === 'succeeded') {
-      this.processing.set(false);
-      this.paymentSuccess.emit(result.paymentIntent.id);
+      this.paymentSuccess.emit({
+        paymentIntentId: result.paymentIntent.id,
+        paymentMethodId: result.paymentIntent.payment_method as string
+      });
     } else {
       throw new Error('Payment was not successful');
     }

@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   forwardRef,
@@ -41,88 +42,94 @@ export class BookingsService {
       throw new BadRequestException('Check-in date cannot be in the past');
     }
 
-    // Get room details
-    const room = await this.prismaService.room.findUnique({
-      where: { id: roomId },
-      include: {
-        hotel: true,
-      },
-    });
+    // Use serializable transaction to prevent race conditions
+    return this.prismaService.$transaction(async (tx) => {
+      // Get room details inside transaction
+      const room = await tx.room.findUnique({
+        where: { id: roomId },
+        include: {
+          hotel: true,
+        },
+      });
 
-    if (!room) {
-      throw new NotFoundException('Room not found');
-    }
+      if (!room) {
+        throw new NotFoundException('Room not found');
+      }
 
-    if (!room.isAvailable) {
-      throw new BadRequestException('Room is not available for booking');
-    }
+      if (!room.isAvailable) {
+        throw new BadRequestException('Room is not available for booking');
+      }
 
-    // Validate guest count
-    if (guests > room.capacity) {
-      throw new BadRequestException(
-        `Room can accommodate maximum ${room.capacity} guests`,
+      // Validate guest count
+      if (guests > room.capacity) {
+        throw new BadRequestException(
+          `Room can accommodate maximum ${room.capacity} guests`,
+        );
+      }
+
+      // Check for overlapping bookings (inside transaction)
+      const overlappingBookings = await tx.booking.count({
+        where: {
+          roomId,
+          OR: [
+            {
+              checkIn: {
+                lte: checkOutDate,
+              },
+              checkOut: {
+                gte: checkInDate,
+              },
+            },
+          ],
+          status: {
+            notIn: ['CANCELLED', 'NO_SHOW'],
+          },
+        },
+      });
+
+      if (overlappingBookings > 0) {
+        throw new ConflictException('Room is not available for the selected dates');
+      }
+
+      // Calculate total price
+      const nights = Math.ceil(
+        (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24),
       );
-    }
+      const totalPrice = room.price * nights;
 
-    // Check for overlapping bookings
-    const overlappingBookings = await this.prismaService.booking.count({
-      where: {
-        roomId,
-        OR: [
-          {
-            checkIn: {
-              lte: checkOutDate,
+      // Create booking
+      return tx.booking.create({
+        data: {
+          userId,
+          roomId,
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+          numberOfGuests: guests,
+          guestName: '',
+          guestEmail: '',
+          totalPrice,
+          specialRequests,
+          status: BookingStatus.PENDING_PAYMENT,
+          paymentStatus: PaymentStatus.PENDING,
+        },
+        include: {
+          room: {
+            include: {
+              hotel: true,
             },
-            checkOut: {
-              gte: checkInDate,
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
             },
           },
-        ],
-        status: {
-          notIn: ['CANCELLED', 'NO_SHOW'],
         },
-      },
-    });
-
-    if (overlappingBookings > 0) {
-      throw new BadRequestException('Room is not available for selected dates');
-    }
-
-    // Calculate total price
-    const nights = Math.ceil(
-      (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24),
-    );
-    const totalPrice = room.price * nights;
-
-    // Create booking
-    return this.prismaService.booking.create({
-      data: {
-        userId,
-        roomId,
-        checkIn: checkInDate,
-        checkOut: checkOutDate,
-        numberOfGuests: guests,
-        guestName: '',
-        guestEmail: '',
-        totalPrice,
-        specialRequests,
-        status: BookingStatus.PENDING_PAYMENT,
-        paymentStatus: PaymentStatus.PENDING,
-      },
-      include: {
-        room: {
-          include: {
-            hotel: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+      });
+    }, {
+      isolationLevel: 'Serializable',
+      timeout: 10000,
     });
   }
 
@@ -449,6 +456,26 @@ export class BookingsService {
       data: {
         status: BookingStatus.CHECKED_OUT,
       },
+    });
+  }
+
+  /**
+   * Get active bookings for a specific room (for availability calendar)
+   */
+  async getRoomBookings(roomId: string) {
+    return this.prismaService.booking.findMany({
+      where: {
+        roomId,
+        status: { notIn: ['CANCELLED', 'NO_SHOW'] },
+        checkOut: { gte: new Date() },
+      },
+      select: {
+        id: true,
+        checkIn: true,
+        checkOut: true,
+        status: true,
+      },
+      orderBy: { checkIn: 'asc' },
     });
   }
 }

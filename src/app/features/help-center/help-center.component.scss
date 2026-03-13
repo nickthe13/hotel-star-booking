@@ -1,0 +1,126 @@
+@use '../../../assets/styles' as *;
+
+.help-page {
+  min-height: calc(100vh - 64px - 300px);
+  padding: $spacing-3xl 0;
+  background: linear-gradient(135deg, $primary-50 0%, $primary-100 100%);
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg $spacing-md;
+  }
+}
+
+.help-header {
+  text-align: center;
+  margin-bottom: $spacing-3xl;
+
+  @include respond-to('mobile') {
+    margin-bottom: $spacing-xl;
+  }
+
+  &__title {
+    font-size: $font-size-4xl;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+
+    @include respond-to('mobile') {
+      font-size: $font-size-2xl;
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $text-secondary;
+  }
+}
+
+.help-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: $radius-xl;
+  padding: $spacing-3xl;
+  box-shadow: $shadow-lg;
+
+  @include respond-to('mobile') {
+    padding: $spacing-lg;
+    border-radius: $radius-lg;
+  }
+}
+
+.faq-title {
+  font-size: $font-size-2xl;
+  color: $text-primary;
+  margin-bottom: $spacing-xl;
+  font-weight: 600;
+
+  @include respond-to('mobile') {
+    font-size: $font-size-xl;
+  }
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.faq-item {
+  border: 1px solid $neutral-200;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+
+  &--open {
+    border-color: $primary-300;
+  }
+
+  &__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: $spacing-lg;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $text-primary;
+    text-align: left;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: $neutral-50;
+    }
+  }
+
+  &__icon {
+    font-size: $font-size-xl;
+    color: $primary-600;
+    font-weight: 300;
+    flex-shrink: 0;
+    margin-left: $spacing-md;
+  }
+
+  &__answer {
+    padding: 0 $spacing-lg $spacing-lg;
+
+    p {
+      font-size: $font-size-base;
+      color: $text-secondary;
+      line-height: 1.7;
+    }
+  }
+}
+
+.help-contact {
+  text-align: center;
+  margin-top: $spacing-3xl;
+
+  &__text {
+    font-size: $font-size-lg;
+    color: $text-secondary;
+    margin-bottom: $spacing-lg;
+  }
+}
