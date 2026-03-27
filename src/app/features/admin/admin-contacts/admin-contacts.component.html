@@ -1,0 +1,74 @@
+<div class="contacts-management">
+  <div class="contacts-management__header">
+    <div>
+      <h2 class="contacts-management__title">Contact Messages</h2>
+      <p class="contacts-management__subtitle">View and manage user contact form submissions</p>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card__icon">📩</div>
+      <div class="stat-card__content">
+        <h3 class="stat-card__value">{{ messages().length }}</h3>
+        <p class="stat-card__label">Total Messages</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__icon">🔵</div>
+      <div class="stat-card__content">
+        <h3 class="stat-card__value">{{ getNewCount() }}</h3>
+        <p class="stat-card__label">New</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__icon">✅</div>
+      <div class="stat-card__content">
+        <h3 class="stat-card__value">{{ getResolvedCount() }}</h3>
+        <p class="stat-card__label">Resolved</p>
+      </div>
+    </div>
+  </div>
+
+  <app-table
+    [columns]="columns"
+    [data]="messages()"
+    [actions]="actions"
+    [loading]="loading()"
+  ></app-table>
+
+  <!-- Expanded Message View -->
+  @if (expandedMessageId()) {
+    @for (msg of messages(); track msg.id) {
+      @if (msg.id === expandedMessageId()) {
+        <div class="message-detail">
+          <div class="message-detail__header">
+            <div>
+              <h3>{{ msg.subject }}</h3>
+              <p class="message-detail__meta">
+                From: <strong>{{ msg.name }}</strong> ({{ msg.email }}) &mdash;
+                {{ msg.createdAt | date:'medium' }}
+              </p>
+            </div>
+            <button class="message-detail__close" (click)="expandedMessageId.set(null)">&times;</button>
+          </div>
+          <div class="message-detail__body">
+            <p>{{ msg.message }}</p>
+          </div>
+        </div>
+      }
+    }
+  }
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirmation-dialog
+    [title]="'Delete Message'"
+    [message]="'Are you sure you want to delete this message from ' + (selectedMessage()?.name || 'this user') + '? This action cannot be undone.'"
+    [isOpen]="showDeleteDialog()"
+    [confirmText]="'Delete'"
+    [cancelText]="'Cancel'"
+    [variant]="'danger'"
+    (onConfirm)="confirmDelete()"
+    (onCancel)="closeDeleteDialog()"
+  ></app-confirmation-dialog>
+</div>

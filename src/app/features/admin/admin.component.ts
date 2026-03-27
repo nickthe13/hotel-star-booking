@@ -5,8 +5,9 @@ import { AdminHotelsComponent } from './admin-hotels/admin-hotels.component';
 import { AdminRoomsComponent } from './admin-rooms/admin-rooms.component';
 import { AdminBookingsComponent } from './admin-bookings/admin-bookings.component';
 import { AdminReviewsComponent } from './admin-reviews/admin-reviews.component';
+import { AdminContactsComponent } from './admin-contacts/admin-contacts.component';
 
-type AdminTab = 'dashboard' | 'hotels' | 'rooms' | 'bookings' | 'reviews';
+type AdminTab = 'dashboard' | 'hotels' | 'rooms' | 'bookings' | 'reviews' | 'contacts';
 
 @Component({
   selector: 'app-admin',
@@ -16,7 +17,8 @@ type AdminTab = 'dashboard' | 'hotels' | 'rooms' | 'bookings' | 'reviews';
     AdminHotelsComponent,
     AdminRoomsComponent,
     AdminBookingsComponent,
-    AdminReviewsComponent
+    AdminReviewsComponent,
+    AdminContactsComponent
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']

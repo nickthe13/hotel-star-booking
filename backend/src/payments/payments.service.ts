@@ -24,6 +24,39 @@ export class PaymentsService {
   }
 
   /**
+   * Get or create a Stripe Customer for a user
+   */
+  async getOrCreateStripeCustomer(userId: string): Promise<string> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, stripeCustomerId: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.stripeCustomerId) {
+      return user.stripeCustomerId;
+    }
+
+    // Create a new Stripe Customer
+    const customer = await this.stripe.customers.create({
+      email: user.email,
+      name: user.name,
+      metadata: { userId: user.id },
+    });
+
+    // Save the Stripe Customer ID to the user record
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { stripeCustomerId: customer.id },
+    });
+
+    return customer.id;
+  }
+
+  /**
    * Create a payment intent for a booking
    */
   async createPaymentIntent(userId: string, dto: CreatePaymentIntentDto) {
@@ -60,10 +93,14 @@ export class PaymentsService {
       throw new BadRequestException('Payment already exists for this booking');
     }
 
-    // Create Stripe payment intent
-    const paymentIntent = await this.stripe.paymentIntents.create({
+    // Get or create Stripe Customer for the user
+    const stripeCustomerId = await this.getOrCreateStripeCustomer(userId);
+
+    // Create Stripe payment intent with customer
+    const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
       amount: dto.amount,
       currency: dto.currency || 'usd',
+      customer: stripeCustomerId,
       metadata: {
         bookingId: booking.id,
         userId,
@@ -74,7 +111,14 @@ export class PaymentsService {
       automatic_payment_methods: {
         enabled: true,
       },
-    });
+    };
+
+    // Allow reuse of payment method if user wants to save it
+    if (dto.savePaymentMethod) {
+      paymentIntentParams.setup_future_usage = 'off_session';
+    }
+
+    const paymentIntent = await this.stripe.paymentIntents.create(paymentIntentParams);
 
     // Create payment record in database
     const payment = await this.prisma.paymentTransaction.create({
@@ -451,6 +495,19 @@ export class PaymentsService {
 
     if (existing) {
       return this.formatPaymentMethod(existing);
+    }
+
+    // Attach payment method to Stripe Customer
+    const stripeCustomerId = await this.getOrCreateStripeCustomer(userId);
+    try {
+      await this.stripe.paymentMethods.attach(paymentMethodId, {
+        customer: stripeCustomerId,
+      });
+    } catch (error) {
+      // Payment method may already be attached (e.g., via setup_future_usage)
+      if (error.code !== 'resource_already_exists') {
+        console.error('Failed to attach payment method to customer:', error.message);
+      }
     }
 
     // Retrieve payment method details from Stripe

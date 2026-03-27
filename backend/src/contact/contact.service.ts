@@ -1,7 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../email/email.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateContactDto } from './dto/create-contact.dto';
+import { ContactMessageStatus } from '@prisma/client';
 
 @Injectable()
 export class ContactService {
@@ -11,12 +13,23 @@ export class ContactService {
   constructor(
     private emailService: EmailService,
     private configService: ConfigService,
+    private prisma: PrismaService,
   ) {
     this.supportEmail = this.configService.get<string>('SUPPORT_EMAIL') || 'support@hotelstarbooking.com';
   }
 
   async submitContactForm(contactDto: CreateContactDto): Promise<{ success: boolean; message: string }> {
     this.logger.log(`New contact form submission from ${contactDto.email}`);
+
+    // Save to database
+    await this.prisma.contactMessage.create({
+      data: {
+        name: contactDto.name,
+        email: contactDto.email,
+        subject: contactDto.subject,
+        message: contactDto.message,
+      },
+    });
 
     // Send notification email to support team
     const supportEmailSent = await this.sendSupportNotification(contactDto);
@@ -31,12 +44,39 @@ export class ContactService {
       };
     }
 
-    // Even if email sending fails, we log the contact submission
-    this.logger.warn(`Email sending failed, but contact form data logged for ${contactDto.email}`);
+    // Even if email sending fails, the message is saved in the database
+    this.logger.warn(`Email sending failed, but contact form saved for ${contactDto.email}`);
     return {
       success: true,
       message: 'Your message has been received. We will get back to you soon.',
     };
+  }
+
+  // Admin methods
+  async getAllMessages() {
+    return this.prisma.contactMessage.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async updateMessageStatus(id: string, status: ContactMessageStatus) {
+    const message = await this.prisma.contactMessage.findUnique({ where: { id } });
+    if (!message) {
+      throw new NotFoundException('Contact message not found');
+    }
+    return this.prisma.contactMessage.update({
+      where: { id },
+      data: { status },
+    });
+  }
+
+  async deleteMessage(id: string) {
+    const message = await this.prisma.contactMessage.findUnique({ where: { id } });
+    if (!message) {
+      throw new NotFoundException('Contact message not found');
+    }
+    await this.prisma.contactMessage.delete({ where: { id } });
+    return { message: 'Contact message deleted successfully' };
   }
 
   private async sendSupportNotification(contactDto: CreateContactDto): Promise<boolean> {

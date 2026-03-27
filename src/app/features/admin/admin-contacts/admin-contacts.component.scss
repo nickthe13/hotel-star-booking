@@ -1,0 +1,133 @@
+@use '../../../../assets/styles' as *;
+
+.contacts-management {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xl;
+    gap: $spacing-md;
+
+    @include respond-to('mobile') {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0 0 $spacing-xs 0;
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+}
+
+.stat-card {
+  @include card($spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  transition: transform $transition-base, box-shadow $transition-base;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  &__icon {
+    font-size: 2.5rem;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, $primary-50, $primary-100);
+    border-radius: $radius-lg;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__value {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $primary-500;
+    margin: 0 0 $spacing-xs 0;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+.message-detail {
+  @include card($spacing-lg);
+  margin-top: $spacing-lg;
+  border-left: 4px solid $primary-500;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+
+    h3 {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin: 0 0 $spacing-xs 0;
+    }
+  }
+
+  &__meta {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: $text-secondary;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-md;
+    transition: background-color $transition-base;
+
+    &:hover {
+      background: $neutral-100;
+    }
+  }
+
+  &__body {
+    p {
+      color: $text-primary;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+  }
+}

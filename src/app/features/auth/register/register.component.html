@@ -43,6 +43,7 @@
 
         <div class="form-group">
           <label for="email" class="form-label">Email Address</label>
+          <small class="form-hint">Accepted domains: gmail.com, outlook.com, example.com</small>
           <div class="input-wrapper">
             <input
               id="email"
@@ -51,7 +52,7 @@
               class="form-input"
               [class.form-input--error]="email?.invalid && email?.touched"
               [class.form-input--valid]="isFieldValid('email')"
-              placeholder="you@example.com"
+              placeholder="you@gmail.com"
             />
             @if (isFieldValid('email')) {
               <span class="input-icon input-icon--success">✓</span>
@@ -64,6 +65,9 @@
               }
               @if (email?.errors?.['email']) {
                 <span>Please enter a valid email</span>
+              }
+              @if (email?.errors?.['allowedEmailDomain'] && !email?.errors?.['email']) {
+                <span>Only gmail.com, outlook.com, and example.com emails are accepted</span>
               }
             </div>
           }

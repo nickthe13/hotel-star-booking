@@ -1,9 +1,19 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { passwordMatchValidator } from '../../../shared/utils/form-validators';
+
+const ALLOWED_EMAIL_DOMAINS = ['gmail.com', 'outlook.com', 'example.com'];
+
+function allowedEmailDomain(control: AbstractControl): ValidationErrors | null {
+  const email = control.value;
+  if (!email) return null;
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (domain && ALLOWED_EMAIL_DOMAINS.includes(domain)) return null;
+  return { allowedEmailDomain: true };
+}
 
 @Component({
   selector: 'app-register',
@@ -23,7 +33,7 @@ export class RegisterComponent {
   ) {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email, allowedEmailDomain]],
       password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)]],
       confirmPassword: ['', [Validators.required]]
     }, {

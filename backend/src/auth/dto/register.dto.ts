@@ -7,6 +7,9 @@ export class RegisterDto {
     description: 'User email address',
   })
   @IsEmail({}, { message: 'Please provide a valid email address' })
+  @Matches(/@(gmail\.com|outlook\.com|example\.com)$/i, {
+    message: 'Only gmail.com, outlook.com, and example.com emails are accepted',
+  })
   email: string;
 
   @ApiProperty({
